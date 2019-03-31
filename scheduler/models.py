@@ -24,7 +24,7 @@ class Professor(models.Model):
         return self.name + " " + self.surname
 
 class Auditorium(models.Model):
-    number = models.IntegerField("Auditorium number", unique=True)
+    number = models.CharField("Auditorium number", max_length=30, unique=True)
 
     def __str__(self):
         return str(self.number)
@@ -52,6 +52,7 @@ class Student(models.Model):
     surname = models.CharField("Student surname", max_length=100)
     group = models.ForeignKey(Group, related_name='students', on_delete=models.CASCADE)
     email = models.EmailField("Student email", max_length=100, null=True, blank=True, unique=True)
+    index = models.CharField(max_length=30, null=True)
 
     def save(self, *args, **kwargs):
         self.full_clean()
