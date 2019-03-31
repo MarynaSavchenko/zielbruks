@@ -50,7 +50,7 @@ class Lesson(models.Model):
 class Student(models.Model):
     name = models.CharField("Student name", max_length=100)
     surname = models.CharField("Student surname", max_length=100)
-    group = models.ForeignKey(Group, related_name='students', on_delete=models.CASCADE)
+    group = models.ForeignKey(Group, related_name='students', on_delete=models.SET_NULL, null=True)
     email = models.EmailField("Student email", max_length=100, null=True, blank=True, unique=True)
     index = models.CharField(max_length=30, null=True)
 
