@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/wgslr/zielbruks.svg?branch=develop)](https://travis-ci.com/wgslr/zielbruks)
+
 # Installation
 
 Guide to installing project's dependencies.
