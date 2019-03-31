@@ -1,0 +1,18 @@
+dist: xenial
+language: python
+python:
+  - "3.6"
+
+cache: pip
+
+install:
+  - pip install -r requirements.txt
+
+jobs:
+  include:
+    - name: "tests"
+      script: "./manage.py test"
+    - name: "linter"
+      script: "pylint scheduler zielbruks"
+    - name: "type analysis"
+      script: "mypy scheduler zielbruks"

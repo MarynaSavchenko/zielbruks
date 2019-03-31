@@ -1,0 +1,6 @@
+django
+
+# development dependencies:
+pylint
+mypy
+django-stubs # required for mypy

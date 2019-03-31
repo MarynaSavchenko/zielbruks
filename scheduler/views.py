@@ -1,5 +1,7 @@
+"""Views gathering point"""
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpRequest
 
-def index(request):
+
+def index(_request: HttpRequest) -> HttpResponse:
     return HttpResponse("Hello, world. Tu będzie strona głowna schedulera")
