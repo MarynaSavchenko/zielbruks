@@ -10,3 +10,4 @@ install:
 script:
   - ./manage.py test
   - "pylint scheduler zielbruks"
+  - "mypy scheduler zielbruks"
