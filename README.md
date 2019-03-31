@@ -20,3 +20,22 @@ This repository contains `requirements.txt` file listing pip packages required t
   2. `pip install -r requirements.txt`
 - Globally
   1. `pip install --user -r requirements.txt`
+
+
+# Tests and static analysis
+
+## Running tests
+`./manage.py test`
+
+## Linter
+
+Linter used is `pylint`.  
+To run it, specify module(s) to check, e.g. `pylint scheduler zielbruks`.
+
+Pylint is configured in `pylintrc` which can be used to adjust enforced rules.
+
+## Type analysis
+
+Python allows specyfing argument and returns types (see [PEP 484](https://www.python.org/dev/peps/pep-0484/)).
+This project uses [mypy](https://github.com/python/mypy) to check type correctness.  
+Invocation: `mypy scheduler zielbruks`
