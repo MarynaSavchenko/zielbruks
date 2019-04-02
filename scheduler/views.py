@@ -3,7 +3,7 @@ import os.path
 import pandas as pd
 from django.shortcuts import render
 from django.http import HttpRequest, HttpResponse
-from django.core.files.storage import FileSystemStorage
+from django.core.files.storage import default_storage
 import scheduler.import_handlers as imp
 
 
@@ -16,20 +16,21 @@ def upload(request: HttpRequest) -> HttpResponse:
     """Render file upload page"""
     if request.method == 'POST' and request.FILES['myfile']:
         myfile = request.FILES['myfile']
-        storage = FileSystemStorage()
-        ext = os.path.splitext(myfile.name)[1]
-        if ext == '.csv':
-            filename = storage.save(myfile.name, myfile)
-            data = pd.read_csv(myfile.name)
-            storage.delete(filename)
-        elif ext == '.xlsx':
-            filename = storage.save(myfile.name, myfile)
-            data = pd.read_excel(myfile.name)
-            storage.delete(filename)
-        else:
-            return render(request, "upload.html", {'error': "Extension not supported"})
-        added_lessons = imp.import_data(data)
-        data_html = data.to_html(classes=["table-bordered", "table-striped", "table-hover"],
-                                 justify='center')
-        return render(request, "upload.html", {'loaded_data': data_html, 'added': added_lessons})
+        if isinstance(myfile.name, str):
+            ext = os.path.splitext(myfile.name)[1]
+            if ext == '.csv':
+                filename = default_storage.save(myfile.name, myfile)
+                data = pd.read_csv(myfile.name)
+                default_storage.delete(filename)
+            elif ext == '.xlsx':
+                filename = default_storage.save(myfile.name, myfile)
+                data = pd.read_excel(myfile.name)
+                default_storage.delete(filename)
+            else:
+                return render(request, "upload.html", {'error': "Extension not supported"})
+            added_lessons = imp.import_data(data)
+            data_html = data.to_html(classes=["table-bordered", "table-striped", "table-hover"],
+                                     justify='center')
+            return render(request, "upload.html",
+                          {'loaded_data': data_html, 'added': added_lessons})
     return render(request, "upload.html")
