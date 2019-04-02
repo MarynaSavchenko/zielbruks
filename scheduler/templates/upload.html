@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(
+            function(){
+                $('input:file').change(
+                    function(){
+                        if ($(this).val()) {
+                            $('input:submit').attr('disabled',false);
+                        }
+                    }
+                    );
+            });
+    </script>
+    <style>
+        th{
+            text-align:center
+        }
+    </style>
+</head>
+<body>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        Select a file:
+        <br>
+        <input type="file" name="myfile" class="btn btn-default" style="float: left;">
+        <input type="submit" value="Upload" class="btn btn-default" disabled />
+    </form>
+    <br>
+
+    {{ error }}
+
+    {% if loaded_data %}
+        <span style="font-size: large; ">
+            {{loaded_data | safe}}
+        </span>
+        <p>Saved {{ added }} lessons into database</p>
+        <button value="Refresh Page" class="btn btn-default" onClick="window.location.href=window.location.href">Refresh</button>
+    {% endif %}
+    <br>
+    <p><a href="{% url 'index' %}">Return to home</a></p>
+
+</body>
+</html>
