@@ -4,3 +4,5 @@ django
 pylint
 mypy
 django-stubs # required for mypy
+pandas
+xlrd # for read_excel in pandas
