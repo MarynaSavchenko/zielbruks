@@ -1,8 +1,8 @@
-django
+django==2.1.7
 
 # development dependencies:
-pylint
-mypy
-django-stubs # required for mypy
-pandas
-xlrd # for read_excel in pandas
+pylint==2.3.1
+mypy==0.670
+django-stubs==0.10.2 # required for mypy
+pandas==0.24.2
+xlrd==1.2.0 # for read_excel in pandas

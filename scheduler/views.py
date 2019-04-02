@@ -15,18 +15,17 @@ def index(_request: HttpRequest) -> HttpResponse:
 def upload(request: HttpRequest) -> HttpResponse:
     """Render file upload page"""
     if request.method == 'POST' and request.FILES['myfile']:
-        print(request.POST)
         myfile = request.FILES['myfile']
         storage = FileSystemStorage()
         ext = os.path.splitext(myfile.name)[1]
         if ext == '.csv':
-            storage.save(myfile.name, myfile)
+            filename = storage.save(myfile.name, myfile)
             data = pd.read_csv(myfile.name)
-            storage.delete(myfile.name)
+            storage.delete(filename)
         elif ext == '.xlsx':
-            storage.save(myfile.name, myfile)
+            filename = storage.save(myfile.name, myfile)
             data = pd.read_excel(myfile.name)
-            storage.delete(myfile.name)
+            storage.delete(filename)
         else:
             return render(request, "upload.html", {'error': "Extension not supported"})
         added_lessons = imp.import_data(data)
