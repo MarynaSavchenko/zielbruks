@@ -7,3 +7,4 @@ mypy==0.670
 django-stubs==0.10.2 # required for mypy
 pandas==0.24.2
 xlrd==1.2.0 # for read_excel in pandas
+django-swingtime==0.8.0

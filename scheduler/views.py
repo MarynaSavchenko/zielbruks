@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.http import HttpRequest, HttpResponse
 from django.core.files.storage import default_storage
 import scheduler.import_handlers as imp
+from scheduler.models import Auditorium
 
 
 def index(_request: HttpRequest) -> HttpResponse:
@@ -34,3 +35,15 @@ def upload(request: HttpRequest) -> HttpResponse:
             return render(request, "upload.html",
                           {'loaded_data': data_html, 'added': added_lessons})
     return render(request, "upload.html")
+
+
+def show_calendar(request: HttpRequest) -> HttpResponse:
+    times = pd.date_range('2019-12-02T08:00:00.000Z', '2019-12-02T22:00:00.000Z', freq='15T')
+    print([d.strftime('%H%M') for d in times])
+    rooms = Auditorium.objects.all()
+    context = {
+        'times': [d.strftime('%H:%M') for d in times],
+        'rooms': rooms,
+        'range': range(len(rooms))
+    }
+    return render(request, "calendar.html", context)
