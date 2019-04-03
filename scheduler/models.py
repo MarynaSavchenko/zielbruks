@@ -1,6 +1,7 @@
 """Models gathering point"""
 from django.db import models
 
+
 # Create your models here.
 
 class Professor(models.Model):
@@ -9,7 +10,6 @@ class Professor(models.Model):
     surname = models.CharField("Professor surname", max_length=100)
     # blank=not required
     email = models.EmailField("Professor email", max_length=100, null=True, blank=True, unique=True)
-
 
     def save(self, *args, **kwargs):
         """Overriding save to run overridden clean()"""
@@ -27,6 +27,7 @@ class Professor(models.Model):
     def __str__(self):
         return self.name + " " + self.surname
 
+
 class Auditorium(models.Model):
     """Place at which a Lesson is given"""
     number = models.CharField("Auditorium number", max_length=30, unique=True)
@@ -34,12 +35,14 @@ class Auditorium(models.Model):
     def __str__(self):
         return str(self.number)
 
+
 class Group(models.Model):
     """Group of Students attending the same courses"""
     number = models.IntegerField("Group number", unique=True)
 
     def __str__(self):
         return str(self.number)
+
 
 class Lesson(models.Model):
     """A university class having specific time and place"""
@@ -54,6 +57,7 @@ class Lesson(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Student(models.Model):
     """Student particiapting in Lessons"""

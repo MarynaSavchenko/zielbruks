@@ -1,11 +1,12 @@
 """Views gathering point"""
+import datetime
 import os.path
 import pandas as pd
 from django.shortcuts import render
 from django.http import HttpRequest, HttpResponse
 from django.core.files.storage import default_storage
 import scheduler.import_handlers as imp
-from scheduler.models import Auditorium
+from scheduler.models import Auditorium, Lesson
 
 
 def index(_request: HttpRequest) -> HttpResponse:
@@ -38,12 +39,13 @@ def upload(request: HttpRequest) -> HttpResponse:
 
 
 def show_calendar(request: HttpRequest) -> HttpResponse:
+    """ to do """
     times = pd.date_range('2019-12-02T08:00:00.000Z', '2019-12-02T22:00:00.000Z', freq='15T')
-    print([d.strftime('%H%M') for d in times])
     rooms = Auditorium.objects.all()
     context = {
         'times': [d.strftime('%H:%M') for d in times],
         'rooms': rooms,
-        'range': range(len(rooms))
+        'range': range(len(rooms)),
+        'lessons': Lesson.objects.all()
     }
     return render(request, "calendar.html", context)
