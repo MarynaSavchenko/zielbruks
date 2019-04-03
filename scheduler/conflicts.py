@@ -32,7 +32,7 @@ def check_lesson(lesson: Lesson) -> List[Tuple[ConflictType, Lesson, Lesson, obj
 			 Lesson1 and Lesson2 are Lesson that are currently in conflict
 			 object is Model object responsible for conflict (Professor,Auditorium,Group)
     """
-    confs = []
+    confs: List[Tuple[ConflictType, Lesson, Lesson, object]] = []
     for lesson_2 in Lesson.objects.filter(professor=lesson.professor):
         if lesson != lesson_2:
             if (ConflictType.PROFESSOR, lesson_2, lesson, lesson.professor) not in confs:
@@ -56,7 +56,7 @@ def check_lesson(lesson: Lesson) -> List[Tuple[ConflictType, Lesson, Lesson, obj
 def db_conflicts() -> List[Tuple[ConflictType, Lesson, Lesson, object]]:
     """Render the main page"""
     les = Lesson.objects.all()
-    confs = []
+    confs: List[Tuple[ConflictType, Lesson, Lesson, object]] = []
     for lesson in les:
         confs = confs + check_lesson(lesson)
     return confs
