@@ -10,7 +10,7 @@ class ConflictType(Enum):
 
 def check_time_conflict(lesson1: Lesson, lesson2: Lesson) -> bool:
     """
-    Check if lesson2 started or ended during lesson1.
+    Check if one lesson started or ended during other  
     Lessons should have common factor like same professor, auditorium, group
     :param lesson1, lesson2: Lesson object retrived from database
     :return: bool if lessons are conflicting
@@ -18,6 +18,8 @@ def check_time_conflict(lesson1: Lesson, lesson2: Lesson) -> bool:
     if lesson1.start_time <= lesson2.start_time and lesson1.end_time > lesson2.start_time:
         return True
     if lesson1.end_time >= lesson2.end_time and lesson1.start_time < lesson2.end_time:
+        return True
+    if lesson1.start_time >= lesson2.start_time and lesson1.end_time <= lesson2.end_time:
         return True
     return False
 
