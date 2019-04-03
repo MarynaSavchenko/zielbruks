@@ -5,6 +5,17 @@ from django.shortcuts import render
 from django.http import HttpRequest, HttpResponse
 from django.core.files.storage import default_storage
 import scheduler.import_handlers as imp
+from django.views import generic
+import scheduler.conflicts as conflicts
+
+
+class ConflictsView(generic.DetailView):
+    template_name = 'conflicts.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(ConflictsView, self).get_context_data(**kwargs)
+        context['conflicts'] = conflicts.db_conflicts()
+        return context
 
 
 def index(_request: HttpRequest) -> HttpResponse:
@@ -34,3 +45,8 @@ def upload(request: HttpRequest) -> HttpResponse:
             return render(request, "upload.html",
                           {'loaded_data': data_html, 'added': added_lessons})
     return render(request, "upload.html")
+
+
+def conflicts(request: HttpRequest) -> HttpResponse:
+    """Render the conflicts page"""
+    return render(request, "conflicts.html")

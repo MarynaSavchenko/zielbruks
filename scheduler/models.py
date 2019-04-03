@@ -10,7 +10,6 @@ class Professor(models.Model):
     # blank=not required
     email = models.EmailField("Professor email", max_length=100, null=True, blank=True, unique=True)
 
-
     def save(self, *args, **kwargs):
         """Overriding save to run overridden clean()"""
         self.full_clean()
