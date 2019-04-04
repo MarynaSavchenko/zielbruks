@@ -6,6 +6,7 @@ from django.http import HttpRequest, HttpResponse
 from django.core.files.storage import default_storage
 from django.template import loader
 import scheduler.import_handlers as imp
+from scheduler.models import Auditorium, Lesson
 import scheduler.conflicts as conflicts
 
 def index(_request: HttpRequest) -> HttpResponse:
@@ -34,6 +35,19 @@ def upload(request: HttpRequest) -> HttpResponse:
             return render(request, "upload.html",
                           {'loaded_data': data_html, 'added': added_lessons})
     return render(request, "upload.html")
+
+
+def show_calendar(request: HttpRequest) -> HttpResponse:
+    """ to do """
+    times = pd.date_range('2019-12-02T08:00:00.000Z', '2019-12-02T22:00:00.000Z', freq='15T')
+    rooms = Auditorium.objects.all()
+    context = {
+        'times': [d.strftime('%H:%M') for d in times],
+        'rooms': rooms,
+        'range': range(len(rooms)),
+        'lessons': Lesson.objects.all()
+    }
+    return render(request, "calendar.html", context)
 
 def confs(request: HttpRequest) -> HttpResponse:
     """Render the conflicts page"""
