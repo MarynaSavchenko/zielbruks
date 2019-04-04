@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+    <title>Calendar Example</title>
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
@@ -16,35 +19,45 @@
                     }
                     );
             });
+
     </script>
     <style>
         th{
             text-align:center
         }
+
     </style>
 </head>
 <body>
 
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        Select a file:
+<div class="container">
+    <h2>Upload file</h2>
+    <div>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            Select a file:
+            <br>
+            <input type="file" name="myfile" class="btn btn-default" style="float: left;">
+            <input type="submit" value="Upload" class="btn btn-default" disabled/>
+        </form>
         <br>
-        <input type="file" name="myfile" class="btn btn-default" style="float: left;">
-        <input type="submit" value="Upload" class="btn btn-default" disabled />
-    </form>
-    <br>
 
-    {{ error }}
+        {{ error }}
 
-    {% if loaded_data %}
+        {% if loaded_data %}
         <span style="font-size: large; ">
             {{loaded_data | safe}}
         </span>
         <p>Saved {{ added }} lessons into database</p>
-        <button value="Refresh Page" class="btn btn-default" onClick="window.location.href=window.location.href">Refresh</button>
-    {% endif %}
-    <br>
-    <p><a href="{% url 'index' %}">Return to home</a></p>
-
+        <button value="Refresh Page" class="btn btn-default" onClick="window.location.href=window.location.href">
+            Refresh
+        </button>
+        {% endif %}
+        <br>
+    </div>
+    <p><a href="{% url 'index' %}">
+        <button type="button" class="btn btn-primary">Return to home</button>
+    </a></p>
+</div>
 </body>
 </html>

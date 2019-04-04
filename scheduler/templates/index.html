@@ -1,3 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Calendar Example</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container">
 <h1>MAIN PAGE</h1>
-Hello, world. Tu bedzie strona glowna schedulera
-<p><a href="{% url 'upload' %}"> Upload schedule </a></p>
+<div> Hello, world. Tu bedzie strona glowna schedulera </div>
+
+<div class="btn-group-vertical">
+    <a href="{% url 'upload' %}"> <button type="button" class="btn btn-primary"> Upload schedule </button> </a>
+    <a href="{% url 'show_calendar' %}"> <button type="button" class="btn btn-primary">Show calendar </button> </a>
+</div>
+</div>
+</body>
