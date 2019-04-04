@@ -1,10 +1,12 @@
 """Data import functions"""
 import datetime
+from typing import List, Tuple
+from numpy import nan
 import pandas as pd
 from scheduler.models import Professor, Auditorium, Group, Lesson
 
 
-def parse_data(data: pd.DataFrame, ext: str) -> int:
+def parse_data(data: pd.DataFrame, ext: str) -> Tuple[int, List[int], List[int]]:
     """
     Parse basic info, process extension and pass to designated function
     :param data: DataFrame with lessons
@@ -12,15 +14,15 @@ def parse_data(data: pd.DataFrame, ext: str) -> int:
     :param ext: File extension: .csv or .xlsx
     :return: number of lessons added
     """
-    if len(data.columns) == 7 and not data.isnull().values.any():
+    if len(data.columns) == 7:
         if ext == '.csv':
             return import_csv(data)
         if ext == '.xlsx':
             return import_excel(data)
-    return 0
+    return 0, [], []
 
 
-def import_csv(data: pd.DataFrame) -> int:
+def import_csv(data: pd.DataFrame) -> Tuple[int, List[int], List[int]]:
     """
     Parse csv data from DataFrame and add to database
     :param data: consists of simple types (str or int)
@@ -28,22 +30,44 @@ def import_csv(data: pd.DataFrame) -> int:
     :return: number of lessons added
     """
     added_columns = 0
-    for row in data.itertuples(index=False):
-        date = [int(val) for val in row[0].split("-")]
-        start_time = [int(val) for val in row[1].split(":")]
-        end_time = [int(val) for val in row[2].split(":")]
-        professor = row[4].split(" ")
-        if len(date) == 3 and len(start_time) == 2 and len(end_time) == 2 and len(professor) == 2:
+    incorrect = []
+    duplicate = []
+    for row in data.itertuples():
+        if row.count(nan) != 0 or not check_types_csv(row):
+            incorrect.append(row[0])
+            continue
+        date = [int(val) for val in row[1].split("-")]
+        start_t = [int(val) for val in row[2].split(":")]
+        end_t = [int(val) for val in row[3].split(":")]
+        professor_data = row[5].split(" ")
+        if len(date) == 3 and len(start_t) == 2 and len(end_t) == 2 and len(professor_data) == 2:
             date[2] += 2000
-            start_date = datetime.datetime(date[2], date[1], date[0], start_time[0], start_time[1])
-            end_date = datetime.datetime(date[2], date[1], date[0], end_time[0], end_time[1])
-            parameters = (row[3], professor[1], professor[0], row[6], row[5], start_date, end_date)
-            if save_into_database(parameters):
+            start_date = datetime.datetime(date[2], date[1], date[0], start_t[0], start_t[1])
+            end_date = datetime.datetime(date[2], date[1], date[0], end_t[0], end_t[1])
+            if start_date > end_date:
+                incorrect.append(row[0])
+                continue
+            professor = get_professor(professor_data[0], professor_data[1])
+            auditorium = get_auditorium(str(row[7]))
+            group = get_group(row[6])
+            _lesson, created = Lesson.objects.get_or_create(
+                name=row[4],
+                professor=professor,
+                auditorium=auditorium,
+                group=group,
+                start_time=start_date,
+                end_time=end_date
+            )
+            if created:
                 added_columns += 1
-    return added_columns
+            else:
+                duplicate.append(row[0])
+        else:
+            incorrect.append(row[0])
+    return added_columns, incorrect, duplicate
 
 
-def import_excel(data: pd.DataFrame) -> int:
+def import_excel(data: pd.DataFrame) -> Tuple[int, List[int], List[int]]:
     """
     Parse excel data from DataFrame and add to database
     :param data: consists of complex types for date etc.
@@ -51,44 +75,86 @@ def import_excel(data: pd.DataFrame) -> int:
     :return: number of lessons added
     """
     added_columns = 0
-    for row in data.itertuples(index=False):
-        professor = row[4].split(" ")
-        if isinstance(row[0], pd.Timestamp) and isinstance(row[1], datetime.time) and \
-                isinstance(row[2], datetime.time) and len(professor) == 2:
-            start_time = datetime.timedelta(hours=row[1].hour, minutes=row[1].minute)
-            end_time = datetime.timedelta(hours=row[2].hour, minutes=row[2].minute)
-            start_date = row[0].to_pydatetime() + start_time
-            end_date = row[0].to_pydatetime() + end_time
-            parameters = (row[3], professor[1], professor[0], row[6], row[5], start_date, end_date)
-            if save_into_database(parameters):
+    incorrect = []
+    duplicate = []
+    for row in data.itertuples():
+        if row.count(nan) != 0 or not check_types_excel(row):
+            incorrect.append(row[0])
+            continue
+        professor_data = row[5].split(" ")
+        if len(professor_data) == 2:
+            start_time = datetime.timedelta(hours=row[2].hour, minutes=row[2].minute)
+            end_time = datetime.timedelta(hours=row[3].hour, minutes=row[3].minute)
+            start_date = row[1].to_pydatetime() + start_time
+            end_date = row[1].to_pydatetime() + end_time
+            if start_date > end_date:
+                incorrect.append(row[0])
+                continue
+            professor = get_professor(professor_data[0], professor_data[1])
+            auditorium = get_auditorium(str(row[7]))
+            group = get_group(row[6])
+            _lesson, created = Lesson.objects.get_or_create(
+                name=row[4],
+                professor=professor,
+                auditorium=auditorium,
+                group=group,
+                start_time=start_date,
+                end_time=end_date
+            )
+            if created:
                 added_columns += 1
-    return added_columns
+            else:
+                duplicate.append(row[0])
+        else:
+            incorrect.append(row[0])
+    return added_columns, incorrect, duplicate
 
 
-def save_into_database(parameters: tuple) -> bool:
-    """
-    Save a lesson (and other model if necessary) objects into database
-    :param parameters: tuple of formatted data needed for database:
-                (lesson_name, prof_name, prof_surname, auditorium, group, start_date, end_date)
-    :return: whether given lesson already existed or not
-    """
-    print(parameters)
-    professor, _created = Professor.objects.get_or_create(
-        name=parameters[1],
-        surname=parameters[2]
-    )
-    auditorium, _created = Auditorium.objects.get_or_create(
-        number=parameters[3]
-    )
-    group, _created = Group.objects.get_or_create(
-        number=parameters[4]
-    )
-    _lesson, created = Lesson.objects.get_or_create(
-        name=parameters[0],
-        professor=professor,
-        auditorium=auditorium,
-        group=group,
-        start_time=parameters[5],
-        end_time=parameters[6]
-    )
-    return created
+def check_types_csv(row: tuple) -> bool:
+    """Returns true if row from csv file has correct types"""
+    if not isinstance(row[1], str):
+        return False
+    if not isinstance(row[2], str) and isinstance(row[3], str):
+        return False
+    if not isinstance(row[4], str) and isinstance(row[5], str):
+        return False
+    if not isinstance(row[6], int):
+        return False
+    if not isinstance(row[7], (str, int, float)):
+        # 3.27, 3.27a and 137 should all be supported
+        return False
+    return True
+
+
+def check_types_excel(row: tuple) -> bool:
+    """Returns true if row from excel file has correct types"""
+    if not isinstance(row[1], pd.Timestamp):
+        return False
+    if not (isinstance(row[2], datetime.time) and isinstance(row[3], datetime.time)):
+        return False
+    if not (isinstance(row[4], str) and isinstance(row[5], str)):
+        return False
+    if not isinstance(row[6], int):
+        return False
+    if not isinstance(row[7], (str, int, float)):
+        # 3.27, 3.27a and 137 should all be supported
+        return False
+    return True
+
+
+def get_professor(name: str, surname: str) -> Professor:
+    """Gets professor from database or creates a new object and returns it"""
+    professor, _created = Professor.objects.get_or_create(name=name, surname=surname)
+    return professor
+
+
+def get_auditorium(number: str) -> Auditorium:
+    """Gets auditorium from database or creates a new object and returns it"""
+    auditorium, _created = Auditorium.objects.get_or_create(number=number)
+    return auditorium
+
+
+def get_group(number: int) -> Group:
+    """Gets group from database or creates a new object and returns it"""
+    group, _created = Group.objects.get_or_create(number=number)
+    return group
