@@ -1,7 +1,6 @@
 """Models gathering point"""
 from django.db import models
 
-# Create your models here.
 
 class Professor(models.Model):
     """Person lecturing in a Lesson"""
@@ -26,12 +25,14 @@ class Professor(models.Model):
     def __str__(self):
         return self.name + " " + self.surname
 
+
 class Auditorium(models.Model):
     """Place at which a Lesson is given"""
     number = models.CharField("Auditorium number", max_length=30, unique=True)
 
     def __str__(self):
         return str(self.number)
+
 
 class Group(models.Model):
     """Group of Students attending the same courses"""
@@ -40,19 +41,24 @@ class Group(models.Model):
     def __str__(self):
         return str(self.number)
 
+
 class Lesson(models.Model):
     """A university class having specific time and place"""
 
     # If you want to get a list of lessons from Foreign Tables, you should use related_name
-    name = models.CharField("Lesson name", max_length=100, unique=True)
+    name = models.CharField("Lesson name", max_length=100)
     professor = models.ForeignKey(Professor, related_name='lessons', on_delete=models.CASCADE)
     auditorium = models.ForeignKey(Auditorium, related_name='lessons', on_delete=models.CASCADE)
     group = models.ForeignKey(Group, related_name='lessons', on_delete=models.CASCADE)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
 
+    class Meta:
+        unique_together = ('name', 'professor', 'auditorium', 'group', 'start_time', 'end_time', )
+
     def __str__(self):
         return self.name
+
 
 class Student(models.Model):
     """Student particiapting in Lessons"""
