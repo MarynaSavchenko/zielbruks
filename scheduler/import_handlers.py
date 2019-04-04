@@ -118,7 +118,9 @@ def check_types_csv(row: tuple) -> bool:
         return False
     if not isinstance(row[4], str) and isinstance(row[5], str):
         return False
-    if not isinstance(row[6], int):
+    try:
+        int(row[6])
+    except ValueError:
         return False
     if not isinstance(row[7], (str, int, float)):
         # 3.27, 3.27a and 137 should all be supported
@@ -134,7 +136,9 @@ def check_types_excel(row: tuple) -> bool:
         return False
     if not (isinstance(row[4], str) and isinstance(row[5], str)):
         return False
-    if not isinstance(row[6], int):
+    try:
+        int(row[6])
+    except ValueError:
         return False
     if not isinstance(row[7], (str, int, float)):
         # 3.27, 3.27a and 137 should all be supported
