@@ -112,11 +112,7 @@ def import_excel(data: pd.DataFrame) -> Tuple[int, List[int], List[int]]:
 
 def check_types_csv(row: tuple) -> bool:
     """Returns true if row from csv file has correct types"""
-    if not isinstance(row[1], str):
-        return False
-    if not isinstance(row[2], str) and isinstance(row[3], str):
-        return False
-    if not isinstance(row[4], str) and isinstance(row[5], str):
+    if not all((isinstance(x, str) for x in row[1:5])):
         return False
     try:
         int(row[6])
