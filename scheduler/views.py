@@ -30,11 +30,12 @@ def upload(request: HttpRequest) -> HttpResponse:
                 default_storage.delete(filename)
             else:
                 return render(request, "upload.html", {'error': "Extension not supported"})
-            added_lessons = imp.import_data(data)
+            added_lessons, incorrect, duplicate = imp.parse_data(data, ext)
             data_html = data.to_html(classes=["table-bordered", "table-striped", "table-hover"],
                                      justify='center')
-            return render(request, "upload.html",
-                          {'loaded_data': data_html, 'added': added_lessons})
+            context = {'loaded_data': data_html, 'added': added_lessons,
+                       'incorrect': incorrect, 'duplicate': duplicate}
+            return render(request, "upload.html", context)
     return render(request, "upload.html")
 
 

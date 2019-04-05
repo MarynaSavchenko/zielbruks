@@ -49,7 +49,20 @@
             {{loaded_data | safe}}
         </span>
         <p>Saved {{ added }} lessons into database</p>
-        <button value="Refresh Page" class="btn btn-default" onClick="window.location.href=window.location.href">
+        {% if incorrect %}
+            Incorrect rows:
+            <p>{% for number in incorrect %}
+                    {{ number }},
+                {% endfor %}</p>
+        {% endif %}
+        {% if duplicate %}
+            Duplicate rows:
+            <p>{% for num in duplicate %}
+                    {{ num }},
+                {% endfor %}</p>
+        {% endif %}
+
+        <button value="Refresh Page" class="btn btn-primary" onClick="window.location.href=window.location.href">
             Refresh
         </button>
         {% endif %}
@@ -59,5 +72,6 @@
         <button type="button" class="btn btn-primary">Return to home</button>
     </a></p>
 </div>
+
 </body>
 </html>
