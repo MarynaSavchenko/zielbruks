@@ -6,8 +6,7 @@ from django.shortcuts import render
 from django.http import HttpRequest, HttpResponse
 from django.core.files.storage import default_storage
 import scheduler.import_handlers as imp
-from scheduler.models import Auditorium, Lesson
-
+from scheduler.models import Auditorium, Lesson, Professor
 
 def index(_request: HttpRequest) -> HttpResponse:
     """Render the main page"""
@@ -50,3 +49,18 @@ def show_calendar(request: HttpRequest) -> HttpResponse:
         'lessons': Lesson.objects.all()
     }
     return render(request, "calendar.html", context)
+
+
+def show_proferssors_schedule(request: HttpRequest) -> HttpResponse:
+    professor_id = Professor.objects.filter(name = "Sergiusz", surname = "Orlowski")
+
+    professors_lessons_query = Lesson.objects.filter(professor__in=professor_id)
+    professors_lessons_list = [(q.start_time.strftime("%Y-%d-%mT%H:%M:%S"), q.end_time.strftime("%Y-%d-%mT%H:%M:%S") , q.name) for q in professors_lessons_query]
+    print(professors_lessons_list)
+    context = {
+        'professors' : [q.name + " " + q.surname for q in Professor.objects.all()],
+        'events' : professors_lessons_list,
+        'current_data' : datetime.datetime.now().strftime("%Y-%d-%m")
+    }
+    print(datetime.datetime.now().strftime("%Y-%m-%d"))
+    return render(request, "professors_scheduler.html", context)

@@ -9,6 +9,7 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('upload/', views.upload, name='upload'),
     path('show_calendar/', views.show_calendar, name='show_calendar'),
+    path('show_professors_schedule/', views.show_proferssors_schedule, name='show_proferssors_schedule')
 ]
 
 if settings.STATIC_URL is not None:
