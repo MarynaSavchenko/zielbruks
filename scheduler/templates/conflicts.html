@@ -10,6 +10,7 @@
 <body>
 
 <div class="container">
+{% load custom_filters %}
 <h2>Conflicts</h2>
     <table class="table table-striped">
      <thead>
@@ -21,24 +22,22 @@
         <th> Group </th>
         <th> Start time  </th>
         <th> End time  </th>
-        <th> Name  </th>
-        <th> Professor  </th>
-        <th> Auditorium  </th>
-        <th> Group  </th>
-        <th> Start time  </th>
-        <th> End time </th>
       </tr>
     </thead>
-    <tbody>
+    <tr>
         {% for ConflictType, Lesson1, Lesson2, object in conflicts %}
-            <tr>
-                <td> {{ ConflictType }}</td>
+            {% set_color forloop.counter0 as color %}
+            <tr class = {{color}} >
+                <td> {{ ConflictType.name }}</td>
                 <td> {{ Lesson1.name }} </td>
                 <td> {{ Lesson1.professor }} </td>
                 <td> {{ Lesson1.auditorium }} </td>
                 <td> {{ Lesson1.group }} </td>
                 <td> {{ Lesson1.start_time }} </td>
                 <td> {{ Lesson1.end_time }} </td>
+            </tr>
+            <tr class = {{color}} >
+                <td> </td>
                 <td> {{ Lesson2.name }} </td>
                 <td> {{ Lesson2.professor }} </td>
                 <td> {{ Lesson2.auditorium }} </td>
