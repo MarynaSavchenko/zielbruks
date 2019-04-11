@@ -26,7 +26,7 @@
     </thead>
     <tr>
         {% for ConflictType, Lesson1, Lesson2, object in conflicts %}
-            {% set_color forloop.counter0 as color %}
+            {% get_color_tag forloop.counter0 as color %}
             <tr class = {{color}} >
                 <td> {{ ConflictType.name }}</td>
                 <td> {{ Lesson1.name }} </td>
