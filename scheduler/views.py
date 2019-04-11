@@ -54,7 +54,7 @@ def confs(request: HttpRequest) -> HttpResponse:
     """Render the conflicts page"""
     template = loader.get_template('conflicts.html')
     conflicts_list = conflicts.db_conflicts()
-    color = 'success'
+    color = ''
     context = {
         'conflicts': conflicts_list,
         'color': color,
