@@ -18,36 +18,21 @@
 
     <h2>Schedule for {{ professor }}</h2>
 
-    {#    <div id="dp"></div>#}
-    {#    <script type="text/javascript">#}
-    {#        var dp = new DayPilot.Calendar("dp");#}
-    {#        dp.days = 3;#}
-    {#        dp.startDate = "2019-05-03"#}
-    {# normally no need for this but we have limited data #}
-    {#        dp.events.list = [];#}
-    {#        {% for e in events %}#}
-    {#            var e = {#}
-    {#                start: new DayPilot.Date("{{ e.0 }}"),#}
-    {#                end: new DayPilot.Date("{{ e.1 }}"),#}
-    {#                id: DayPilot.guid(),#}
-    {#                text: "{{ e.2 }}"#}
-    {#            };#}
-    {#            dp.events.list.push(e);#}
-    {#        {% endfor %}#}
-    {#        dp.init();#}
-    {#    </script>#}
-    {##}
     <div style="float:left; width: 150px;">
         <div id="nav"></div>
     </div>
     <div style="margin-left: 150px;">
         <div id="dp"></div>
     </div>
+    <div style="...">
+        <div id="details"></div>
+    </div>
 
     <script type="text/javascript">
         var nav = new DayPilot.Navigator("nav");
-        nav.showMonths = 3;
-        nav.selectMode = "week";
+        nav.showMonths = 2;
+        nav.selectMode = "day";
+        nav.startDate = "{{ start_date }}";
         nav.onTimeRangeSelected = function (args) {
             dp.startDate = args.start;
             dp.update();
@@ -55,7 +40,10 @@
         nav.init();
 
         var dp = new DayPilot.Calendar("dp");
-        dp.viewType = "Week";
+        dp.startDate = "{{ start_date }}";
+        dp.viewType = "Days";
+        dp.days = 2;
+        dp.businessBeginsHour = 7;
         dp.events.list = [];
         {% for e in events %}
             var e = {
@@ -64,14 +52,19 @@
                 id: DayPilot.guid(),
                 text: "{{ e.2 }},\
                 group: {{ e.4 }},\
-                place: {{ e.4 }}",
+                place: {{ e.3 }}",
                 moveDisabled: true
             };
             dp.events.list.push(e);
         {% endfor %}
 
-        dp.init();
+        dp.eventClickHandling = "Enabled";
+        dp.eventMoveHandling = "Disabled";
+        dp.onEventClicked = function (args) {
+             document.getElementById("details").innerText =  args.e.text() ;
+        };
 
+        dp.init();
     </script>
 </div>
 
