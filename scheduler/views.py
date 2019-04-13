@@ -1,18 +1,17 @@
 """Views gathering point"""
-import datetime
 import os.path
 import pandas as pd
 from django.shortcuts import render
 from django.http import HttpRequest, HttpResponse
 from django.core.files.storage import default_storage
+from django.template import loader
 import scheduler.import_handlers as imp
 from scheduler.models import Auditorium, Lesson
-
+import scheduler.conflicts as conflicts
 
 def index(_request: HttpRequest) -> HttpResponse:
     """Render the main page"""
     return render(_request, 'index.html')
-
 
 def upload(request: HttpRequest) -> HttpResponse:
     """Render file upload page"""
@@ -50,3 +49,14 @@ def show_calendar(request: HttpRequest) -> HttpResponse:
         'lessons': Lesson.objects.all()
     }
     return render(request, "calendar.html", context)
+
+def confs(request: HttpRequest) -> HttpResponse:
+    """Render the conflicts page"""
+    template = loader.get_template('conflicts.html')
+    conflicts_list = conflicts.db_conflicts()
+    color = ''
+    context = {
+        'conflicts': conflicts_list,
+        'color': color,
+    }
+    return HttpResponse(template.render(context, request))
