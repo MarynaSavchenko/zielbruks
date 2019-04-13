@@ -28,30 +28,27 @@ def check_lesson(lesson: Lesson) -> List[Tuple[ConflictType, Lesson, Lesson, obj
     And then checks if they are conflcting with eachother using are_overlapping
     :param lesson: Lesson for which we are chcecking possible conflicts
     :return: List of tuples holding information about conflict.
-    		 Tuple[ConflictType, Lesson1, Lesson1, object]
-			 ConflictType helps to differentiate which conflict it is
-			 Lesson1 and Lesson2 are Lesson that are currently in conflict
-			 object is Model object responsible for conflict (Professor,Auditorium,Group)
+             Tuple[ConflictType, Lesson1, Lesson1, object]
+             ConflictType helps to differentiate which conflict it is
+             Lesson1 and Lesson2 are Lesson that are currently in conflict
+             object is Model object responsible for conflict (Professor,Auditorium,Group)
     """
     confs: List[Tuple[ConflictType, Lesson, Lesson, object]] = []
     for lesson_2 in Lesson.objects.filter(professor=lesson.professor):
         if lesson != lesson_2:
-            if (ConflictType.PROFESSOR, lesson_2, lesson, lesson.professor) not in confs:
-                if are_overlapping(lesson, lesson_2):
-                    new_conflict = (ConflictType.PROFESSOR, lesson, lesson_2, lesson.professor)
-                    confs.append(new_conflict)
+            if are_overlapping(lesson, lesson_2):
+                new_conflict = (ConflictType.PROFESSOR, lesson, lesson_2, lesson.professor)
+                confs.append(new_conflict)
     for lesson_2 in Lesson.objects.filter(auditorium=lesson.auditorium):
         if lesson != lesson_2:
-            if (ConflictType.AUDITORIUM, lesson_2, lesson, lesson.auditorium) not in confs:
-                if are_overlapping(lesson, lesson_2):
-                    new_conflict = (ConflictType.AUDITORIUM, lesson, lesson_2, lesson.auditorium)
-                    confs.append(new_conflict)
+            if are_overlapping(lesson, lesson_2):
+                new_conflict = (ConflictType.AUDITORIUM, lesson, lesson_2, lesson.auditorium)
+                confs.append(new_conflict)
     for lesson_2 in Lesson.objects.filter(group=lesson.group):
         if lesson != lesson_2:
-            if (ConflictType.GROUP, lesson_2, lesson, lesson.group) not in confs:
-                if are_overlapping(lesson, lesson_2):
-                    new_conflict = (ConflictType.GROUP, lesson, lesson_2, lesson.group)
-                    confs.append(new_conflict)
+            if are_overlapping(lesson, lesson_2):
+                new_conflict = (ConflictType.GROUP, lesson, lesson_2, lesson.group)
+                confs.append(new_conflict)
     return confs
 
 def db_conflicts() -> List[Tuple[ConflictType, Lesson, Lesson, object]]:
@@ -66,5 +63,8 @@ def db_conflicts() -> List[Tuple[ConflictType, Lesson, Lesson, object]]:
     les = Lesson.objects.all()
     confs: List[Tuple[ConflictType, Lesson, Lesson, object]] = []
     for lesson in les:
-        confs = confs + check_lesson(lesson)
+        lesson_conflicts = check_lesson(lesson)
+        for conflict in lesson_conflicts:
+            if (conflict[0], conflict[2], conflict[1], conflict[3]) not in confs:
+                confs.append(conflict)
     return confs
