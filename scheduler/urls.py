@@ -9,7 +9,7 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('conflicts/', views.confs, name='conflicts'),
     path('upload/', views.upload, name='upload'),
-    path('show_calendar/', views.show_calendar, name='show_calendar'),
+    path('show_calendar/', views.show_rooms_schedule, name='room_schedule'),
 ]
 
 if settings.STATIC_URL is not None:
