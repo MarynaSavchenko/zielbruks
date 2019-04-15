@@ -24,9 +24,12 @@
     <div style="margin-left: 150px;">
         <div id="dp"></div>
     </div>
-    <div style="...">
-        <div id="details"></div>
+
+    <p style="...">
+    <div id="details" class="alert alert-info">
+        Select an event to show the details.
     </div>
+    </p>
 
     <script type="text/javascript">
         var nav = new DayPilot.Navigator("nav");
@@ -61,7 +64,7 @@
         dp.eventClickHandling = "Enabled";
         dp.eventMoveHandling = "Disabled";
         dp.onEventClicked = function (args) {
-             document.getElementById("details").innerText =  args.e.text() ;
+            document.getElementById("details").innerText = args.e.text();
         };
 
         dp.init();
