@@ -7,7 +7,8 @@ from django.http import HttpRequest, HttpResponse
 from django.core.files.storage import default_storage
 from django.template import loader
 import scheduler.import_handlers as imp
-from .forms import SelectAuditoriumForm
+from scheduler.calendar_util import get_start_date
+from .forms import SelectAuditoriumForm, SelectProfessorForm
 from django.contrib import messages
 import scheduler.conflicts as conflicts
 from scheduler.models import Auditorium, Lesson, Professor, Group
@@ -81,25 +82,36 @@ def confs(request: HttpRequest) -> HttpResponse:
 
 
 def show_proferssors_schedule(request: HttpRequest) -> HttpResponse:
-    professor_id = Professor.objects.filter(name="Sergiusz", surname="Orlowski")
+    """Render the professor schedule page"""
+    professors = Auditorium.objects.all()
+    if_chosen = False
+    professor = None
+    professors_lessons_list = []
+    professors_lessons_query = Lesson.objects.all()
+    if request.method == 'POST':
+        form = SelectProfessorForm(request.POST)
+        if form.is_valid():
+            professor = form.cleaned_data['professor']
+            if_chosen = True
+            professors_lessons_query = Lesson.objects.filter(professor=professor)
+            professors_lessons_list = [(q.start_time.strftime("%Y-%m-%dT%H:%M:%S"),
+                                        q.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
+                                        q.name,
+                                        Auditorium.objects.filter(id=q.auditorium_id)[:1].get().number,
+                                        Group.objects.filter(id=q.group_id)[:1].get().number)
+                                       for q in professors_lessons_query]
+        else:
+            return HttpResponse("AN ERROR OCCURRED")
+    else:
+        form = SelectProfessorForm()
 
-    professors_lessons_query = Lesson.objects.filter(professor__in=professor_id).order_by('start_time')
-    professors_lessons_list = [(q.start_time.strftime("%Y-%m-%dT%H:%M:%S"),
-                                q.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
-                                q.name,
-                                Auditorium.objects.filter(id=q.auditorium_id)[:1].get().number,
-                                Group.objects.filter(id=q.group_id)[:1].get().number)
-                               for q in professors_lessons_query]
-
-    start_date = datetime.datetime.now()
-    for d in professors_lessons_query:
-        if (d.start_time > start_date):
-            start_date = d.start_time
-    start_date_str = start_date.strftime("%Y-%m-%dT%H:%M:%S")
-    print(start_date_str)
     context = {
-        'professor': 'Sergiusz Orlowski',
+        'range': range(len(professors)),
+        'form': form,
+        'flag': if_chosen,
         'events': professors_lessons_list,
-        'start_date': start_date_str
+        'professor': professor,
+        'lessons': Lesson.objects.all(),
+        'start_date': get_start_date(professors_lessons_query)
     }
     return render(request, "professors_scheduler.html", context)

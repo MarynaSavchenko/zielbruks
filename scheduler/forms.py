@@ -10,3 +10,12 @@ class SelectAuditoriumForm(forms.ModelForm):
     class Meta:
         model = Auditorium
         fields: list = []
+
+
+class SelectProfessorForm(forms.ModelForm):
+    """ form to choose professor to show their schedule"""
+    professor = forms.ModelChoiceField(queryset=Professor.objects.all(), to_field_name='id')
+
+    class Meta:
+        model = Professor
+        fields: list = []
