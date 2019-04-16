@@ -1,16 +1,15 @@
+"""Utilities for displaying calendars"""
 import datetime
-from typing import Union, List
 
 from django.db.models import QuerySet
 
-from scheduler.models import Lesson
 
-
-def get_start_date(lessons : Union[QuerySet, List[Lesson]]):
+def get_start_date(lessons: QuerySet):
     """Returns the date which should be displayed as first in calendar as string"""
     lessons.order_by('start_time')
     start_date = datetime.datetime.now()
-    for d in lessons:
-        if (d.start_time > start_date):
-            start_date = d.start_time
-    return start_date.strftime("%Y-%m-%dT%H:%M:%S")
+    for lesson in lessons:
+        if lesson.start_time > start_date:
+            start_date = lesson.start_time
+            return start_date.strftime("%Y-%m-%dT%H:%M:%S")
+    return start_date

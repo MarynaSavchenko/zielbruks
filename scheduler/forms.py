@@ -1,3 +1,4 @@
+"""Forms"""
 from django import forms
 
 from .models import Lesson, Student, Auditorium, Professor, Group

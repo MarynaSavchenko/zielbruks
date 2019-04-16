@@ -1,17 +1,20 @@
 """Views gathering point"""
-import os.path
 import datetime
+import os.path
+from typing import List, Tuple
+
 import pandas as pd
-from django.shortcuts import render
-from django.http import HttpRequest, HttpResponse
+from django.contrib import messages
 from django.core.files.storage import default_storage
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import render
 from django.template import loader
+
+import scheduler.conflicts as conflicts
 import scheduler.import_handlers as imp
 from scheduler.calendar_util import get_start_date
+from scheduler.models import Auditorium, Lesson, Group
 from .forms import SelectAuditoriumForm, SelectProfessorForm
-from django.contrib import messages
-import scheduler.conflicts as conflicts
-from scheduler.models import Auditorium, Lesson, Professor, Group
 
 
 def index(_request: HttpRequest) -> HttpResponse:
@@ -86,7 +89,7 @@ def show_proferssors_schedule(request: HttpRequest) -> HttpResponse:
     professors = Auditorium.objects.all()
     if_chosen = False
     professor = None
-    professors_lessons_list = []
+    professors_lessons_list: List[Tuple[str, str, str, str, int]] = []
     professors_lessons_query = Lesson.objects.all()
     if request.method == 'POST':
         form = SelectProfessorForm(request.POST)
@@ -97,7 +100,8 @@ def show_proferssors_schedule(request: HttpRequest) -> HttpResponse:
             professors_lessons_list = [(q.start_time.strftime("%Y-%m-%dT%H:%M:%S"),
                                         q.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
                                         q.name,
-                                        Auditorium.objects.filter(id=q.auditorium_id)[:1].get().number,
+                                        Auditorium.objects.filter(id=q.auditorium_id)[:1]
+                                        .get().number,
                                         Group.objects.filter(id=q.group_id)[:1].get().number)
                                        for q in professors_lessons_query]
         else:

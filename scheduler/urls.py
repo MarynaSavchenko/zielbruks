@@ -10,7 +10,8 @@ urlpatterns = [
     path('conflicts/', views.confs, name='conflicts'),
     path('upload/', views.upload, name='upload'),
     path('show_calendar/', views.show_rooms_schedule, name='room_schedule'),
-    path('show_professors_schedule/', views.show_proferssors_schedule, name='show_proferssors_schedule'),
+    path('show_professors_schedule/', views.show_proferssors_schedule,
+         name='show_proferssors_schedule'),
 ]
 
 if settings.STATIC_URL is not None:
