@@ -28,7 +28,7 @@ def check_lesson(lesson: Lesson) -> List[Tuple[ConflictType, Lesson, Lesson, obj
     And then checks if they are conflcting with eachother using are_overlapping
     :param lesson: Lesson for which we are chcecking possible conflicts
     :return: List of tuples holding information about conflict.
-             Tuple[ConflictType, Lesson1, Lesson1, object]
+             Tuple[ConflictType, Lesson1, Lesson2, object]
              ConflictType helps to differentiate which conflict it is
              Lesson1 and Lesson2 are Lesson that are currently in conflict
              object is Model object responsible for conflict (Professor,Auditorium,Group)
