@@ -125,7 +125,7 @@ def show_groups_schedule(request: HttpRequest) -> HttpResponse:
     groups = Group.objects.all()
     if_chosen = False
     group = None
-    groups_lessons_list: List[Tuple[str, str, str, int, str]] = []
+    groups_lessons_list: List[Tuple[str, str, str, str, str]] = []
     groups_lessons_query = Lesson.objects.none()
     if request.method == 'POST':
         form = SelectGroupForm(request.POST)
@@ -134,11 +134,11 @@ def show_groups_schedule(request: HttpRequest) -> HttpResponse:
             if_chosen = True
             groups_lessons_query = Lesson.objects.filter(group=group)
             groups_lessons_list = [(q.start_time.strftime("%Y-%m-%dT%H:%M:%S"),
-                                        q.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
-                                        q.name,
-                                        Auditorium.objects.filter(id=q.auditorium_id)[:1].get().number,
-                                        q.professor)
-                                       for q in groups_lessons_query]
+                                    q.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
+                                    q.name,
+                                    Auditorium.objects.filter(id=q.auditorium_id)[:1].get().number,
+                                    (q.professor.name + " " + q.professor.surname))
+                                   for q in groups_lessons_query]
         else:
             return HttpResponse("AN ERROR OCCURRED")
     else:
@@ -154,4 +154,3 @@ def show_groups_schedule(request: HttpRequest) -> HttpResponse:
         'start_date': get_start_date(groups_lessons_query)
     }
     return render(request, "groups_scheduler.html", context)
-
