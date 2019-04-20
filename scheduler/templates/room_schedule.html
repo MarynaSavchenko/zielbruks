@@ -15,64 +15,77 @@
 <body>
 <div class="container">
 
-    <h2>Room schedule</h2>
-
     <div class="jumbotron">
         <form method="POST">
             {% csrf_token %}
             <input type="hidden" name="next" value="{{ next }}">
             {{ form.as_p }}
-
             <div class="container">
                 <input type="submit" value="Choose"/>
             </div>
-
         </form>
     </div>
 
     {% if flag %}
 
-    <div> Schedule for auditorium {{ room_no }}</div>
+        <h3> Schedule for auditorium {{ room_no }}</h3>
 
+        <div style="float:left; width: 150px;">
+            <div id="nav"></div>
+        </div>
+        <div style="margin-left: 150px;">
+            <div id="dp"></div>
+        </div>
 
-    <div style="float:left; width: 150px;">
-        <div id="nav"></div>
-    </div>
-    <div style="margin-left: 150px;">
-        <div id="dp"></div>
-    </div>
+        <p style="...">
+        <div id="details" class="alert alert-info">
+            Select an event to show the details.
+        </div>
+        </p>
 
-    <script type="text/javascript">
-        var nav = new DayPilot.Navigator("nav");
-        nav.showMonths = 2;
-        nav.selectMode = "week";
-        nav.onTimeRangeSelected = function (args) {
-            dp.startDate = args.start;
-            dp.update();
-        };
-        nav.init();
-
-        var dp = new DayPilot.Calendar("dp");
-        dp.viewType = "Week";
-        dp.events.list = [];
-        {% for e in events %}
-            var e = {
-                start: new DayPilot.Date("{{ e.0 }}"),
-                end: new DayPilot.Date("{{ e.1 }}"),
-                id: DayPilot.guid(),
-                text: "{{ e.2 }},\
-                group: {{ e.4 }},\
-                room: {{ e.4 }}",
-                moveDisabled: true
+        <script type="text/javascript">
+            var nav = new DayPilot.Navigator("nav");
+            nav.showMonths = 2;
+            nav.selectMode = "day";
+            nav.startDate = "{{ start_date }}";
+            nav.onTimeRangeSelected = function (args) {
+                dp.startDate = args.start;
+                dp.update();
             };
-            dp.events.list.push(e);
-        {% endfor %}
+            nav.init();
 
-        dp.init();
+            var dp = new DayPilot.Calendar("dp");
+            dp.startDate = "{{ start_date }}";
+            dp.viewType = "Days";
+            dp.days = 2;
+            dp.businessBeginsHour = 7;
+            dp.events.list = [];
+            {% for e in events %}
+                var e = {
+                    start: new DayPilot.Date("{{ e.0 }}"),
+                    end: new DayPilot.Date("{{ e.1 }}"),
+                    id: DayPilot.guid(),
+                    text: "{{ e.2 }},\
+                    group: {{ e.4 }},\
+                    place: {{ e.3 }}",
+                    moveDisabled: true
+                };
+                dp.events.list.push(e);
+            {% endfor %}
 
+            dp.eventClickHandling = "Enabled";
+            dp.eventMoveHandling = "Disabled";
+            dp.onEventClicked = function (args) {
+                document.getElementById("details").innerText = args.e.text();
+            };
 
-    </script>
+            dp.init();
+        </script>
     {% endif %}
+
+    <p><a href="{% url 'index' %}">
+        <button type="button" class="btn btn-primary">Return to home</button>
+    </a></p>
 </div>
 </body>
 </html>

@@ -13,7 +13,7 @@ from django.template import loader
 import scheduler.conflicts as conflicts
 import scheduler.import_handlers as imp
 from scheduler.calendar_util import get_start_date
-from scheduler.models import Auditorium, Lesson, Group
+from scheduler.models import Auditorium, Lesson, Group, Professor
 from .forms import SelectAuditoriumForm, SelectProfessorForm
 
 
@@ -49,25 +49,33 @@ def upload(request: HttpRequest) -> HttpResponse:
 
 def show_rooms_schedule(request: HttpRequest) -> HttpResponse:
     """Render the auditorium schedule page"""
-    rooms = Auditorium.objects.all()
     if_chosen = False
     room_number = None
+    auditorium_lessons_list: List[Tuple[str, str, str, str, int]] = []
+    auditorium_lessons_query = Lesson.objects.none()
     if request.method == 'POST':
         form = SelectAuditoriumForm(request.POST)
         if form.is_valid():
-            room_number = form.cleaned_data['auditorium']
-            messages.success(request, 'Communicate successfully sent!')
+            room = form.cleaned_data['auditorium']
+            room_number = room.number
             if_chosen = True
+            auditorium_lessons_query = Lesson.objects.filter(auditorium=room)
+            auditorium_lessons_list = [(q.start_time.strftime("%Y-%m-%dT%H:%M:%S"),
+                                        q.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
+                                        Professor.objects.filter(id=q.professor_id)[:1].get(),
+                                        room_number,
+                                        Group.objects.filter(id=q.group_id)[:1].get().number)
+                                       for q in auditorium_lessons_query]
         else:
-            return HttpResponse("WHAT ARE YOU DOING?")
+            return HttpResponse("AN ERROR OCCURRED")
     else:
         form = SelectAuditoriumForm()
     context = {
-        'range': range(len(rooms)),
         'form': form,
         'flag': if_chosen,
         'room_no': room_number,
-        'lessons': Lesson.objects.all()
+        'events': auditorium_lessons_list,
+        'start_date': get_start_date(auditorium_lessons_query)
     }
     return render(request, "room_schedule.html", context)
 
@@ -86,7 +94,6 @@ def confs(request: HttpRequest) -> HttpResponse:
 
 def show_proferssors_schedule(request: HttpRequest) -> HttpResponse:
     """Render the professor schedule page"""
-    professors = Auditorium.objects.all()
     if_chosen = False
     professor = None
     professors_lessons_list: List[Tuple[str, str, str, str, int]] = []
@@ -110,7 +117,6 @@ def show_proferssors_schedule(request: HttpRequest) -> HttpResponse:
         form = SelectProfessorForm()
 
     context = {
-        'range': range(len(professors)),
         'form': form,
         'flag': if_chosen,
         'events': professors_lessons_list,
