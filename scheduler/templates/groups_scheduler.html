@@ -33,7 +33,7 @@
 
 
 
-        <h2>Schedule for {{ professor }}</h2>
+        <h2>Schedule for group {{ group }}</h2>
 
         <div style="float:left; width: 150px;">
             <div id="nav"></div>
@@ -71,7 +71,7 @@
                     end: new DayPilot.Date("{{ e.1 }}"),
                     id: DayPilot.guid(),
                     text: "{{ e.2 }},\
-                group: {{ e.4 }},\
+                 {{ e.4 }},\
                 place: {{ e.3 }}",
                     moveDisabled: true
                 };

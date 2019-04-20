@@ -20,3 +20,12 @@ class SelectProfessorForm(forms.ModelForm):
     class Meta:
         model = Professor
         fields: list = []
+
+
+class SelectGroupForm(forms.ModelForm):
+    """ form to choose group to show its schedule"""
+    group = forms.ModelChoiceField(queryset=Group.objects.all(), to_field_name='id')
+
+    class Meta:
+        model = Group
+        fields: list = []
