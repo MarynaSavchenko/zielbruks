@@ -13,6 +13,7 @@ urlpatterns = [
     path('show_professors_schedule/', views.show_professors_schedule,
          name='show_professors_schedule'),
     path('show_groups_schedule/', views.show_groups_schedule, name='show_groups_schedule'),
+    path('show_schedule/', views.show_schedule, name='show_schedule'),
 ]
 
 if settings.STATIC_URL is not None:
