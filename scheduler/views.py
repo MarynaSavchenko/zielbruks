@@ -1,12 +1,15 @@
 """Views gathering point"""
-import datetime
 import os.path
 import pandas as pd
 from django.shortcuts import render
 from django.http import HttpRequest, HttpResponse
 from django.core.files.storage import default_storage
+from django.template import loader
 import scheduler.import_handlers as imp
 from scheduler.models import Auditorium, Lesson
+from .forms import SelectAuditoriumForm
+from django.contrib import messages
+import scheduler.conflicts as conflicts
 
 
 def index(_request: HttpRequest) -> HttpResponse:
@@ -39,14 +42,38 @@ def upload(request: HttpRequest) -> HttpResponse:
     return render(request, "upload.html")
 
 
-def show_calendar(request: HttpRequest) -> HttpResponse:
-    """ to do """
-    times = pd.date_range('2019-12-02T08:00:00.000Z', '2019-12-02T22:00:00.000Z', freq='15T')
+def show_rooms_schedule(request: HttpRequest) -> HttpResponse:
+    """Render the auditorium schedule page"""
     rooms = Auditorium.objects.all()
+    if_chosen = False
+    room_number = None
+    if request.method == 'POST':
+        form = SelectAuditoriumForm(request.POST)
+        if form.is_valid():
+            room_number = form.cleaned_data['auditorium']
+            messages.success(request, 'Communicate successfully sent!')
+            if_chosen = True
+        else:
+            return HttpResponse("WHAT ARE YOU DOING?")
+    else:
+        form = SelectAuditoriumForm()
     context = {
-        'times': [d.strftime('%H:%M') for d in times],
-        'rooms': rooms,
         'range': range(len(rooms)),
+        'form': form,
+        'flag': if_chosen,
+        'room_no': room_number,
         'lessons': Lesson.objects.all()
     }
-    return render(request, "calendar.html", context)
+    return render(request, "room_schedule.html", context)
+
+
+def confs(request: HttpRequest) -> HttpResponse:
+    """Render the conflicts page"""
+    template = loader.get_template('conflicts.html')
+    conflicts_list = conflicts.db_conflicts()
+    color = ''
+    context = {
+        'conflicts': conflicts_list,
+        'color': color,
+    }
+    return HttpResponse(template.render(context, request))
