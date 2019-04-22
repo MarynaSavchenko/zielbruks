@@ -126,6 +126,7 @@ def show_professors_schedule(request: HttpRequest) -> HttpResponse:
     }
     return render(request, "professors_scheduler.html", context)
 
+
 def show_groups_schedule(request: HttpRequest) -> HttpResponse:
     """Render the group schedule page"""
     groups = Group.objects.all()
@@ -160,3 +161,27 @@ def show_groups_schedule(request: HttpRequest) -> HttpResponse:
         'start_date': get_start_date(groups_lessons_query)
     }
     return render(request, "groups_scheduler.html", context)
+
+
+def show_schedule(request: HttpRequest) -> HttpResponse:
+    """Render the schedule page"""
+    lessons_query = Lesson.objects.all()
+    for l in lessons_query:
+        print(Auditorium.objects.filter(id=l.auditorium_id)[:1].get().color)
+        print(Group.objects.filter(id=l.group_id)[:1].get().color)
+    lessons_list = [(q.start_time.strftime("%Y-%m-%dT%H:%M:%S"),
+                     q.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
+                     q.name,
+                     Group.objects.filter(id=q.group_id)[:1].get().number,
+                     Auditorium.objects.filter(id=q.auditorium_id)[:1].get().number,
+                     (q.professor.name + " " + q.professor.surname),
+                     Auditorium.objects.filter(id=q.auditorium_id)[:1].get().color,
+                     Group.objects.filter(id=q.group_id)[:1].get().color)
+                    for q in lessons_query]
+
+    context = {
+        'events': lessons_list,
+        'lessons': Lesson.objects.all(),
+        'start_date': get_start_date(lessons_query)
+    }
+    return render(request, "scheduler.html", context)
