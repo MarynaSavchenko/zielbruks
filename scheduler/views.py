@@ -1,7 +1,6 @@
 """Views gathering point"""
 import datetime
 import os.path
-from typing import List, Tuple
 
 import pandas as pd
 from django.contrib import messages
@@ -19,7 +18,11 @@ from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm
 
 def index(_request: HttpRequest) -> HttpResponse:
     """Render the main page"""
-    return render(_request, 'index.html')
+    context = {
+        'conflicts': conflicts.db_conflicts(),
+        'color': '',
+    }
+    return render(_request, 'index.html', context)
 
 
 def upload(request: HttpRequest) -> HttpResponse:
@@ -77,7 +80,8 @@ def show_rooms_schedule(request: HttpRequest) -> HttpResponse:
                 'form': form,
                 'chosen_flag': True,
                 'events_flag': bool(auditorium_lessons_list),
-                'room_no': room_number,
+                'type': 'auditorium',
+                'name': room_number,
                 'events': auditorium_lessons_list,
                 'start_date': get_start_date(auditorium_lessons_query)
             }
@@ -105,7 +109,8 @@ def show_professors_schedule(request: HttpRequest) -> HttpResponse:
                 'chosen_flag': True,
                 'events_flag': bool(professors_lessons_list),
                 'events': professors_lessons_list,
-                'professor': professor,
+                'type': 'professor',
+                'name': professor,
                 'lessons': Lesson.objects.all(),
                 'start_date': get_start_date(professors_lessons_query)
             }
@@ -132,7 +137,8 @@ def show_groups_schedule(request: HttpRequest) -> HttpResponse:
                 'chosen_flag': True,
                 'events_flag': bool(groups_lessons_list),
                 'events': groups_lessons_list,
-                'group': group,
+                'type': 'group',
+                'name': group,
                 'lessons': Lesson.objects.all(),
                 'start_date': get_start_date(groups_lessons_query)
             }
@@ -163,3 +169,11 @@ def show_schedule(request: HttpRequest) -> HttpResponse:
         'start_date': get_start_date(lessons_query)
     }
     return render(request, "scheduler.html", context)
+
+
+def sign_up(request: HttpRequest) -> HttpResponse:
+    return render(request, "still_working.html")
+
+
+def log_in(request: HttpRequest) -> HttpResponse:
+    return render(request, "still_working.html")

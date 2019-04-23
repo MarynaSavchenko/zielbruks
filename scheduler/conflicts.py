@@ -3,10 +3,12 @@ from typing import List, Tuple
 from enum import Enum
 from scheduler.models import Lesson, Professor, Auditorium, Group
 
+
 class ConflictType(Enum):
     PROFESSOR = 1
     AUDITORIUM = 2
     GROUP = 3
+
 
 def are_overlapping(lesson1: Lesson, lesson2: Lesson) -> bool:
     """
@@ -21,6 +23,7 @@ def are_overlapping(lesson1: Lesson, lesson2: Lesson) -> bool:
     if lesson1.start_time >= lesson2.start_time and lesson1.end_time <= lesson2.end_time:
         return True
     return False
+
 
 def check_lesson(lesson: Lesson) -> List[Tuple[ConflictType, Lesson, Lesson, object]]:
     """
@@ -50,6 +53,7 @@ def check_lesson(lesson: Lesson) -> List[Tuple[ConflictType, Lesson, Lesson, obj
                 new_conflict = (ConflictType.GROUP, lesson, lesson_2, lesson.group)
                 confs.append(new_conflict)
     return confs
+
 
 def db_conflicts() -> List[Tuple[ConflictType, Lesson, Lesson, object]]:
     """
