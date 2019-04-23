@@ -67,8 +67,8 @@ def show_rooms_schedule(request: HttpRequest) -> HttpResponse:
             room = form.cleaned_data['auditorium']
             room_number = room.number
             auditorium_lessons_query = Lesson.objects.filter(auditorium=room)
-            auditorium_lessons_list = [(q.start_time.strftime("%Y-%m-%dT%H:%M:%S"),
-                                        q.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
+            auditorium_lessons_list = [(q.start_time.isoformat(timespec='seconds'),
+                                        q.end_time.isoformat(timespec='seconds'),
                                         Professor.objects.filter(id=q.professor_id)[:1].get(),
                                         room_number,
                                         Group.objects.filter(id=q.group_id)[:1].get().number)
@@ -93,8 +93,8 @@ def show_professors_schedule(request: HttpRequest) -> HttpResponse:
         if form.is_valid():
             professor = form.cleaned_data['professor']
             professors_lessons_query = Lesson.objects.filter(professor=professor)
-            professors_lessons_list = [(q.start_time.strftime("%Y-%m-%dT%H:%M:%S"),
-                                        q.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
+            professors_lessons_list = [(q.start_time.isoformat(timespec='seconds'),
+                                        q.end_time.isoformat(timespec='seconds'),
                                         q.name,
                                         Auditorium.objects.filter(id=q.auditorium_id)[:1]
                                         .get().number,
@@ -121,8 +121,8 @@ def show_groups_schedule(request: HttpRequest) -> HttpResponse:
         if form.is_valid():
             group = form.cleaned_data['group']
             groups_lessons_query = Lesson.objects.filter(group=group)
-            groups_lessons_list = [(q.start_time.strftime("%Y-%m-%dT%H:%M:%S"),
-                                    q.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
+            groups_lessons_list = [(q.start_time.isoformat(timespec='seconds'),
+                                    q.end_time.isoformat(timespec='seconds'),
                                     q.name,
                                     Auditorium.objects.filter(id=q.auditorium_id)[:1].get().number,
                                     (q.professor.name + " " + q.professor.surname))

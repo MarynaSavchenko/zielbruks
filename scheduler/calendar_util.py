@@ -11,5 +11,5 @@ def get_start_date(lessons: QuerySet):
     for lesson in lessons:
         if lesson.start_time > start_date:
             start_date = lesson.start_time
-            return start_date.strftime("%Y-%m-%dT%H:%M:%S")
+            return start_date.isoformat(timespec='seconds')
     return start_date
