@@ -3,7 +3,6 @@ import datetime
 import os.path
 
 import pandas as pd
-from django.contrib import messages
 from django.core.files.storage import default_storage
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
@@ -150,9 +149,6 @@ def show_groups_schedule(request: HttpRequest) -> HttpResponse:
 def show_schedule(request: HttpRequest) -> HttpResponse:
     """Render the schedule page"""
     lessons_query = Lesson.objects.all()
-    for l in lessons_query:
-        print(Auditorium.objects.filter(id=l.auditorium_id)[:1].get().color)
-        print(Group.objects.filter(id=l.group_id)[:1].get().color)
     lessons_list = [(q.start_time.strftime("%Y-%m-%dT%H:%M:%S"),
                      q.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
                      q.name,

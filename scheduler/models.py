@@ -2,10 +2,9 @@
 from random import randint
 
 from django.db import models
-from colorutils import random_web
 
-palette = ["C5C5C6", "FFFFFF", "FFBFC9", "DAE3ED", "C2AB93", "D4D4D5", "FFD0D7", "E4EAF1", "D2C1B0", "E4E4E5", "FFE1E6",
-           "EEF2F6", "E3D8CD", "F4F4F4", "FFF3F5", "F8F9FB", "F3EFEB"]
+palette = ["C5C5C6", "FFFFFF", "FFBFC9", "DAE3ED", "C2AB93", "D4D4D5", "FFD0D7", "E4EAF1", "D2C1B0",
+           "E4E4E5", "FFE1E6", "EEF2F6", "E3D8CD", "F4F4F4", "FFF3F5", "F8F9FB", "F3EFEB"]
 
 
 def random_color():
