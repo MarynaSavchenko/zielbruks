@@ -29,26 +29,33 @@
         </form>
     </div>
 
-    {% if flag %}
+    {% if chosen_flag %}
+
+    <h2>Schedule for {{ professor }}</h2>
+
+    <div style="float:left; width: 150px;">
+        <div id="nav"></div>
+    </div>
+    <div style="margin-left: 150px;">
+        <div id="dp"></div>
+    </div>
 
 
+    {% if events_flag %}
+    <p style="...">
+    <div id="details" class="alert alert-info">
+        Select an event to show the details.
+    </div>
+    </p>
+    {% else %}
+    <p style="...">
+    <div class="alert alert-danger">
+        This professor has no lessons.
+    </div>
+    </p>
+    {% endif %}
 
-        <h2>Schedule for {{ professor }}</h2>
-
-        <div style="float:left; width: 150px;">
-            <div id="nav"></div>
-        </div>
-        <div style="margin-left: 150px;">
-            <div id="dp"></div>
-        </div>
-
-        <p style="...">
-        <div id="details" class="alert alert-info">
-            Select an event to show the details.
-        </div>
-        </p>
-
-        <script type="text/javascript">
+    <script type="text/javascript">
             var nav = new DayPilot.Navigator("nav");
             nav.showMonths = 2;
             nav.selectMode = "day";
@@ -85,7 +92,8 @@
             };
 
             dp.init();
-        </script>
+
+    </script>
 
     {% endif %}
 

@@ -47,40 +47,7 @@ def upload(request: HttpRequest) -> HttpResponse:
     return render(request, "upload.html")
 
 
-def show_rooms_schedule(request: HttpRequest) -> HttpResponse:
-    """Render the auditorium schedule page"""
-    if_chosen = False
-    room_number = None
-    auditorium_lessons_list: List[Tuple[str, str, str, str, int]] = []
-    auditorium_lessons_query = Lesson.objects.none()
-    if request.method == 'POST':
-        form = SelectAuditoriumForm(request.POST)
-        if form.is_valid():
-            room = form.cleaned_data['auditorium']
-            room_number = room.number
-            if_chosen = True
-            auditorium_lessons_query = Lesson.objects.filter(auditorium=room)
-            auditorium_lessons_list = [(q.start_time.strftime("%Y-%m-%dT%H:%M:%S"),
-                                        q.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
-                                        Professor.objects.filter(id=q.professor_id)[:1].get(),
-                                        room_number,
-                                        Group.objects.filter(id=q.group_id)[:1].get().number)
-                                       for q in auditorium_lessons_query]
-        else:
-            return HttpResponse("AN ERROR OCCURRED")
-    else:
-        form = SelectAuditoriumForm()
-    context = {
-        'form': form,
-        'flag': if_chosen,
-        'room_no': room_number,
-        'events': auditorium_lessons_list,
-        'start_date': get_start_date(auditorium_lessons_query)
-    }
-    return render(request, "room_schedule.html", context)
-
-
-def confs(request: HttpRequest) -> HttpResponse:
+def show_conflicts(request: HttpRequest) -> HttpResponse:
     """Render the conflicts page"""
     template = loader.get_template('conflicts.html')
     conflicts_list = conflicts.db_conflicts()
@@ -92,17 +59,39 @@ def confs(request: HttpRequest) -> HttpResponse:
     return HttpResponse(template.render(context, request))
 
 
+def show_rooms_schedule(request: HttpRequest) -> HttpResponse:
+    """Render the auditorium schedule page"""
+    if request.method == 'POST':
+        form = SelectAuditoriumForm(request.POST)
+        if form.is_valid():
+            room = form.cleaned_data['auditorium']
+            room_number = room.number
+            auditorium_lessons_query = Lesson.objects.filter(auditorium=room)
+            auditorium_lessons_list = [(q.start_time.strftime("%Y-%m-%dT%H:%M:%S"),
+                                        q.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
+                                        Professor.objects.filter(id=q.professor_id)[:1].get(),
+                                        room_number,
+                                        Group.objects.filter(id=q.group_id)[:1].get().number)
+                                       for q in auditorium_lessons_query]
+            context = {
+                'form': form,
+                'chosen_flag': True,
+                'events_flag': bool(auditorium_lessons_list),
+                'room_no': room_number,
+                'events': auditorium_lessons_list,
+                'start_date': get_start_date(auditorium_lessons_query)
+            }
+            return render(request, "room_schedule.html", context)
+        return HttpResponse("AN ERROR OCCURRED")
+    return render(request, "room_schedule.html", context={'form': SelectAuditoriumForm()})
+
+
 def show_professors_schedule(request: HttpRequest) -> HttpResponse:
     """Render the professor schedule page"""
-    if_chosen = False
-    professor = None
-    professors_lessons_list: List[Tuple[str, str, str, str, int]] = []
-    professors_lessons_query = Lesson.objects.none()
     if request.method == 'POST':
         form = SelectProfessorForm(request.POST)
         if form.is_valid():
             professor = form.cleaned_data['professor']
-            if_chosen = True
             professors_lessons_query = Lesson.objects.filter(professor=professor)
             professors_lessons_list = [(q.start_time.strftime("%Y-%m-%dT%H:%M:%S"),
                                         q.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
@@ -111,33 +100,26 @@ def show_professors_schedule(request: HttpRequest) -> HttpResponse:
                                         .get().number,
                                         Group.objects.filter(id=q.group_id)[:1].get().number)
                                        for q in professors_lessons_query]
-        else:
-            return HttpResponse("AN ERROR OCCURRED")
-    else:
-        form = SelectProfessorForm()
+            context = {
+                'form': form,
+                'chosen_flag': True,
+                'events_flag': bool(professors_lessons_list),
+                'events': professors_lessons_list,
+                'professor': professor,
+                'lessons': Lesson.objects.all(),
+                'start_date': get_start_date(professors_lessons_query)
+            }
+            return render(request, "professors_scheduler.html", context)
+        return HttpResponse("AN ERROR OCCURRED")
+    return render(request, "professors_scheduler.html", context={'form': SelectProfessorForm()})
 
-    context = {
-        'form': form,
-        'flag': if_chosen,
-        'events': professors_lessons_list,
-        'professor': professor,
-        'lessons': Lesson.objects.all(),
-        'start_date': get_start_date(professors_lessons_query)
-    }
-    return render(request, "professors_scheduler.html", context)
 
 def show_groups_schedule(request: HttpRequest) -> HttpResponse:
     """Render the group schedule page"""
-    groups = Group.objects.all()
-    if_chosen = False
-    group = None
-    groups_lessons_list: List[Tuple[str, str, str, str, str]] = []
-    groups_lessons_query = Lesson.objects.none()
     if request.method == 'POST':
         form = SelectGroupForm(request.POST)
         if form.is_valid():
             group = form.cleaned_data['group']
-            if_chosen = True
             groups_lessons_query = Lesson.objects.filter(group=group)
             groups_lessons_list = [(q.start_time.strftime("%Y-%m-%dT%H:%M:%S"),
                                     q.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
@@ -145,18 +127,15 @@ def show_groups_schedule(request: HttpRequest) -> HttpResponse:
                                     Auditorium.objects.filter(id=q.auditorium_id)[:1].get().number,
                                     (q.professor.name + " " + q.professor.surname))
                                    for q in groups_lessons_query]
-        else:
-            return HttpResponse("AN ERROR OCCURRED")
-    else:
-        form = SelectGroupForm()
-
-    context = {
-        'range': range(len(groups)),
-        'form': form,
-        'flag': if_chosen,
-        'events': groups_lessons_list,
-        'group': group,
-        'lessons': Lesson.objects.all(),
-        'start_date': get_start_date(groups_lessons_query)
-    }
-    return render(request, "groups_scheduler.html", context)
+            context = {
+                'form': form,
+                'chosen_flag': True,
+                'events_flag': bool(groups_lessons_list),
+                'events': groups_lessons_list,
+                'group': group,
+                'lessons': Lesson.objects.all(),
+                'start_date': get_start_date(groups_lessons_query)
+            }
+            return render(request, "groups_scheduler.html", context)
+        return HttpResponse("AN ERROR OCCURRED")
+    return render(request, "groups_scheduler.html", context={'form': SelectGroupForm()})

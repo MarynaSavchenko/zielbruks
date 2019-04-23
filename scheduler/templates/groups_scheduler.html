@@ -29,9 +29,7 @@
         </form>
     </div>
 
-    {% if flag %}
-
-
+    {% if chosen_flag %}
 
         <h2>Schedule for group {{ group }}</h2>
 
@@ -42,11 +40,19 @@
             <div id="dp"></div>
         </div>
 
+         {% if events_flag %}
         <p style="...">
         <div id="details" class="alert alert-info">
-            Select an event to show the details.
+            Select an event to show the details. {{ events }}
         </div>
         </p>
+        {% else %}
+        <p style="...">
+        <div class="alert alert-danger">
+            This group has no lessons.
+        </div>
+        </p>
+        {% endif %}
 
         <script type="text/javascript">
             var nav = new DayPilot.Navigator("nav");

@@ -25,25 +25,33 @@
             </div>
         </form>
     </div>
+    {% if chosen_flag %}
 
-    {% if flag %}
+    <h2>Schedule for {{ professor }}</h2>
 
-        <h3> Schedule for auditorium {{ room_no }}</h3>
+    <div style="float:left; width: 150px;">
+        <div id="nav"></div>
+    </div>
+    <div style="margin-left: 150px;">
+        <div id="dp"></div>
+    </div>
 
-        <div style="float:left; width: 150px;">
-            <div id="nav"></div>
-        </div>
-        <div style="margin-left: 150px;">
-            <div id="dp"></div>
-        </div>
 
-        <p style="...">
-        <div id="details" class="alert alert-info">
-            Select an event to show the details.
-        </div>
-        </p>
+    {% if events_flag %}
+    <p style="...">
+    <div id="details" class="alert alert-info">
+        Select an event to show the details.
+    </div>
+    </p>
+    {% else %}
+    <p style="...">
+    <div class="alert alert-danger">
+        This auditorium has no lessons.
+    </div>
+    </p>
+    {% endif %}
 
-        <script type="text/javascript">
+    <script type="text/javascript">
             var nav = new DayPilot.Navigator("nav");
             nav.showMonths = 2;
             nav.selectMode = "day";
@@ -80,7 +88,8 @@
             };
 
             dp.init();
-        </script>
+
+    </script>
     {% endif %}
 
     <p><a href="{% url 'index' %}">

@@ -7,9 +7,9 @@ from . import views
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('conflicts/', views.confs, name='conflicts'),
+    path('conflicts/', views.show_conflicts, name='conflicts'),
     path('upload/', views.upload, name='upload'),
-    path('show_calendar/', views.show_rooms_schedule, name='room_schedule'),
+    path('show_room_schedule/', views.show_rooms_schedule, name='show_room_schedule'),
     path('show_professors_schedule/', views.show_professors_schedule,
          name='show_professors_schedule'),
     path('show_groups_schedule/', views.show_groups_schedule, name='show_groups_schedule'),
