@@ -36,9 +36,13 @@ def import_csv(data: pd.DataFrame) -> Tuple[int, List[int], List[int]]:
         if row.count(nan) != 0 or not check_types_csv(row):
             incorrect.append(row[0])
             continue
-        date = [int(val) for val in row[1].split("-")]
-        start_t = [int(val) for val in row[2].split(":")]
-        end_t = [int(val) for val in row[3].split(":")]
+        try:
+            date = [int(val) for val in row[1].split("-")]
+            start_t = [int(val) for val in row[2].split(":")]
+            end_t = [int(val) for val in row[3].split(":")]
+        except ValueError:
+            incorrect.append(row[0])
+            continue
         professor_data = row[5].split(" ")
         if len(date) == 3 and len(start_t) == 2 and len(end_t) == 2 and len(professor_data) == 2:
             date[2] += 2000
