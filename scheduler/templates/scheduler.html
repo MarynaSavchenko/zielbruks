@@ -16,9 +16,6 @@
 
 <div class="container">
 
-
-    <h2>Schedule for {{ professor }}</h2>
-
     <div style="float:left; width: 150px;">
         <div id="nav"></div>
     </div>
@@ -59,8 +56,8 @@
                     place: {{ e.4 }},\
                     professor: {{ e.5 }}",
                 moveDisabled: true,
-                backColor: "#{{ e.6 }}",
-                barColor: "#{{ e.7 }}"
+                backColor: "{{ e.6 }}",
+                barColor: "{{ e.7 }}"
             };
             dp.events.list.push(e);
         {% endfor %}
