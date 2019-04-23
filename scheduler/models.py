@@ -3,8 +3,10 @@ from random import randint
 
 from django.db import models
 
-palette = ["C5C5C6", "FFFFFF", "FFBFC9", "DAE3ED", "C2AB93", "D4D4D5", "FFD0D7", "E4EAF1", "D2C1B0",
-           "E4E4E5", "FFE1E6", "EEF2F6", "E3D8CD", "F4F4F4", "FFF3F5", "F8F9FB", "F3EFEB"]
+palette = ['#66BD63', '#006837', '#92C5DE', '#1A9850', '#D6604D', '#B2182B', '#4D9221', '#7FBC41',
+           '#2166AC', '#C51B7D', '#276419', '#F1B6DA', '#FDDBC7', '#D73027', '#F46D43', '#F4A582',
+           '#A50026', '#053061', '#DE77AE', '#A6D96A', '#F7F7F7', '#B8E186', '#FEE08B', '#67001F',
+           '#D1E5F0', '#FDAE61', '#FFFFBF', '#E6F5D0', '#D9EF8B', '#8E0152', '#4393C3', '#FDE0EF']
 
 
 def random_color():
