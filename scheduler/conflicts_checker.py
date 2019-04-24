@@ -3,12 +3,10 @@ from typing import List, Tuple
 from enum import Enum
 from scheduler.models import Lesson, Professor, Auditorium, Group
 
-
 class ConflictType(Enum):
     PROFESSOR = 1
     AUDITORIUM = 2
     GROUP = 3
-
 
 def are_overlapping(lesson1: Lesson, lesson2: Lesson) -> bool:
     """
@@ -24,7 +22,6 @@ def are_overlapping(lesson1: Lesson, lesson2: Lesson) -> bool:
         return True
     return False
 
-
 def check_lesson(lesson: Lesson) -> List[Tuple[ConflictType, Lesson, Lesson, object]]:
     """
     This function searches db for other lessons sharing the same professor, auditorium and group
@@ -36,24 +33,23 @@ def check_lesson(lesson: Lesson) -> List[Tuple[ConflictType, Lesson, Lesson, obj
              Lesson1 and Lesson2 are Lesson that are currently in conflict
              object is Model object responsible for conflict (Professor,Auditorium,Group)
     """
-    confs: List[Tuple[ConflictType, Lesson, Lesson, object]] = []
+    conflicts: List[Tuple[ConflictType, Lesson, Lesson, object]] = []
     for lesson_2 in Lesson.objects.filter(professor=lesson.professor):
         if lesson != lesson_2:
             if are_overlapping(lesson, lesson_2):
                 new_conflict = (ConflictType.PROFESSOR, lesson, lesson_2, lesson.professor)
-                confs.append(new_conflict)
+                conflicts.append(new_conflict)
     for lesson_2 in Lesson.objects.filter(auditorium=lesson.auditorium):
         if lesson != lesson_2:
             if are_overlapping(lesson, lesson_2):
                 new_conflict = (ConflictType.AUDITORIUM, lesson, lesson_2, lesson.auditorium)
-                confs.append(new_conflict)
+                conflicts.append(new_conflict)
     for lesson_2 in Lesson.objects.filter(group=lesson.group):
         if lesson != lesson_2:
             if are_overlapping(lesson, lesson_2):
                 new_conflict = (ConflictType.GROUP, lesson, lesson_2, lesson.group)
-                confs.append(new_conflict)
-    return confs
-
+                conflicts.append(new_conflict)
+    return conflicts
 
 def db_conflicts() -> List[Tuple[ConflictType, Lesson, Lesson, object]]:
     """
@@ -64,11 +60,11 @@ def db_conflicts() -> List[Tuple[ConflictType, Lesson, Lesson, object]]:
              Lesson1 and Lesson2 are Lesson that are currently in conflict
              object is Model object responsible for conflict (Professor,Auditorium,Group)
     """
-    les = Lesson.objects.all()
-    confs: List[Tuple[ConflictType, Lesson, Lesson, object]] = []
-    for lesson in les:
+    lessons = Lesson.objects.all()
+    conflicts: List[Tuple[ConflictType, Lesson, Lesson, object]] = []
+    for lesson in lessons:
         lesson_conflicts = check_lesson(lesson)
         for conflict in lesson_conflicts:
-            if (conflict[0], conflict[2], conflict[1], conflict[3]) not in confs:
-                confs.append(conflict)
-    return confs
+            if (conflict[0], conflict[2], conflict[1], conflict[3]) not in conflicts:
+                conflicts.append(conflict)
+    return conflicts
