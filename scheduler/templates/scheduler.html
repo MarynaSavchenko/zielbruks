@@ -1,82 +1,74 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Calendar Example</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
-
-    {% load static %}
-    <script src="{% static 'js/daypilot/daypilot-all.min.js' %}" type="text/javascript"></script>
-
-</head>
-<body>
-
 <div class="container">
 
-    <div style="float:left; width: 150px;">
-        <div id="nav"></div>
-    </div>
-    <div style="margin-left: 150px;">
-        <div id="dp"></div>
-    </div>
+    {% if chosen_flag %}
 
-    <p style="...">
-    <div id="details" class="alert alert-info">
-        Select an event to show the details.
-    </div>
-    </p>
+        <h2>Schedule for {{ type }} {{ name }}</h2>
 
-    <script type="text/javascript">
-        var nav = new DayPilot.Navigator("nav");
-        nav.showMonths = 2;
-        nav.selectMode = "day";
-        nav.startDate = "{{ start_date }}";
-        nav.onTimeRangeSelected = function (args) {
-            dp.startDate = args.start;
-            dp.update();
-        };
-        nav.init();
+        <div style="float:left; width: 150px;">
+            <div id="nav"></div>
+        </div>
+        <div style="margin-left: 150px;">
+            <div id="dp"></div>
+        </div>
 
-        var dp = new DayPilot.Calendar("dp");
-        dp.startDate = "{{ start_date }}";
-        dp.viewType = "Days";
-        dp.days = 2;
-        dp.businessBeginsHour = 7;
-        dp.events.list = [];
-        {% for e in events %}
-            var e = {
-                start: new DayPilot.Date("{{ e.0 }}"),
-                end: new DayPilot.Date("{{ e.1 }}"),
-                id: DayPilot.guid(),
-                text: "{{ e.2 }},\
-                    group: {{ e.3 }},\
-                    place: {{ e.4 }},\
-                    professor: {{ e.5 }}",
-                moveDisabled: true,
-                backColor: "{{ e.6 }}",
-                barColor: "{{ e.7 }}"
+        {% if events_flag %}
+            <p style="...">
+            <div id="details" class="alert alert-info">
+                Select an event to show the details.
+            </div>
+            </p>
+            {% else %}
+            <p style="...">
+            <div class="alert alert-danger">
+                There is no lessons.
+            </div>
+            </p>
+        {% endif %}
+
+        <script type="text/javascript">
+            var nav = new DayPilot.Navigator("nav");
+            nav.showMonths = 2;
+            nav.selectMode = "day";
+            nav.startDate = "{{ start_date }}";
+            nav.onTimeRangeSelected = function (args) {
+                dp.startDate = args.start;
+                dp.update();
             };
-            dp.events.list.push(e);
-        {% endfor %}
+            nav.init();
 
-        dp.eventClickHandling = "Enabled";
-        dp.eventMoveHandling = "Disabled";
-        dp.onEventClicked = function (args) {
-            document.getElementById("details").innerText = args.e.text();
-        };
+            var dp = new DayPilot.Calendar("dp");
+            dp.startDate = "{{ start_date }}";
+            dp.viewType = "Days";
+            dp.days = 2;
+            dp.businessBeginsHour = 7;
+            dp.events.list = [];
+            {% for e in events %}
+                var e = {
+                    start: new DayPilot.Date("{{ e.0 }}"),
+                    end: new DayPilot.Date("{{ e.1 }}"),
+                    id: DayPilot.guid(),
+                    text: "{{ e.2 }},\
+                        group: {{ e.3 }},\
+                        place: {{ e.4 }},\
+                        professor: {{ e.5 }}",
+                    moveDisabled: true,
+                    backColor: "{{ e.6 }}",
+                    barColor: "{{ e.7 }}"
+                };
+                dp.events.list.push(e);
+            {% endfor %}
 
-        dp.init();
-    </script>
+            dp.eventClickHandling = "Enabled";
+            dp.eventMoveHandling = "Disabled";
+            dp.onEventClicked = function (args) {
+                document.getElementById("details").innerText = args.e.text();
+            };
 
+            dp.init();
 
-    <p><a href="{% url 'index' %}">
-        <button type="button" class="btn btn-primary">Return to home</button>
-    </a></p>
+        </script>
+    {% endif %}
+
 </div>
 
-</body>
-</html>
 
