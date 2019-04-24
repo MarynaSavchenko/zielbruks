@@ -63,7 +63,8 @@ def show_rooms_schedule(request: HttpRequest) -> HttpResponse:
             room_number = room.number
             auditorium_lessons_query = Lesson.objects.filter(auditorium=room)
             auditorium_lessons_list = [(q.start_time.isoformat(timespec='seconds'),
-                                        q.end_time.isoformat(timespec='seconds'), q.name,
+                                        q.end_time.isoformat(timespec='seconds'),
+                                        q.name,
                                         Group.objects.filter(id=q.group_id)[:1].get().number,
                                         room_number,
                                         (q.professor.name + " " + q.professor.surname),
@@ -152,12 +153,14 @@ def show_groups_schedule(request: HttpRequest) -> HttpResponse:
 def show_schedule(request: HttpRequest) -> HttpResponse:
     """Render the schedule page"""
     context = generate_full_schedule_context()
-    return render(request, "scheduler.html", context)
+    return render(request, "full_schedule.html", context)
 
 
 def sign_up(request: HttpRequest) -> HttpResponse:
+    """Render the signup page"""
     return render(request, "still_working.html")
 
 
 def log_in(request: HttpRequest) -> HttpResponse:
+    """Render the login page"""
     return render(request, "still_working.html")
