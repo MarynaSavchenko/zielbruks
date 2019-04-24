@@ -3,7 +3,7 @@ import datetime
 
 from django.db.models import QuerySet
 
-from scheduler import conflicts
+from scheduler import conflicts_checker
 from scheduler.models import Lesson, Auditorium, Group
 
 
@@ -44,7 +44,7 @@ def generate_full_schedule_context():
 
 def generate_conflicts_context():
     """Returns context dict for conflicts"""
-    conflicts_list = conflicts.db_conflicts()
+    conflicts_list = conflicts_checker.db_conflicts()
     color = ''
     context = {
         'conflicts': conflicts_list,
