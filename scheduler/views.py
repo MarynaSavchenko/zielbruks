@@ -10,7 +10,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.template import loader
 
-import scheduler.conflicts as conflicts
+import scheduler.conflicts_checker as conflicts
 import scheduler.import_handlers as imp
 from scheduler.calendar_util import get_start_date
 from scheduler.models import Auditorium, Lesson, Group, Professor
