@@ -19,6 +19,7 @@ def get_start_date(lessons: QuerySet):
 
 
 def generate_full_schedule_context():
+    """Returns context dict for full schedule"""
     lessons_query = Lesson.objects.all()
     lessons_list = [(q.start_time.strftime("%Y-%m-%dT%H:%M:%S"),
                      q.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
@@ -42,6 +43,7 @@ def generate_full_schedule_context():
 
 
 def generate_conflicts_context():
+    """Returns context dict for conflicts"""
     conflicts_list = conflicts.db_conflicts()
     color = ''
     context = {

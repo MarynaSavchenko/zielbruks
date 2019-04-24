@@ -8,14 +8,15 @@ from django.shortcuts import render
 from django.template import loader
 
 import scheduler.import_handlers as imp
-from scheduler.calendar_util import get_start_date, generate_conflicts_context, generate_full_schedule_context
+from scheduler.calendar_util import get_start_date, generate_conflicts_context, \
+    generate_full_schedule_context
 from scheduler.models import Auditorium, Lesson, Group
 from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm
 
 
 def index(_request: HttpRequest) -> HttpResponse:
     """Render the main page"""
-    context = dict()
+    context: dict = {}
     context.update(generate_conflicts_context())
     context.update(generate_full_schedule_context())
     return render(_request, 'index.html', context)
@@ -66,7 +67,8 @@ def show_rooms_schedule(request: HttpRequest) -> HttpResponse:
                                         Group.objects.filter(id=q.group_id)[:1].get().number,
                                         room_number,
                                         (q.professor.name + " " + q.professor.surname),
-                                        Auditorium.objects.filter(id=q.auditorium_id)[:1].get().color,
+                                        Auditorium.objects.filter(id=q.auditorium_id)[:1]
+                                        .get().color,
                                         Group.objects.filter(id=q.group_id)[:1].get().color)
                                        for q in auditorium_lessons_query]
             context = {
@@ -94,9 +96,11 @@ def show_professors_schedule(request: HttpRequest) -> HttpResponse:
                                         q.end_time.isoformat(timespec='seconds'),
                                         q.name,
                                         Group.objects.filter(id=q.group_id)[:1].get().number,
-                                        Auditorium.objects.filter(id=q.auditorium_id)[:1].get().number,
+                                        Auditorium.objects.filter(id=q.auditorium_id)[:1]
+                                        .get().number,
                                         (q.professor.name + " " + q.professor.surname),
-                                        Auditorium.objects.filter(id=q.auditorium_id)[:1].get().color,
+                                        Auditorium.objects.filter(id=q.auditorium_id)[:1]
+                                        .get().color,
                                         Group.objects.filter(id=q.group_id)[:1].get().color)
                                        for q in professors_lessons_query]
             context = {
