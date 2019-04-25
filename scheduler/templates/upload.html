@@ -20,15 +20,38 @@
                     );
             });
 
+
     </script>
     <style>
         th{
             text-align:center
         }
 
+
     </style>
 </head>
 <body>
+
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="{% url 'index' %}">ZIELBRUKS-schedule</a>
+        </div>
+        <ul class="nav navbar-nav">
+            <li><a href="{% url 'index' %}">Home</a></li>
+            <li class="active"><a href="{% url 'upload' %}">Upload</a></li>
+            <li><a href="{% url 'show_schedule' %}">Full calendar</a></li>
+            <li><a href="{% url 'show_room_schedule' %}">Room's calendar</a></li>
+            <li><a href="{% url 'show_professors_schedule' %}">Professor's calendar</a></li>
+            <li><a href="{% url 'show_groups_schedule' %}">Group's calendar</a></li>
+            <li><a href="{% url 'conflicts' %}">Conflicts</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+            <li><a href="{% url 'sign_up' %}"><span class=" glyphicon glyphicon-user"></span> Sign Up</a></li>
+            <li><a href="{% url 'log_in' %}"><span class=" glyphicon glyphicon-log-in"></span> Login</a></li>
+        </ul>
+    </div>
+</nav>
 
 <div class="container">
     <h2>Upload file</h2>
@@ -50,16 +73,16 @@
         </span>
         <p>Saved {{ added }} lessons into database</p>
         {% if incorrect %}
-            Incorrect rows:
-            <p>{% for number in incorrect %}
-                    {{ number }},
-                {% endfor %}</p>
+        Incorrect rows:
+        <p>{% for number in incorrect %}
+            {{ number }},
+            {% endfor %}</p>
         {% endif %}
         {% if duplicate %}
-            Duplicate rows:
-            <p>{% for num in duplicate %}
-                    {{ num }},
-                {% endfor %}</p>
+        Duplicate rows:
+        <p>{% for num in duplicate %}
+            {{ num }},
+            {% endfor %}</p>
         {% endif %}
 
         <button value="Refresh Page" class="btn btn-primary" onClick="window.location.href=window.location.href">
@@ -68,9 +91,7 @@
         {% endif %}
         <br>
     </div>
-    <p><a href="{% url 'index' %}">
-        <button type="button" class="btn btn-primary">Return to home</button>
-    </a></p>
+
 </div>
 
 </body>

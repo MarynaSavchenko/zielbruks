@@ -1,25 +1,25 @@
 """Views gathering point"""
-import datetime
 import os.path
-from typing import List, Tuple
 
 import pandas as pd
-from django.contrib import messages
 from django.core.files.storage import default_storage
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.template import loader
 
-import scheduler.conflicts_checker as conflicts
 import scheduler.import_handlers as imp
-from scheduler.calendar_util import get_start_date
-from scheduler.models import Auditorium, Lesson, Group, Professor
+from scheduler.calendar_util import get_start_date, generate_conflicts_context, \
+    generate_full_schedule_context
+from scheduler.models import Auditorium, Lesson, Group
 from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm
 
 
 def index(_request: HttpRequest) -> HttpResponse:
     """Render the main page"""
-    return render(_request, 'index.html')
+    context: dict = {}
+    context.update(generate_conflicts_context())
+    context.update(generate_full_schedule_context())
+    return render(_request, 'index.html', context)
 
 
 def upload(request: HttpRequest) -> HttpResponse:
@@ -50,12 +50,7 @@ def upload(request: HttpRequest) -> HttpResponse:
 def show_conflicts(request: HttpRequest) -> HttpResponse:
     """Render the conflicts page"""
     template = loader.get_template('conflicts.html')
-    conflicts_list = conflicts.db_conflicts()
-    color = ''
-    context = {
-        'conflicts': conflicts_list,
-        'color': color,
-    }
+    context = generate_conflicts_context()
     return HttpResponse(template.render(context, request))
 
 
@@ -69,15 +64,20 @@ def show_rooms_schedule(request: HttpRequest) -> HttpResponse:
             auditorium_lessons_query = Lesson.objects.filter(auditorium=room)
             auditorium_lessons_list = [(q.start_time.isoformat(timespec='seconds'),
                                         q.end_time.isoformat(timespec='seconds'),
-                                        Professor.objects.filter(id=q.professor_id)[:1].get(),
+                                        q.name,
+                                        Group.objects.filter(id=q.group_id)[:1].get().number,
                                         room_number,
-                                        Group.objects.filter(id=q.group_id)[:1].get().number)
+                                        (q.professor.name + " " + q.professor.surname),
+                                        Auditorium.objects.filter(id=q.auditorium_id)[:1]
+                                        .get().color,
+                                        Group.objects.filter(id=q.group_id)[:1].get().color)
                                        for q in auditorium_lessons_query]
             context = {
                 'form': form,
                 'chosen_flag': True,
                 'events_flag': bool(auditorium_lessons_list),
-                'room_no': room_number,
+                'type': 'auditorium',
+                'name': room_number,
                 'events': auditorium_lessons_list,
                 'start_date': get_start_date(auditorium_lessons_query)
             }
@@ -96,16 +96,21 @@ def show_professors_schedule(request: HttpRequest) -> HttpResponse:
             professors_lessons_list = [(q.start_time.isoformat(timespec='seconds'),
                                         q.end_time.isoformat(timespec='seconds'),
                                         q.name,
+                                        Group.objects.filter(id=q.group_id)[:1].get().number,
                                         Auditorium.objects.filter(id=q.auditorium_id)[:1]
                                         .get().number,
-                                        Group.objects.filter(id=q.group_id)[:1].get().number)
+                                        (q.professor.name + " " + q.professor.surname),
+                                        Auditorium.objects.filter(id=q.auditorium_id)[:1]
+                                        .get().color,
+                                        Group.objects.filter(id=q.group_id)[:1].get().color)
                                        for q in professors_lessons_query]
             context = {
                 'form': form,
                 'chosen_flag': True,
                 'events_flag': bool(professors_lessons_list),
                 'events': professors_lessons_list,
-                'professor': professor,
+                'type': 'professor',
+                'name': professor,
                 'lessons': Lesson.objects.all(),
                 'start_date': get_start_date(professors_lessons_query)
             }
@@ -124,18 +129,38 @@ def show_groups_schedule(request: HttpRequest) -> HttpResponse:
             groups_lessons_list = [(q.start_time.isoformat(timespec='seconds'),
                                     q.end_time.isoformat(timespec='seconds'),
                                     q.name,
+                                    group,
                                     Auditorium.objects.filter(id=q.auditorium_id)[:1].get().number,
-                                    (q.professor.name + " " + q.professor.surname))
+                                    (q.professor.name + " " + q.professor.surname),
+                                    Auditorium.objects.filter(id=q.auditorium_id)[:1].get().color,
+                                    Group.objects.filter(id=q.group_id)[:1].get().color)
                                    for q in groups_lessons_query]
             context = {
                 'form': form,
                 'chosen_flag': True,
                 'events_flag': bool(groups_lessons_list),
                 'events': groups_lessons_list,
-                'group': group,
+                'type': 'group',
+                'name': group,
                 'lessons': Lesson.objects.all(),
                 'start_date': get_start_date(groups_lessons_query)
             }
             return render(request, "groups_scheduler.html", context)
         return HttpResponse("AN ERROR OCCURRED")
     return render(request, "groups_scheduler.html", context={'form': SelectGroupForm()})
+
+
+def show_schedule(request: HttpRequest) -> HttpResponse:
+    """Render the schedule page"""
+    context = generate_full_schedule_context()
+    return render(request, "full_schedule.html", context)
+
+
+def sign_up(request: HttpRequest) -> HttpResponse:
+    """Render the signup page"""
+    return render(request, "still_working.html")
+
+
+def log_in(request: HttpRequest) -> HttpResponse:
+    """Render the login page"""
+    return render(request, "still_working.html")

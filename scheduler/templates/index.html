@@ -1,24 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Calendar Example</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
-</head>
-<body>
-<div class="container">
-<h1>MAIN PAGE</h1>
-<div> Hello, world. Tu bedzie strona glowna schedulera </div>
+{% extends 'base.html' %}
+{% block static %}
+     {% load static %}
+    <script src="{% static 'js/daypilot/daypilot-all.min.js' %}" type="text/javascript"></script>
+{% endblock static %}
 
-<div class="btn-group-vertical">
-    <a href="{% url 'upload' %}"> <button type="button" class="btn btn-primary"> Upload schedule </button> </a>
-    <a href="{% url 'show_room_schedule' %}"> <button type="button" class="btn btn-primary">Show Room's schedule </button> </a>
-    <a href="{% url 'show_professors_schedule' %}"> <button type="button" class="btn btn-primary">Show Professor's calendar </button> </a>
-    <a href="{% url 'show_groups_schedule' %}"> <button type="button" class="btn btn-primary">Show Group's calendar </button> </a>
-    <a href="{% url 'conflicts' %}"> <button type="button" class="btn btn-primary">Conflicts </button> </a>
+{% block navbar %}
+        <ul class="nav navbar-nav">
+            <li class="active"><a href="{% url 'index' %}">Home</a></li>
+            <li><a href="{% url 'upload' %}">Upload</a></li>
+            <li><a href="{% url 'show_schedule' %}">Full calendar</a></li>
+            <li><a href="{% url 'show_room_schedule' %}">Room's calendar</a></li>
+            <li><a href="{% url 'show_professors_schedule' %}">Professor's calendar</a></li>
+            <li><a href="{% url 'show_groups_schedule' %}">Group's calendar</a></li>
+            <li><a href="{% url 'conflicts' %}">Conflicts</a></li>
+        </ul>
+{% endblock navbar %}
+
+{% block content %}
+<div class="container">
+    <div class="basic">
+        {% include "scheduler.html" %}
+    </div>
 </div>
+
+<div class="container">
+    <div class="basic">
+        {% include "conflicts_list.html" %}
+    </div>
 </div>
-</body>
+{% endblock content %}
