@@ -51,7 +51,6 @@
                         group: {{ e.3 }},\
                         place: {{ e.4 }},\
                         professor: {{ e.5 }}",
-                    moveDisabled: true,
                     backColor: "{{ e.6 }}",
                     barColor: "{{ e.7 }}"
                 };
@@ -60,6 +59,7 @@
 
             dp.eventClickHandling = "Enabled";
             dp.eventMoveHandling = "Disabled";
+            dp.eventResizeHandling = "Disabled";
             dp.onEventClicked = function (args) {
                 document.getElementById("details").innerText = args.e.text();
             };
