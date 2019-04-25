@@ -1,5 +1,16 @@
 """Models gathering point"""
+from random import randint
+
 from django.db import models
+
+palette = ['#66BD63', '#006837', '#92C5DE', '#1A9850', '#D6604D', '#B2182B', '#4D9221', '#7FBC41',
+           '#2166AC', '#C51B7D', '#276419', '#F1B6DA', '#FDDBC7', '#D73027', '#F46D43', '#F4A582',
+           '#A50026', '#053061', '#DE77AE', '#A6D96A', '#F7F7F7', '#B8E186', '#FEE08B', '#67001F',
+           '#D1E5F0', '#FDAE61', '#FFFFBF', '#E6F5D0', '#D9EF8B', '#8E0152', '#4393C3', '#FDE0EF']
+
+
+def random_color():
+    return palette[randint(0, len(palette) - 1)]
 
 
 class Professor(models.Model):
@@ -29,6 +40,7 @@ class Professor(models.Model):
 class Auditorium(models.Model):
     """Place at which a Lesson is given"""
     number = models.CharField("Auditorium number", max_length=30, unique=True)
+    color = models.CharField(max_length=10, default=random_color)
 
     def __str__(self):
         return str(self.number)
@@ -37,6 +49,7 @@ class Auditorium(models.Model):
 class Group(models.Model):
     """Group of Students attending the same courses"""
     number = models.IntegerField("Group number", unique=True)
+    color = models.CharField(max_length=10, default=random_color)
 
     def __str__(self):
         return str(self.number)
@@ -54,7 +67,7 @@ class Lesson(models.Model):
     end_time = models.DateTimeField()
 
     class Meta:
-        unique_together = ('name', 'professor', 'auditorium', 'group', 'start_time', 'end_time', )
+        unique_together = ('name', 'professor', 'auditorium', 'group', 'start_time', 'end_time',)
 
     def __str__(self):
         return self.name

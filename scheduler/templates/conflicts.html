@@ -1,55 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
-</head>
-<body>
+{% extends 'base.html' %}
 
-<div class="container">
-{% load custom_filters %}
-<h2>Conflicts</h2>
-    <table class="table table-striped">
-     <thead>
-      <tr>
-        <th> ConflictType </th>
-        <th> Name </th>
-        <th> Professor  </th>
-        <th> Auditorium </th>
-        <th> Group </th>
-        <th> Start time  </th>
-        <th> End time  </th>
-      </tr>
-    </thead>
-    <tr>
-        {% for ConflictType, Lesson1, Lesson2, object in conflicts %}
-            {% get_color_tag forloop.counter0 as color %}
-            <tr class = {{color}} >
-                <td> {{ ConflictType.name }}</td>
-                <td> {{ Lesson1.name }} </td>
-                <td> {{ Lesson1.professor }} </td>
-                <td> {{ Lesson1.auditorium }} </td>
-                <td> {{ Lesson1.group }} </td>
-                <td> {{ Lesson1.start_time }} </td>
-                <td> {{ Lesson1.end_time }} </td>
-            </tr>
-            <tr class = {{color}} >
-                <td> </td>
-                <td> {{ Lesson2.name }} </td>
-                <td> {{ Lesson2.professor }} </td>
-                <td> {{ Lesson2.auditorium }} </td>
-                <td> {{ Lesson2.group }} </td>
-                <td> {{ Lesson2.start_time }} </td>
-                <td> {{ Lesson2.end_time }} </td>
-            </tr>
-        {% endfor %}
-    </tbody>
-    </table>
+{% block navbar %}
+        <ul class="nav navbar-nav">
+            <li><a href="{% url 'index' %}">Home</a></li>
+            <li><a href="{% url 'upload' %}">Upload</a></li>
+            <li><a href="{% url 'show_schedule' %}">Full calendar</a></li>
+            <li><a href="{% url 'show_room_schedule' %}">Room's calendar</a></li>
+            <li><a href="{% url 'show_professors_schedule' %}">Professor's calendar</a></li>
+            <li><a href="{% url 'show_groups_schedule' %}">Group's calendar</a></li>
+            <li class="active"><a href="{% url 'conflicts' %}">Conflicts</a></li>
+        </ul>
+{% endblock navbar %}
+
+{% block content %}
+<div class="basic">
+    {% include "conflicts_list.html" %}
 </div>
-
-
-</body>
-</html>
+{% endblock content %}

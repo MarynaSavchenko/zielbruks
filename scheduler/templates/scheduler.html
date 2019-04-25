@@ -1,0 +1,74 @@
+<div class="container">
+
+    {% if chosen_flag %}
+
+        <h2>Schedule for {{ type }} {{ name }}</h2>
+
+        <div style="float:left; width: 150px;">
+            <div id="nav"></div>
+        </div>
+        <div style="margin-left: 150px;">
+            <div id="dp"></div>
+        </div>
+
+        {% if events_flag %}
+            <p style="...">
+            <div id="details" class="alert alert-info">
+                Select an event to show the details.
+            </div>
+            </p>
+            {% else %}
+            <p style="...">
+            <div class="alert alert-danger">
+                There are no lessons.
+            </div>
+            </p>
+        {% endif %}
+
+        <script type="text/javascript">
+            var nav = new DayPilot.Navigator("nav");
+            nav.showMonths = 2;
+            nav.selectMode = "day";
+            nav.startDate = "{{ start_date }}";
+            nav.onTimeRangeSelected = function (args) {
+                dp.startDate = args.start;
+                dp.update();
+            };
+            nav.init();
+
+            var dp = new DayPilot.Calendar("dp");
+            dp.startDate = "{{ start_date }}";
+            dp.viewType = "Days";
+            dp.days = 2;
+            dp.businessBeginsHour = 7;
+            dp.events.list = [];
+            {% for e in events %}
+                var e = {
+                    start: new DayPilot.Date("{{ e.0 }}"),
+                    end: new DayPilot.Date("{{ e.1 }}"),
+                    id: DayPilot.guid(),
+                    text: "{{ e.2 }},\
+                        group: {{ e.3 }},\
+                        place: {{ e.4 }},\
+                        professor: {{ e.5 }}",
+                    backColor: "{{ e.6 }}",
+                    barColor: "{{ e.7 }}"
+                };
+                dp.events.list.push(e);
+            {% endfor %}
+
+            dp.eventClickHandling = "Enabled";
+            dp.eventMoveHandling = "Disabled";
+            dp.eventResizeHandling = "Disabled";
+            dp.onEventClicked = function (args) {
+                document.getElementById("details").innerText = args.e.text();
+            };
+
+            dp.init();
+
+        </script>
+    {% endif %}
+
+</div>
+
+
