@@ -1,0 +1,33 @@
+{% extends 'scheduler.html' %}
+
+{% block add_event %}
+    <style type="text/css">
+        #edit_button {
+            display: none;
+        }
+
+    </style>
+    <div class="modal fade" tabindex="-1" role="dialog" id="modal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+
+            </div>
+        </div>
+    </div>
+    <p align="right">
+        <button class="edit btn btn-primary" type="button" name="button" id="edit_button">Edit event</button>
+        <button class="edit btn btn-primary" type="button" name="button">Create event</button>
+    </p>
+    <script type="text/javascript">
+        $(function () {
+            $(".edit").modalForm({formURL: "{% url 'edit' %}"});
+        });
+    </script>
+{% endblock add_event %}
+
+{% block edit_event %}
+    dp.onEventClicked = function (args) {
+    document.getElementById("details").innerText = args.e.text();
+    $('#edit_button').show();
+    };
+{% endblock edit_event %}

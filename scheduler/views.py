@@ -3,15 +3,16 @@ import os.path
 
 import pandas as pd
 from django.core.files.storage import default_storage
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.template import loader
+from django.urls import reverse
 
 import scheduler.import_handlers as imp
 from scheduler.calendar_util import get_start_date, generate_conflicts_context, \
     generate_full_schedule_context
 from scheduler.models import Auditorium, Lesson, Group
-from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm
+from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm, EditForm
 
 
 def index(_request: HttpRequest) -> HttpResponse:
@@ -164,3 +165,10 @@ def sign_up(request: HttpRequest) -> HttpResponse:
 def log_in(request: HttpRequest) -> HttpResponse:
     """Render the login page"""
     return render(request, "still_working.html")
+
+
+def edit(request: HttpRequest) -> HttpResponse:
+    """Render the edit page"""
+    if request.method == 'POST':
+        return HttpResponseRedirect(reverse('index'))
+    return render(request, 'edit.html', context = {"form" : EditForm()})

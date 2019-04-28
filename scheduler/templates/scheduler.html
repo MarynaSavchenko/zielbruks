@@ -4,20 +4,23 @@
 
         <h2>Schedule for {{ type }} {{ name }}</h2>
 
-        <div style="float:left; width: 150px;">
-            <div id="nav"></div>
-        </div>
-        <div style="margin-left: 150px;">
-            <div id="dp"></div>
-        </div>
+        {% block add_event %}{% endblock add_event %}
 
+        <div>
+            <div style="float:left; width: 150px;">
+                <div id="nav"></div>
+            </div>
+            <div style="margin-left: 150px;">
+                <div id="dp"></div>
+            </div>
+        </div>
         {% if events_flag %}
             <p style="...">
             <div id="details" class="alert alert-info">
                 Select an event to show the details.
             </div>
             </p>
-            {% else %}
+        {% else %}
             <p style="...">
             <div class="alert alert-danger">
                 There are no lessons.
@@ -64,7 +67,9 @@
                 document.getElementById("details").innerText = args.e.text();
             };
 
-            dp.init();
+            {% block edit_event %}{% endblock edit_event %}
+
+            dp.init()
 
         </script>
     {% endif %}

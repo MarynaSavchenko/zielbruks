@@ -2,6 +2,7 @@
 from django import forms
 
 from .models import Lesson, Student, Auditorium, Professor, Group
+from bootstrap_modal_forms.forms import BSModalForm
 
 
 class SelectAuditoriumForm(forms.ModelForm):
@@ -29,3 +30,11 @@ class SelectGroupForm(forms.ModelForm):
     class Meta:
         model = Group
         fields: list = []
+
+
+class EditForm(BSModalForm):
+    """ popup form to edit lessons"""
+
+    class Meta:
+        model = Lesson
+        fields = ['start_time', 'end_time']
