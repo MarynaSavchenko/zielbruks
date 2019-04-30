@@ -19,15 +19,11 @@
                     }
                     );
             });
-
-
     </script>
     <style>
         th{
             text-align:center
         }
-
-
     </style>
 </head>
 <body>
@@ -65,12 +61,10 @@
         </form>
         <br>
 
-        {{ error }}
+        <p style="color:red;font-size:large">{{ error }}</p>
 
         {% if loaded_data %}
-        <span style="font-size: large; ">
             {{loaded_data | safe}}
-        </span>
         <p>Saved {{ added }} lessons into database</p>
         {% if incorrect %}
         Incorrect rows:

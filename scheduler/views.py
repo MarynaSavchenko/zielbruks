@@ -6,6 +6,7 @@ from django.core.files.storage import default_storage
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.template import loader
+from xlrd import XLRDError
 
 import scheduler.import_handlers as imp
 from scheduler.calendar_util import get_start_date, generate_conflicts_context, \
@@ -27,24 +28,27 @@ def upload(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST' and request.FILES['myfile']:
         myfile = request.FILES['myfile']
         if isinstance(myfile.name, str):
-            ext = os.path.splitext(myfile.name)[1]
-            if ext == '.csv':
-                filename = default_storage.save(myfile.name, myfile)
-                data = pd.read_csv(myfile.name)
+            filename = default_storage.save(myfile.name, myfile)
+            try:
+                ext = os.path.splitext(myfile.name)[1]
+                if ext == '.csv':
+                    data = pd.read_csv(myfile.name)
+                elif ext == '.xlsx':
+                    data = pd.read_excel(myfile.name)
+                else:
+                    return render(request, "upload.html", {'error': "Error: Extension not supported"})
+                added_lessons, incorrect, duplicate = imp.parse_data(data, ext)
+                data_html = data.to_html(classes=["table", "table-bordered", "table-striped", "table-hover"],
+                                         justify='center')
+                context = {'loaded_data': data_html, 'added': added_lessons,
+                           'incorrect': incorrect, 'duplicate': duplicate}
+                return render(request, "upload.html", context)
+            except XLRDError:
+                return render(request, "upload.html", {'error': "Error: Corrupted file"})
+            finally:
                 default_storage.delete(filename)
-            elif ext == '.xlsx':
-                filename = default_storage.save(myfile.name, myfile)
-                data = pd.read_excel(myfile.name)
-                default_storage.delete(filename)
-            else:
-                return render(request, "upload.html", {'error': "Extension not supported"})
-            added_lessons, incorrect, duplicate = imp.parse_data(data, ext)
-            data_html = data.to_html(classes=["table-bordered", "table-striped", "table-hover"],
-                                     justify='center')
-            context = {'loaded_data': data_html, 'added': added_lessons,
-                       'incorrect': incorrect, 'duplicate': duplicate}
-            return render(request, "upload.html", context)
-    return render(request, "upload.html")
+    else:
+        return render(request, "upload.html")
 
 
 def show_conflicts(request: HttpRequest) -> HttpResponse:
