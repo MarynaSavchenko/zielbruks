@@ -36,19 +36,22 @@ def upload(request: HttpRequest) -> HttpResponse:
                 elif ext == '.xlsx':
                     data = pd.read_excel(myfile.name)
                 else:
-                    return render(request, "upload.html", {'error': "Error: Extension not supported"})
+                    return render(request, "upload.html",
+                                  {'error': "Error: Extension not supported"})
                 added_lessons, incorrect, duplicate = imp.parse_data(data, ext)
-                data_html = data.to_html(classes=["table", "table-bordered", "table-striped", "table-hover"],
-                                         justify='center')
-                context = {'loaded_data': data_html, 'added': added_lessons,
-                           'incorrect': incorrect, 'duplicate': duplicate}
-                return render(request, "upload.html", context)
+                data_html = data.style \
+                    .set_table_attributes('class="table table-striped table-hover table-bordered"')\
+                    .apply(lambda x: [('background: lightcoral' if x.name in incorrect else
+                                       ('background: lightblue' if x.name in duplicate else ''))
+                                      for i in x], axis=1) \
+                    .render()
+                return render(request, "upload.html",
+                              {'loaded_data': data_html, 'added': added_lessons})
             except XLRDError:
                 return render(request, "upload.html", {'error': "Error: Corrupted file"})
             finally:
                 default_storage.delete(filename)
-    else:
-        return render(request, "upload.html")
+    return render(request, "upload.html")
 
 
 def show_conflicts(request: HttpRequest) -> HttpResponse:
