@@ -171,4 +171,4 @@ def edit(request: HttpRequest) -> HttpResponse:
     """Render the edit page"""
     if request.method == 'POST':
         return HttpResponseRedirect(reverse('index'))
-    return render(request, 'edit.html', context = {"form" : EditForm()})
+    return render(request, 'edit.html', context={"form": EditForm()})

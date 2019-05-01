@@ -1,8 +1,7 @@
 """Forms"""
 from django import forms
-
-from .models import Lesson, Student, Auditorium, Professor, Group
 from bootstrap_modal_forms.forms import BSModalForm
+from .models import Lesson, Student, Auditorium, Professor, Group
 
 
 class SelectAuditoriumForm(forms.ModelForm):
