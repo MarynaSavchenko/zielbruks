@@ -1,10 +1,9 @@
 """Forms"""
-import datetime
 
 from django import forms
-from bootstrap_modal_forms.forms import BSModalForm
 from django.utils import timezone
 from django.forms.widgets import SplitDateTimeWidget
+from bootstrap_modal_forms.forms import BSModalForm
 
 from .models import Lesson, Auditorium, Professor, Group
 
