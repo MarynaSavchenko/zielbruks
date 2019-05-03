@@ -177,5 +177,8 @@ def log_in(request: HttpRequest) -> HttpResponse:
 def edit(request: HttpRequest) -> HttpResponse:
     """Render the edit page"""
     if request.method == 'POST':
-        return HttpResponseRedirect(reverse('index'))
+        form = EditForm(request.POST)
+        if form.is_valid():
+            return HttpResponseRedirect(reverse('index'))
+        return render(request, 'edit.html', context={"form": form})
     return render(request, 'edit.html', context={"form": EditForm()})

@@ -3,9 +3,8 @@
 from django import forms
 from django.utils import timezone
 from django.forms.widgets import SplitDateTimeWidget
-from bootstrap_modal_forms.forms import BSModalForm
 
-from .models import Lesson, Auditorium, Professor, Group
+from .models import Auditorium, Professor, Group
 
 
 class SelectAuditoriumForm(forms.ModelForm):
@@ -35,21 +34,26 @@ class SelectGroupForm(forms.ModelForm):
         fields: list = []
 
 
-class EditForm(BSModalForm):
+class EditForm(forms.Form):
     """ popup form to edit lessons"""
     # id is empty when creating new lesson
     id = forms.IntegerField(widget=forms.HiddenInput(), required=False)
     name = forms.CharField(max_length=100)
-    start_date = forms.DateTimeField(initial=timezone.now, input_formats=['%d-%m-%Y %H:%M'],
-                                     widget=SplitDateTimeWidget(date_attrs={'type': 'date'},
-                                                                time_attrs={'type': 'time'}))
-    end_date = forms.DateTimeField(initial=timezone.now, input_formats=['%d-%m-%Y %H:%M'],
-                                   widget=SplitDateTimeWidget(date_attrs={'type': 'date'},
-                                                              time_attrs={'type': 'time'}))
+    start_time = forms.SplitDateTimeField(initial=timezone.now,
+                                          widget=SplitDateTimeWidget(date_attrs={'type': 'date'},
+                                                                     time_attrs={'type': 'time'}))
+    end_time = forms.SplitDateTimeField(initial=timezone.now,
+                                        widget=SplitDateTimeWidget(date_attrs={'type': 'date'},
+                                                                   time_attrs={'type': 'time'}))
     auditorium = forms.CharField(max_length=100)
     group = forms.IntegerField()
     professor = forms.CharField(max_length=100)
 
-    class Meta:
-        model = Lesson
-        fields: list = []
+    def clean(self):
+        start = self.cleaned_data['start_time'].replace(second=0)
+        end = self.cleaned_data['end_time'].replace(second=0)
+        if end < start:
+            self.add_error('end_time', 'End date before start date!')
+        if end == start:
+            self.add_error('end_time', 'End date equals start date!')
+        return self.cleaned_data
