@@ -39,10 +39,10 @@ class EditForm(forms.Form):
     # id is empty when creating new lesson
     id = forms.IntegerField(widget=forms.HiddenInput(), required=False)
     name = forms.CharField(max_length=100)
-    start_time = forms.SplitDateTimeField(initial=timezone.now,
+    start_time = forms.SplitDateTimeField(initial=timezone.now().replace(second=0),
                                           widget=SplitDateTimeWidget(date_attrs={'type': 'date'},
                                                                      time_attrs={'type': 'time'}))
-    end_time = forms.SplitDateTimeField(initial=timezone.now,
+    end_time = forms.SplitDateTimeField(initial=timezone.now().replace(second=0),
                                         widget=SplitDateTimeWidget(date_attrs={'type': 'date'},
                                                                    time_attrs={'type': 'time'}))
     auditorium = forms.CharField(max_length=100)
@@ -50,8 +50,8 @@ class EditForm(forms.Form):
     professor = forms.CharField(max_length=100)
 
     def clean(self):
-        start = self.cleaned_data['start_time'].replace(second=0)
-        end = self.cleaned_data['end_time'].replace(second=0)
+        start = self.cleaned_data['start_time']
+        end = self.cleaned_data['end_time']
         if end < start:
             self.add_error('end_time', 'End date before start date!')
         if end == start:
