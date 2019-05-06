@@ -36,8 +36,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'scheduler',
     'bootstrap_modal_forms',
+    'scheduler',
 ]
 
 MIDDLEWARE = [
