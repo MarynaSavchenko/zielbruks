@@ -195,6 +195,11 @@ def create(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         form = EditForm(request.POST)
         if form.is_valid():
-            return HttpResponseRedirect(reverse('index'))
+            start_date = form.cleaned_data['start_time']
+            context: dict = {}
+            context.update(generate_conflicts_context())
+            context.update(generate_full_schedule_context())
+            context['start_date'] = start_date.isoformat(timespec='seconds')
+            return render(request, 'index.html', context=context)
         return render(request, 'edit.html', context={"form": form})
     return render(request, 'edit.html', context={"form": EditForm()})
