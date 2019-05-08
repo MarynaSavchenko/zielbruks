@@ -44,9 +44,9 @@
             dp.viewType = "Days";
             dp.days = 2;
             dp.businessBeginsHour = 7;
-            dp.events.list = [];
+            dp.events.list = [
             {% for e in events %}
-                var e = {
+                {
                     start: new DayPilot.Date("{{ e.0 }}"),
                     end: new DayPilot.Date("{{ e.1 }}"),
                     id: {{ e.8 }},
@@ -56,10 +56,9 @@
                         professor: {{ e.5 }}",
                     backColor: "{{ e.6 }}",
                     barColor: "{{ e.7 }}"
-                };
-                dp.events.list.push(e);
+                },
             {% endfor %}
-
+            ];
             dp.eventClickHandling = "Enabled";
             dp.eventMoveHandling = "Disabled";
             dp.eventResizeHandling = "Disabled";
