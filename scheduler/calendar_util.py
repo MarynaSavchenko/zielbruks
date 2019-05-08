@@ -28,7 +28,8 @@ def generate_full_schedule_context():
                      Auditorium.objects.filter(id=q.auditorium_id)[:1].get().number,
                      (q.professor.name + " " + q.professor.surname),
                      Auditorium.objects.filter(id=q.auditorium_id)[:1].get().color,
-                     Group.objects.filter(id=q.group_id)[:1].get().color)
+                     Group.objects.filter(id=q.group_id)[:1].get().color,
+                     q.id)
                     for q in lessons_query]
     context = {
         'events': lessons_list,

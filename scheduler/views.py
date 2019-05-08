@@ -174,7 +174,23 @@ def log_in(request: HttpRequest) -> HttpResponse:
     return render(request, "still_working.html")
 
 
-def edit(request: HttpRequest) -> HttpResponse:
+def edit(request: HttpRequest, lesson_id) -> HttpResponse:
+    """Render the edit page"""
+    if request.method == 'POST':
+        form = EditForm(request.POST)
+        if form.is_valid():
+            return HttpResponseRedirect(reverse('index'))
+        return render(request, 'edit.html', context={"form": form})
+
+    lesson = Lesson.objects.get(id=lesson_id)
+    form = EditForm(
+        initial={'id': lesson_id, 'name': lesson.name, 'professor': lesson.professor,
+                 'auditorium': lesson.auditorium, 'group': lesson.group,
+                 'start_time': lesson.start_time, 'end_time': lesson.end_time})
+    return render(request, 'edit.html', context={"form": form})
+
+
+def create(request: HttpRequest) -> HttpResponse:
     """Render the edit page"""
     if request.method == 'POST':
         form = EditForm(request.POST)

@@ -38,7 +38,8 @@ class EditForm(forms.Form):
     """ popup form to edit lessons"""
     # id is empty when creating new lesson
     id = forms.IntegerField(widget=forms.HiddenInput(), required=False)
-    name = forms.CharField(max_length=100)
+    name = forms.CharField(max_length=100, widget=forms.TextInput(
+        attrs={'size': '30', 'class': 'inputText'}))
     start_time = forms.SplitDateTimeField(initial=timezone.now().replace(second=0),
                                           widget=SplitDateTimeWidget(date_attrs={'type': 'date'},
                                                                      time_attrs={'type': 'time'}))
