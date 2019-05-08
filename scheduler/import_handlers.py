@@ -3,7 +3,9 @@ import datetime
 from typing import List, Tuple
 from numpy import nan
 import pandas as pd
-from scheduler.models import Professor, Auditorium, Group, Lesson
+
+from scheduler.model_util import get_professor, get_auditorium, get_group
+from scheduler.models import Lesson
 
 
 def parse_data(data: pd.DataFrame, ext: str) -> Tuple[int, List[int], List[int]]:
@@ -144,21 +146,3 @@ def check_types_excel(row: tuple) -> bool:
         # 3.27, 3.27a and 137 should all be supported
         return False
     return True
-
-
-def get_professor(name: str, surname: str) -> Professor:
-    """Gets professor from database or creates a new object and returns it"""
-    professor, _created = Professor.objects.get_or_create(name=name, surname=surname)
-    return professor
-
-
-def get_auditorium(number: str) -> Auditorium:
-    """Gets auditorium from database or creates a new object and returns it"""
-    auditorium, _created = Auditorium.objects.get_or_create(number=number)
-    return auditorium
-
-
-def get_group(number: int) -> Group:
-    """Gets group from database or creates a new object and returns it"""
-    group, _created = Group.objects.get_or_create(number=number)
-    return group
