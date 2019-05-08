@@ -15,7 +15,7 @@ def get_start_date(lessons: QuerySet):
         if lesson.start_time > start_date:
             start_date = lesson.start_time
             return start_date.isoformat(timespec='seconds')
-    return start_date
+    return start_date.isoformat(timespec='seconds')
 
 
 def generate_full_schedule_context():
