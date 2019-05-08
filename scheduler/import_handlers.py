@@ -43,7 +43,7 @@ def import_csv(data: pd.DataFrame) -> Tuple[int, List[int], List[int]]:
         except ValueError:
             incorrect.append(row[0])
             continue
-        professor_data = row[5].split(" ")
+        professor_data = row[5].strip().split()
         if len(date) == 3 and len(start_t) == 2 and len(end_t) == 2 and len(professor_data) == 2:
             date[2] += 2000
             start_date = datetime.datetime(date[2], date[1], date[0], start_t[0], start_t[1])
@@ -85,7 +85,7 @@ def import_excel(data: pd.DataFrame) -> Tuple[int, List[int], List[int]]:
         if row.count(nan) != 0 or not check_types_excel(row):
             incorrect.append(row[0])
             continue
-        professor_data = row[5].split(" ")
+        professor_data = row[5].strip.split()
         if len(professor_data) == 2:
             start_time = datetime.timedelta(hours=row[2].hour, minutes=row[2].minute)
             end_time = datetime.timedelta(hours=row[3].hour, minutes=row[3].minute)
