@@ -87,7 +87,7 @@ def import_excel(data: pd.DataFrame) -> Tuple[int, List[int], List[int]]:
         if row.count(nan) != 0 or not check_types_excel(row):
             incorrect.append(row[0])
             continue
-        professor_data = row[5].strip.split()
+        professor_data = row[5].strip().split()
         if len(professor_data) == 2:
             start_time = datetime.timedelta(hours=row[2].hour, minutes=row[2].minute)
             end_time = datetime.timedelta(hours=row[3].hour, minutes=row[3].minute)
