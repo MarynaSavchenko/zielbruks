@@ -14,13 +14,13 @@
             </div>
         </div>
     </div>
-    <p align="right">
+    <p align="right" id="p_with_buttons">
         <button class="edit btn btn-primary" type="button" name="button" id="edit_button">Edit event</button>
-        <button class="edit btn btn-primary" type="button" name="button">Create event</button>
+        <button class="create btn btn-primary" type="button" name="button">Create event</button>
     </p>
     <script type="text/javascript">
         $(function () {
-            $(".edit").modalForm({formURL: "{% url 'edit' %}"});
+            $(".create").modalForm({formURL: "{% url 'create' %}"});
         });
     </script>
 {% endblock add_event %}
@@ -28,6 +28,18 @@
 {% block edit_event %}
     dp.onEventClicked = function (args) {
     document.getElementById("details").innerText = args.e.text();
+
+    var old_btn = document.getElementById('edit_button');
+    old_btn.parentNode.removeChild(old_btn);
+
+    var new_btn = document.createElement("button");
+    new_btn.setAttribute("id", "edit_button");
+    new_btn.setAttribute("class","edit btn btn-primary");
+    new_btn.innerHTML = "Edit event";
+    document.getElementById('p_with_buttons').appendChild(new_btn);
     $('#edit_button').show();
+    $("#edit_button").modalForm({formURL: "{% url 'edit' lesson_id=123 %}".replace(/123/, args.e.id())});
+
     };
 {% endblock edit_event %}
+
