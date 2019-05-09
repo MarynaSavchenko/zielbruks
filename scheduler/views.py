@@ -12,6 +12,7 @@ from xlrd import XLRDError
 import scheduler.import_handlers as imp
 from scheduler.calendar_util import get_start_date, generate_conflicts_context, \
     generate_full_schedule_context, get_full_context_with_date
+from scheduler.conflicts_checker import db_conflicts
 from scheduler.model_util import get_professor, get_auditorium, get_group
 from scheduler.models import Auditorium, Lesson, Group
 from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm, EditForm
@@ -47,6 +48,7 @@ def upload(request: HttpRequest) -> HttpResponse:
                                        ('background: lightblue' if x.name in duplicate else ''))
                                       for i in x], axis=1) \
                     .render()
+                db_conflicts()
                 return render(request, "upload.html",
                               {'loaded_data': data_html, 'added': added_lessons})
             except XLRDError:
