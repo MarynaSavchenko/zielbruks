@@ -78,7 +78,8 @@ def show_rooms_schedule(request: HttpRequest) -> HttpResponse:
                                         (q.professor.name + " " + q.professor.surname),
                                         Auditorium.objects.filter(id=q.auditorium_id)[:1]
                                         .get().color,
-                                        Group.objects.filter(id=q.group_id)[:1].get().color)
+                                        Group.objects.filter(id=q.group_id)[:1].get().color,
+                                        q.id)
                                        for q in auditorium_lessons_query]
             context = {
                 'form': form,
@@ -110,7 +111,8 @@ def show_professors_schedule(request: HttpRequest) -> HttpResponse:
                                         (q.professor.name + " " + q.professor.surname),
                                         Auditorium.objects.filter(id=q.auditorium_id)[:1]
                                         .get().color,
-                                        Group.objects.filter(id=q.group_id)[:1].get().color)
+                                        Group.objects.filter(id=q.group_id)[:1].get().color,
+                                        q.id)
                                        for q in professors_lessons_query]
             context = {
                 'form': form,
@@ -141,7 +143,8 @@ def show_groups_schedule(request: HttpRequest) -> HttpResponse:
                                     Auditorium.objects.filter(id=q.auditorium_id)[:1].get().number,
                                     (q.professor.name + " " + q.professor.surname),
                                     Auditorium.objects.filter(id=q.auditorium_id)[:1].get().color,
-                                    Group.objects.filter(id=q.group_id)[:1].get().color)
+                                    Group.objects.filter(id=q.group_id)[:1].get().color,
+                                    q.id)
                                    for q in groups_lessons_query]
             context = {
                 'form': form,
