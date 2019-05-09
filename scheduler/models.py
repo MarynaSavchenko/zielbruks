@@ -3,15 +3,19 @@ from random import randint
 
 from django.db import models
 
-palette = ['#66BD63', '#006837', '#92C5DE', '#1A9850', '#D6604D', '#B2182B', '#4D9221', '#7FBC41',
-           '#2166AC', '#C51B7D', '#276419', '#F1B6DA', '#FDDBC7', '#D73027', '#F46D43', '#F4A582',
-           '#A50026', '#053061', '#DE77AE', '#A6D96A', '#F7F7F7', '#B8E186', '#FEE08B', '#67001F',
-           '#D1E5F0', '#FDAE61', '#FFFFBF', '#E6F5D0', '#D9EF8B', '#8E0152', '#4393C3', '#FDE0EF']
-
+# generated with http://tools.medialab.sciences-po.fr/iwanthue/
+palette = ["#be7349", "#7977ec", "#73e36e", "#dd50b4", "#59ac2e", "#ab70e1", "#b1e160",
+           "#cf6ad6", "#9fb528", "#5d85e7", "#d8bd2d", "#4398df", "#dedb54", "#e73f8a",
+           "#5be3a2", "#e53d56", "#46a654", "#e84675", "#71e4cf", "#ea4c39", "#47cde5",
+           "#ea6642", "#3c98c2", "#ea9e2f", "#5e7bb7", "#af9a23", "#9b83cd", "#6c8d21",
+           "#c9579a", "#a5e093", "#f072a8", "#99b656", "#bd73b6", "#d3d67a", "#e5a9ef",
+           "#6e8e3b", "#8ea1de", "#da702a", "#7abdf3", "#bd822a", "#32a79f", "#e86266",
+           "#47a178", "#d56480", "#649b61", "#de96c5", "#9d8e30", "#b86990", "#e4ba58",
+           "#eb92a2", "#738c4e", "#ce5f46", "#a0b87a", "#c36c6a", "#969448", "#f29278",
+           "#89834d", "#e2c988", "#a68347", "#dea573"]
 
 def random_color():
     return palette[randint(0, len(palette) - 1)]
-
 
 class Professor(models.Model):
     """Person lecturing in a Lesson"""
