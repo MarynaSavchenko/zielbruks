@@ -11,7 +11,8 @@ from xlrd import XLRDError
 
 import scheduler.import_handlers as imp
 from scheduler.calendar_util import get_start_date, generate_conflicts_context, \
-    generate_full_schedule_context
+    generate_full_schedule_context, get_full_context_with_date
+from scheduler.model_util import get_professor, get_auditorium, get_group
 from scheduler.models import Auditorium, Lesson, Group
 from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm, EditForm
 
@@ -182,12 +183,21 @@ def edit(request: HttpRequest, lesson_id) -> HttpResponse:
     if request.method == 'POST':
         form = EditForm(request.POST)
         if form.is_valid():
-            return HttpResponseRedirect(reverse('index'))
+            lesson = Lesson.objects.get(id=form.cleaned_data['id'])
+            lesson.name = form.cleaned_data['name']
+            professor = form.cleaned_data['professor'].strip().split()
+            lesson.professor = get_professor(professor[0], professor[1])
+            lesson.auditorium = get_auditorium(form.cleaned_data['auditorium'])
+            lesson.group = get_group(form.cleaned_data['group'])
+            lesson.start_time = form.cleaned_data['start_time']
+            lesson.end_time = form.cleaned_data['end_time']
+            lesson.save()
+            context = get_full_context_with_date(form.cleaned_data['start_time'])
+            return render(request, 'index.html', context=context)
         return render(request, 'edit.html', context={"form": form})
-
     lesson = Lesson.objects.get(id=lesson_id)
     form = EditForm(
-        initial={'id': lesson_id, 'name': lesson.name, 'professor': lesson.professor,
+        initial={'id': lesson.id, 'name': lesson.name, 'professor': lesson.professor,
                  'auditorium': lesson.auditorium, 'group': lesson.group,
                  'start_time': lesson.start_time, 'end_time': lesson.end_time})
     return render(request, 'edit.html', context={"form": form})
@@ -198,11 +208,19 @@ def create(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         form = EditForm(request.POST)
         if form.is_valid():
-            start_date = form.cleaned_data['start_time']
-            context: dict = {}
-            context.update(generate_conflicts_context())
-            context.update(generate_full_schedule_context())
-            context['start_date'] = start_date.isoformat(timespec='seconds')
+            professor = form.cleaned_data['professor'].strip().split()
+            professor = get_professor(professor[0], professor[1])
+            auditorium = get_auditorium(form.cleaned_data['auditorium'])
+            group = get_group(form.cleaned_data['group'])
+            Lesson.objects.get_or_create(
+                name=form.cleaned_data['name'],
+                professor=professor,
+                auditorium=auditorium,
+                group=group,
+                start_time=form.cleaned_data['start_time'],
+                end_time=form.cleaned_data['end_time']
+            )
+            context = get_full_context_with_date(form.cleaned_data['start_time'])
             return render(request, 'index.html', context=context)
         return render(request, 'edit.html', context={"form": form})
     return render(request, 'edit.html', context={"form": EditForm()})

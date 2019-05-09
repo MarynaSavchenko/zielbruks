@@ -53,3 +53,12 @@ def generate_conflicts_context():
         'conflicts_flag': bool(conflicts_list)
     }
     return context
+
+
+def get_full_context_with_date(start_time):
+    """Returns full context dict and """
+    context: dict = {}
+    context.update(generate_conflicts_context())
+    context.update(generate_full_schedule_context())
+    context['start_date'] = start_time.isoformat(timespec='seconds')
+    return context
