@@ -206,3 +206,8 @@ def create(request: HttpRequest) -> HttpResponse:
             return render(request, 'index.html', context=context)
         return render(request, 'edit.html', context={"form": form})
     return render(request, 'edit.html', context={"form": EditForm()})
+
+
+def professors(request: HttpRequest) -> HttpResponse:
+    """Render the login page"""
+    return render(request, "professors.html")

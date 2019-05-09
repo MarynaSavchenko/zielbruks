@@ -18,6 +18,7 @@ urlpatterns = [
     path('log_in/', views.log_in, name='log_in'),
     path('edit/<int:lesson_id>/', views.edit, name='edit'),
     path('create/', views.create, name='create'),
+    path('professors/', views.professors, name='professors'),
 ]
 
 if settings.STATIC_URL is not None:
