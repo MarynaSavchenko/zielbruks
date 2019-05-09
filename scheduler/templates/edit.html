@@ -5,7 +5,11 @@
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
         </button>
-        <h5 class="modal-title">Edit Lesson</h5>
+        <h5 class="modal-title">
+            {% if form.id.value %}Edit Lesson
+            {% else %}Create Lesson
+            {% endif %}
+        </h5>
     </div>
 
     <div class="modal-body">
@@ -24,7 +28,11 @@
 
     <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="submit-btn btn btn-primary">Edit</button>
+        <button type="button" class="submit-btn btn btn-primary">
+            {% if form.id.value %}Edit
+            {% else %}Create
+            {% endif %}
+        </button>
     </div>
 
 </form>
