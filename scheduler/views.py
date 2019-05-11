@@ -80,7 +80,8 @@ def show_rooms_schedule(request: HttpRequest) -> HttpResponse:
                                         (q.professor.name + " " + q.professor.surname),
                                         models.palette[q.auditorium_id % len(models.palette)],
                                         models.palette[q.group_id % len(models.palette)],
-                                        q.id)
+                                        q.id,
+                                        q.start_time.strftime("%H:%M") + "-" + q.end_time.strftime("%H:%M"))
                                        for q in auditorium_lessons_query]
             context = {
                 'form': form,
@@ -112,7 +113,8 @@ def show_professors_schedule(request: HttpRequest) -> HttpResponse:
                                         (q.professor.name + " " + q.professor.surname),
                                         models.palette[q.auditorium_id % len(models.palette)],
                                         models.palette[q.group_id % len(models.palette)],
-                                        q.id)
+                                        q.id,
+                                        q.start_time.strftime("%H:%M") + "-" + q.end_time.strftime("%H:%M"))
                                        for q in professors_lessons_query]
             context = {
                 'form': form,
@@ -144,7 +146,8 @@ def show_groups_schedule(request: HttpRequest) -> HttpResponse:
                                     (q.professor.name + " " + q.professor.surname),
                                     models.palette[q.auditorium_id % len(models.palette)],
                                     models.palette[q.group_id % len(models.palette)],
-                                    q.id)
+                                    q.id,
+                                    q.start_time.strftime("%H:%M") + "-" + q.end_time.strftime("%H:%M"))
                                    for q in groups_lessons_query]
             context = {
                 'form': form,

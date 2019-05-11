@@ -29,7 +29,8 @@ def generate_full_schedule_context():
                      (q.professor.name + " " + q.professor.surname),
                      models.palette[q.auditorium_id % len(models.palette)],
                      models.palette[q.group_id % len(models.palette)],
-                     q.id)
+                     q.id,
+                     q.start_time.strftime("%H:%M") + "-" + q.end_time.strftime("%H:%M"))
                     for q in lessons_query]
     context = {
         'events': lessons_list,
