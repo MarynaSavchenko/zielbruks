@@ -6,43 +6,50 @@
 
     {% load custom_filters %}
 
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th> ConflictType</th>
-            <th> Name</th>
-            <th> Professor</th>
-            <th> Auditorium</th>
-            <th> Group</th>
-            <th> Start time</th>
-            <th> End time</th>
-        </tr>
-        </thead>
-        <tr>
-            {% for ConflictType, Lesson1, Lesson2, object in conflicts %}
-            {% get_color_tag forloop.counter0 as conflicts_color %}
-        <tr class={{conflicts_color}}>
-            <td> {{ ConflictType.name }}</td>
-            <td> {{ Lesson1.name }}</td>
-            <td> {{ Lesson1.professor }}</td>
-            <td> {{ Lesson1.auditorium }}</td>
-            <td> {{ Lesson1.group }}</td>
-            <td> {{ Lesson1.start_time }}</td>
-            <td> {{ Lesson1.end_time }}</td>
-        </tr>
-        <tr class={{conflicts_color}}>
-            <td></td>
-            <td> {{ Lesson2.name }}</td>
-            <td> {{ Lesson2.professor }}</td>
-            <td> {{ Lesson2.auditorium }}</td>
-            <td> {{ Lesson2.group }}</td>
-            <td> {{ Lesson2.start_time }}</td>
-            <td> {{ Lesson2.end_time }}</td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
 
+    <form>
+    {% block edit_conflicts %}{% endblock edit_conflicts %}
+
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th></th>
+                <th> ConflictType</th>
+                <th> Name</th>
+                <th> Professor</th>
+                <th> Auditorium</th>
+                <th> Group</th>
+                <th> Start time</th>
+                <th> End time</th>
+            </tr>
+            </thead>
+            <tr>
+                {% for ConflictType, Lesson1, Lesson2, object in conflicts %}
+                {% get_color_tag forloop.counter0 as conflicts_color %}
+            <tr class={{conflicts_color}}>
+                <td><input type="checkbox" name="checks" id={{ Lesson1.id }} /></td>
+                <td> {{ ConflictType.name }}</td>
+                <td> {{ Lesson1.name }}</td>
+                <td> {{ Lesson1.professor }}</td>
+                <td> {{ Lesson1.auditorium }}</td>
+                <td> {{ Lesson1.group }}</td>
+                <td> {{ Lesson1.start_time }}</td>
+                <td> {{ Lesson1.end_time }}</td>
+            </tr>
+            <tr class={{conflicts_color}}>
+                <td><input type="checkbox" name="checks" id={{ Lesson2.id }} /></td>
+                <td></td>
+                <td> {{ Lesson2.name }}</td>
+                <td> {{ Lesson2.professor }}</td>
+                <td> {{ Lesson2.auditorium }}</td>
+                <td> {{ Lesson2.group }}</td>
+                <td> {{ Lesson2.start_time }}</td>
+                <td> {{ Lesson2.end_time }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </form>
 
     {% else %}
     <p style="...">
