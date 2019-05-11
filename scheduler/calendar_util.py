@@ -3,7 +3,7 @@ import datetime
 
 from django.db.models import QuerySet
 
-from scheduler import conflicts_checker
+from scheduler import conflicts_checker, models
 from scheduler.models import Lesson, Auditorium, Group
 
 
@@ -27,8 +27,8 @@ def generate_full_schedule_context():
                      Group.objects.filter(id=q.group_id)[:1].get().number,
                      Auditorium.objects.filter(id=q.auditorium_id)[:1].get().number,
                      (q.professor.name + " " + q.professor.surname),
-                     Auditorium.objects.filter(id=q.auditorium_id)[:1].get().color,
-                     Group.objects.filter(id=q.group_id)[:1].get().color,
+                     models.palette[q.auditorium_id % len(models.palette)],
+                     models.palette[q.group_id % len(models.palette)],
                      q.id)
                     for q in lessons_query]
     context = {

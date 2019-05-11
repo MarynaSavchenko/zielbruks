@@ -8,11 +8,6 @@ palette = ['#66BD63', '#006837', '#92C5DE', '#1A9850', '#D6604D', '#B2182B', '#4
            '#A50026', '#053061', '#DE77AE', '#A6D96A', '#F7F7F7', '#B8E186', '#FEE08B', '#67001F',
            '#D1E5F0', '#FDAE61', '#FFFFBF', '#E6F5D0', '#D9EF8B', '#8E0152', '#4393C3', '#FDE0EF']
 
-
-def random_color():
-    return palette[randint(0, len(palette) - 1)]
-
-
 class Professor(models.Model):
     """Person lecturing in a Lesson"""
     name = models.CharField("Professor name", max_length=100)
@@ -40,7 +35,6 @@ class Professor(models.Model):
 class Auditorium(models.Model):
     """Place at which a Lesson is given"""
     number = models.CharField("Auditorium number", max_length=30, unique=True)
-    color = models.CharField(max_length=10, default=random_color)
 
     def __str__(self):
         return str(self.number)
@@ -49,7 +43,6 @@ class Auditorium(models.Model):
 class Group(models.Model):
     """Group of Students attending the same courses"""
     number = models.IntegerField("Group number", unique=True)
-    color = models.CharField(max_length=10, default=random_color)
 
     def __str__(self):
         return str(self.number)
