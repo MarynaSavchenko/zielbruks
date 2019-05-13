@@ -12,9 +12,9 @@ from xlrd import XLRDError
 import scheduler.import_handlers as imp
 from scheduler.calendar_util import get_start_date, generate_conflicts_context, \
     generate_full_schedule_context, get_full_context_with_date
-from scheduler.conflicts_checker import db_conflicts
+from scheduler.conflicts_checker import db_conflicts, conflicts_diff
 from scheduler.model_util import get_professor, get_auditorium, get_group
-from scheduler.models import Auditorium, Lesson, Group
+from scheduler.models import Auditorium, Lesson, Group, Conflict
 from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm, EditForm
 
 
@@ -43,7 +43,7 @@ def upload(request: HttpRequest) -> HttpResponse:
                                   {'error': "Error: Extension not supported"})
                 added_lessons, incorrect, duplicate = imp.parse_data(data, ext)
                 data_html = data.style \
-                    .set_table_attributes('class="table table-striped table-hover table-bordered"')\
+                    .set_table_attributes('class="table table-striped table-hover table-bordered"') \
                     .apply(lambda x: [('background: lightcoral' if x.name in incorrect else
                                        ('background: lightblue' if x.name in duplicate else ''))
                                       for i in x], axis=1) \
@@ -185,6 +185,7 @@ def edit(request: HttpRequest, lesson_id) -> HttpResponse:
     if request.method == 'POST':
         form = EditForm(request.POST)
         if form.is_valid():
+            past_conflicts = list(Conflict.objects.all())
             lesson = Lesson.objects.get(id=form.cleaned_data['id'])
             lesson.name = form.cleaned_data['name']
             professor = form.cleaned_data['professor'].strip().split()
@@ -194,7 +195,19 @@ def edit(request: HttpRequest, lesson_id) -> HttpResponse:
             lesson.start_time = form.cleaned_data['start_time']
             lesson.end_time = form.cleaned_data['end_time']
             lesson.save()
+            db_conflicts()
             context = get_full_context_with_date(form.cleaned_data['start_time'])
+            current_conflicts = list(context['conflicts'])
+            print(len(past_conflicts))
+            print(len(current_conflicts))
+            new_conflicts, removed_conflicts = conflicts_diff(past_conflicts, current_conflicts)
+            # does not work...
+            print("--NEW--")
+            print(new_conflicts)
+            print(len(new_conflicts))
+            print("--OLD--")
+            print(removed_conflicts)
+            print(len(removed_conflicts))
             return render(request, 'index.html', context=context)
         return render(request, 'edit.html', context={"form": form})
     lesson = Lesson.objects.get(id=lesson_id)
@@ -210,6 +223,7 @@ def create(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         form = EditForm(request.POST)
         if form.is_valid():
+            past_conflicts = list(Conflict.objects.all())
             professor = form.cleaned_data['professor'].strip().split()
             professor = get_professor(professor[0], professor[1])
             auditorium = get_auditorium(form.cleaned_data['auditorium'])
@@ -222,7 +236,18 @@ def create(request: HttpRequest) -> HttpResponse:
                 start_time=form.cleaned_data['start_time'],
                 end_time=form.cleaned_data['end_time']
             )
+            db_conflicts()
             context = get_full_context_with_date(form.cleaned_data['start_time'])
+            current_conflicts = list(context['conflicts'])
+            print(len(past_conflicts))
+            print(len(current_conflicts))
+            new_conflicts, removed_conflicts = conflicts_diff(past_conflicts, current_conflicts)
+            print("--NEW--")
+            print(new_conflicts)
+            print(len(new_conflicts))
+            print("--OLD--")
+            print(removed_conflicts)
+            print(len(removed_conflicts))
             return render(request, 'index.html', context=context)
         return render(request, 'edit.html', context={"form": form})
     return render(request, 'edit.html', context={"form": EditForm()})

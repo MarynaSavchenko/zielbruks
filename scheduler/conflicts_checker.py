@@ -1,6 +1,10 @@
 """module responsible for finding conflicts in database"""
+import copy
 from typing import List, Tuple
 from enum import Enum
+
+from django.db.models.query import QuerySet
+
 from scheduler.models import Lesson, Professor, Auditorium, Group, Conflict
 
 
@@ -19,61 +23,67 @@ def are_overlapping(lesson1: Lesson, lesson2: Lesson) -> bool:
     return False
 
 
-def check_lesson(lesson: Lesson) -> List[Tuple[str, Lesson, Lesson, object]]:
+def check_lesson(index: int, lesson_list: List[Lesson]) -> List[Tuple[str, Lesson, Lesson, object]]:
     """
     This function searches db for other lessons sharing the same professor, auditorium and group
     And then checks if they are conflicting with each other using are_overlapping
-    :param lesson: Lesson for which we are checking possible conflicts
+    :param index: index of Lesson for which we are checking possible conflicts
+    :param lesson_list: lessons list
     :return: List of tuples holding information about conflict.
-             Tuple[ConflictType, Lesson1, Lesson2, object]
-             ConflictType helps to differentiate which conflict it is
+             Tuple[str, Lesson1, Lesson2, object]
+             str helps to differentiate which conflict it is
              Lesson1 and Lesson2 are Lesson that are currently in conflict
-             object is Model object responsible for conflict (Professor,Auditorium,Group)
+             int is Model object id responsible for conflict (Professor,Auditorium,Group)
     """
-    conflicts: List[Tuple[str, Lesson, Lesson, object]] = []
-    for lesson_2 in Lesson.objects.filter(professor=lesson.professor):
-        if lesson != lesson_2:
-            if are_overlapping(lesson, lesson_2):
+    conflicts: List[Tuple[str, Lesson, Lesson, int]] = []
+    lesson = lesson_list[index]
+    for ind in range(index, len(lesson_list)):
+        lesson_2 = lesson_list[ind]
+        if lesson != lesson_2 and are_overlapping(lesson, lesson_2):
+            if lesson_2.professor == lesson.professor:
                 new_conflict = ("PROFESSOR", lesson, lesson_2, lesson.professor.id)
                 conflicts.append(new_conflict)
-    for lesson_2 in Lesson.objects.filter(auditorium=lesson.auditorium):
-        if lesson != lesson_2:
-            if are_overlapping(lesson, lesson_2):
+            if lesson_2.auditorium == lesson.auditorium:
                 new_conflict = ('AUDITORIUM', lesson, lesson_2, lesson.auditorium.id)
                 conflicts.append(new_conflict)
-    for lesson_2 in Lesson.objects.filter(group=lesson.group):
-        if lesson != lesson_2:
-            if are_overlapping(lesson, lesson_2):
+            if lesson_2.group == lesson.group:
                 new_conflict = ("GROUP", lesson, lesson_2, lesson.group.id)
                 conflicts.append(new_conflict)
     return conflicts
 
 
-def conflict_already_in_db(c_type, f_lesson, o_id, s_lesson):
-    return Conflict.objects.filter(conflict_type=c_type,
-                                   first_lesson=s_lesson,
-                                   second_lesson=f_lesson,
-                                   object_id=o_id).exists()
-
-
 def db_conflicts():
     """
     This function finds conflicts for every lesson in database by using check_lesson
-    :return: List of tuples holding information about conflict.
-             Tuple[ConflictType, Lesson1, Lesson1, object]
-             ConflictType helps to differentiate which conflict it is
-             Lesson1 and Lesson2 are Lesson that are currently in conflict
-             object is Model object responsible for conflict (Professor,Auditorium,Group)
+    :return: nothing
+            Adds conflicts to database
     """
+    Conflict.objects.all().delete()
     lessons = Lesson.objects.all()
-    for lesson in lessons:
-        lesson_conflicts = check_lesson(lesson)
+    lessons_list = list(lessons)
+    for index in range(len(lessons_list)):
+        lesson_conflicts = check_lesson(index, lessons_list)
         for conflict in lesson_conflicts:
             c_type, f_lesson, s_lesson, o_id = conflict
-            if not conflict_already_in_db(c_type, s_lesson, o_id, f_lesson):
-                if not conflict_already_in_db(c_type, f_lesson, o_id, s_lesson):
-                    new_conflict = Conflict(conflict_type=c_type,
-                                            first_lesson=f_lesson,
-                                            second_lesson=s_lesson,
-                                            object_id=o_id)
-                    new_conflict.save()
+            new_conflict = Conflict(conflict_type=c_type,
+                                    first_lesson=f_lesson,
+                                    second_lesson=s_lesson,
+                                    object_id=o_id)
+            new_conflict.save()
+
+
+def conflicts_diff(past_conflicts: List[Conflict], current_conflicts: List[Conflict]):
+    removed_conflicts: List[Conflict] = []
+    added_conflicts: List[Conflict] = []
+    current_conflicts_copy = copy.deepcopy(current_conflicts)
+    for conflict in past_conflicts:
+        perfect_match = False
+        for conflict2 in current_conflicts:
+            if conflict.__eq__(conflict2):
+                perfect_match = True
+                current_conflicts_copy.remove(conflict2)
+        if not perfect_match:
+            removed_conflicts.append(conflict)
+    for cur_conflict in current_conflicts_copy:
+        added_conflicts.append(cur_conflict)
+    return added_conflicts, removed_conflicts
