@@ -27,8 +27,8 @@ def generate_full_schedule_context():
                      Group.objects.filter(id=q.group_id)[:1].get().number,
                      Auditorium.objects.filter(id=q.auditorium_id)[:1].get().number,
                      (q.professor.name + " " + q.professor.surname),
-                     models.palette[q.auditorium_id % len(models.palette)],
-                     models.palette[q.group_id % len(models.palette)],
+                     q.auditorium_color,
+                     q.group_color,
                      q.id,
                      q.start_time.strftime("%H:%M") + "-" + q.end_time.strftime("%H:%M"))
                     for q in lessons_query]

@@ -8,6 +8,9 @@ palette = ['#66BD63', '#006837', '#92C5DE', '#1A9850', '#D6604D', '#B2182B', '#4
            '#A50026', '#053061', '#DE77AE', '#A6D96A', '#F7F7F7', '#B8E186', '#FEE08B', '#67001F',
            '#D1E5F0', '#FDAE61', '#FFFFBF', '#E6F5D0', '#D9EF8B', '#8E0152', '#4393C3', '#FDE0EF']
 
+def color_from_id(numeric_id):
+    return palette[numeric_id % len(palette)]
+
 class Professor(models.Model):
     """Person lecturing in a Lesson"""
     name = models.CharField("Professor name", max_length=100)
@@ -58,6 +61,9 @@ class Lesson(models.Model):
     group = models.ForeignKey(Group, related_name='lessons', on_delete=models.CASCADE)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
+
+    group_color = property(lambda self: color_from_id(self.group_id))
+    auditorium_color = property(lambda self: color_from_id(self.auditorium_id))
 
     class Meta:
         unique_together = ('name', 'professor', 'auditorium', 'group', 'start_time', 'end_time',)

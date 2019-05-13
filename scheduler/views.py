@@ -78,8 +78,8 @@ def show_rooms_schedule(request: HttpRequest) -> HttpResponse:
                                         Group.objects.filter(id=q.group_id)[:1].get().number,
                                         room_number,
                                         (q.professor.name + " " + q.professor.surname),
-                                        models.palette[q.auditorium_id % len(models.palette)],
-                                        models.palette[q.group_id % len(models.palette)],
+                                        q.auditorium_color,
+                                        q.group_color,
                                         q.id,
                                         q.start_time.strftime("%H:%M") + "-"
                                         + q.end_time.strftime("%H:%M"))
@@ -112,8 +112,8 @@ def show_professors_schedule(request: HttpRequest) -> HttpResponse:
                                         Auditorium.objects.filter(id=q.auditorium_id)[:1]
                                         .get().number,
                                         (q.professor.name + " " + q.professor.surname),
-                                        models.palette[q.auditorium_id % len(models.palette)],
-                                        models.palette[q.group_id % len(models.palette)],
+                                        q.auditorium_color,
+                                        q.group_color,
                                         q.id,
                                         q.start_time.strftime("%H:%M") + "-"
                                         + q.end_time.strftime("%H:%M"))
@@ -146,8 +146,8 @@ def show_groups_schedule(request: HttpRequest) -> HttpResponse:
                                     group,
                                     Auditorium.objects.filter(id=q.auditorium_id)[:1].get().number,
                                     (q.professor.name + " " + q.professor.surname),
-                                    models.palette[q.auditorium_id % len(models.palette)],
-                                    models.palette[q.group_id % len(models.palette)],
+                                    q.auditorium_color,
+                                    q.group_color,
                                     q.id,
                                     q.start_time.strftime("%H:%M") + "-"
                                     + q.end_time.strftime("%H:%M"))
