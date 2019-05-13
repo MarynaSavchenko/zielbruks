@@ -43,3 +43,13 @@ function setupEditButton(daypilot, url) {
     $("#edit_button").modalForm({ formURL: url.replace(/123/, args.e.id()) });
   };
 }
+
+
+function onEditFormSubmit(event) {
+  // This function is called only after XHR submit
+  // executed by bootstrap form validation succeeds
+
+  location.reload();
+
+  // TODO place the calendar on the new date
+}
