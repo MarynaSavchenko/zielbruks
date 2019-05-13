@@ -29,22 +29,8 @@
         {% endif %}
 
         <script type="text/javascript">
-            var nav = new DayPilot.Navigator("nav");
-            nav.showMonths = 1;
-            nav.selectMode = "day";
-            nav.startDate = "{{ start_date }}";
-            nav.onTimeRangeSelected = function (args) {
-                dp.startDate = args.start;
-                dp.update();
-            };
-            nav.init();
-
-            var dp = new DayPilot.Calendar("dp");
-            dp.startDate = "{{ start_date }}";
-            dp.viewType = "Days";
-            dp.days = 2;
-            dp.businessBeginsHour = 7;
-            dp.events.list = [
+            var start_date = "{{ start_date }}";
+            var events = [
             {% for e in events %}
                 {
                     start: new DayPilot.Date("{{ e.0 }}"),
@@ -59,16 +45,10 @@
                 },
             {% endfor %}
             ];
-            dp.eventClickHandling = "Enabled";
-            dp.eventMoveHandling = "Disabled";
-            dp.eventResizeHandling = "Disabled";
-            dp.onEventClicked = function (args) {
-                document.getElementById("details").innerText = args.e.text();
-            };
+
+            var dp = setupCalendar(events, start_date);
 
             {% block edit_event %}{% endblock edit_event %}
-
-            dp.init()
 
         </script>
     {% endif %}

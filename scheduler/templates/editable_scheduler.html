@@ -26,20 +26,6 @@
 {% endblock add_event %}
 
 {% block edit_event %}
-    dp.onEventClicked = function (args) {
-    document.getElementById("details").innerText = args.e.text();
-
-    var old_btn = document.getElementById('edit_button');
-    old_btn.parentNode.removeChild(old_btn);
-
-    var new_btn = document.createElement("button");
-    new_btn.setAttribute("id", "edit_button");
-    new_btn.setAttribute("class","edit btn btn-primary");
-    new_btn.innerHTML = "Edit event";
-    document.getElementById('p_with_buttons').appendChild(new_btn);
-    $('#edit_button').show();
-    $("#edit_button").modalForm({formURL: "{% url 'edit' lesson_id=123 %}".replace(/123/, args.e.id())});
-
-    };
+    setupEditButton(dp, "{% url 'edit' lesson_id=123 %}");
 {% endblock edit_event %}
 
