@@ -1,0 +1,51 @@
+<div class="container">
+
+    <div class="jumbotron">
+        <form method="POST">
+            {% csrf_token %}
+
+            {{ form.as_p }}
+            <div class="container">
+                <input type="submit" name="choose" value="Choose"/>
+            </div>
+
+            {% if email %}
+                <input type="email" name="email" value="{{ email }}">
+                <div class="container">
+                    <input type="submit" name="save" value="Save"/>
+                </div>
+            {% endif %}
+
+
+        </form>
+    </div>
+
+    <h2>Professors</h2>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th> Name</th>
+            <th> Surname</th>
+            <th> Email</th>
+        </tr>
+        </thead>
+        <tr>
+            {% for professor in professors %}
+                <tr>
+                    <td>{{ professor.name }}</td>
+                    <td>{{ professor.surname }}</td>
+                    <td>{% if not professor.email %}
+                        There is no email.
+                    {% else %}
+                        {{ professor.email }}
+                    {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <li>There are no professors.</li>
+            {% endfor %}
+        </tr>
+    </table>
+
+
+</div>

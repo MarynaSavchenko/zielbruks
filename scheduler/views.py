@@ -12,7 +12,7 @@ from xlrd import XLRDError
 import scheduler.import_handlers as imp
 from scheduler.calendar_util import get_start_date, generate_conflicts_context, \
     generate_full_schedule_context
-from scheduler.models import Auditorium, Lesson, Group
+from scheduler.models import Auditorium, Lesson, Group, Professor
 from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm, EditForm
 
 
@@ -209,5 +209,28 @@ def create(request: HttpRequest) -> HttpResponse:
 
 
 def professors(request: HttpRequest) -> HttpResponse:
-    """Render the login page"""
-    return render(request, "professors.html")
+    """Render the professors page"""
+    professors_list = Professor.objects.all()
+    context = {'professors': professors_list, 'form': SelectProfessorForm()}
+    if request.method == 'POST':
+        if 'choose' in request.POST:
+            form = SelectProfessorForm(request.POST)
+            if form.is_valid():
+                professor = form.cleaned_data['professor']
+                email = professor.email
+                if not email:
+                    email = "Enter@email"
+                context = {'professors': professors_list, 'form': form, 'email': email}
+        elif 'save' in request.POST:
+            form = SelectProfessorForm(request.POST)
+            if form.is_valid():
+                email = request.POST.get('email')
+                professor = form.cleaned_data['professor']
+                professor.email = email
+                professor.save()
+                context = {'professors': professors_list, 'form': SelectProfessorForm()}
+        else:
+            return HttpResponse("AN ERROR OCCURRED")
+
+
+    return render(request, "professors.html", context)
