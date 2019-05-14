@@ -219,7 +219,7 @@ def professors(request: HttpRequest) -> HttpResponse:
                 professor = form.cleaned_data['professor']
                 email = professor.email
                 if not email:
-                    email = "Enter@email"
+                    email = "Noemail"
                 context = {'professors': professors_list, 'form': form, 'email': email}
         elif 'save' in request.POST:
             form = SelectProfessorForm(request.POST)

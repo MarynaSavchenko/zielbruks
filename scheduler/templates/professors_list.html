@@ -1,51 +1,58 @@
 <div class="container">
-
-    <div class="jumbotron">
+    <div class="jumbotron" style="height: 150px">
         <form method="POST">
             {% csrf_token %}
-
-            {{ form.as_p }}
-            <div class="container">
-                <input type="submit" name="choose" value="Choose"/>
-            </div>
-
-            {% if email %}
-                <input type="email" name="email" value="{{ email }}">
-                <div class="container">
-                    <input type="submit" name="save" value="Save"/>
+            <div id="wrapperDiv">
+                <div id="div1" style="padding:20px;float:left">
+                    {{ form.as_p }}
+                    <input type="submit" name="choose" value="Choose"/>
                 </div>
-            {% endif %}
-
-
+                <div id="div2" style="padding:20px;float:left">
+                    {% if email %}
+                        <p><b>Enter email:</b>
+                            {% if email == 'Noemail' %}
+                                <input type="email" name="email" size="35">
+                            {% else %}
+                                <input type="email" size="35" name="email" value="{{ email }}">
+                            {% endif %}
+                        </p>
+                        <input type="submit" name="save" value="Save"/>
+                    {% endif %}
+                </div>
+            </div>
         </form>
     </div>
 
-    <h2>Professors</h2>
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th> Name</th>
-            <th> Surname</th>
-            <th> Email</th>
-        </tr>
-        </thead>
-        <tr>
-            {% for professor in professors %}
+    <div class="container">
+        <div class="basic">
+            {% if professors %}
+                <h2>Professors</h2>
+                <table class="table table-striped">
+                <thead>
                 <tr>
-                    <td>{{ professor.name }}</td>
-                    <td>{{ professor.surname }}</td>
-                    <td>{% if not professor.email %}
-                        There is no email.
-                    {% else %}
-                        {{ professor.email }}
-                    {% endif %}
-                    </td>
+                    <th> Name</th>
+                    <th> Surname</th>
+                    <th> Email</th>
                 </tr>
-            {% empty %}
-                <li>There are no professors.</li>
-            {% endfor %}
-        </tr>
-    </table>
-
-
+                </thead>
+                <tr>
+                    {% for professor in professors %}
+                        <tr>
+                            <td>{{ professor.name }}</td>
+                            <td>{{ professor.surname }}</td>
+                            <td>{% if not professor.email %}
+                                Email is not set.
+                            {% else %}
+                                {{ professor.email }}
+                            {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tr>
+            {% else %}
+                <p align="center" style="font-size:30px">There are no professors.</p>
+            {% endif %}
+            </table>
+        </div>
+    </div>
 </div>
