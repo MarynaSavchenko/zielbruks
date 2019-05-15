@@ -7,12 +7,27 @@
         {% block add_event %}{% endblock add_event %}
 
         <div>
-            <div style="float:left; width: 150px;">
+            <div style="float:left; width: 150px; ">
                 <div id="nav"></div>
             </div>
-            <div style="margin-left: 150px;">
-                <div id="dp"></div>
+            <div style="float:right; width: 150px; padding: 5px">
+                <h4 class="title">Legend</h4>
+                <p class="text">
+                    Auditoriums: <br/>
+                    {% for a in auditoriums_colors %}
+                        <li style="color:{{ a.1 }}; font-size: 150%;"><span style="color:black; font-size: 50%;">{{ a.0 }}</span></li>
+                    {% endfor %}
+                Groups: <br/>
+                {% for g in groups_colors %}
+                    <li style="color:{{ g.1 }}; font-size: 150%;"><span style="color:black; font-size: 50%;">{{ g.0 }}</span></li>
+                {% endfor %}
+                </p>
+
             </div>
+        </div>
+        <div style="float:none; overflow: hidden">
+            <div id="dp"></div>
+        </div>
         </div>
         {% if events_flag %}
             <p style="...">
