@@ -2,19 +2,32 @@
 
 {% block edit_conflicts %}
     <style>
-
+        input[name="checks[]"]{
+            display: inline;
+        }
     </style>
 
     <script type="text/javascript">
     function toggle(source) {
-        checkboxes = document.getElementsByName('checks');
+        checkboxes = document.getElementsByName('checks[]');
         for(var i=0, n=checkboxes.length;i<n;i++) {
              checkboxes[i].checked = source.checked;
      }
     }
+
+    function edit_lessons(source){
+
+    }
+
+    function delete_lessons(){
+        if(confirm('Are you sure you want to delete selected lessons?')){
+            document.form.action="{% url 'delete_lessons' %}"
+            document.form.submit()
+        }
+    }
     </script>
 
     <input type="checkbox" onClick="toggle(this)" />
-    <button type="button" class="btn btn-default">Edit</button>
-    <button type="button" class="submit-btn btn btn-primary">Delete</button>
+    <button type="button" class="edit_lessons btn btn-primary" onClick="edit_lessons(this)">Edit</button>
+    <input type="button" class="delete_lessons btn btn-primary" onClick="delete_lessons()" value="Delete"/>
 {% endblock edit_conflicts %}

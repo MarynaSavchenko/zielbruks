@@ -17,12 +17,12 @@ from scheduler.models import Auditorium, Lesson, Group
 from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm, EditForm
 
 
-def index(_request: HttpRequest) -> HttpResponse:
+def index(request: HttpRequest) -> HttpResponse:
     """Render the main page"""
     context: dict = {}
     context.update(generate_conflicts_context())
     context.update(generate_full_schedule_context())
-    return render(_request, 'index.html', context)
+    return render(request, 'index.html', context)
 
 
 def upload(request: HttpRequest) -> HttpResponse:
@@ -224,3 +224,16 @@ def create(request: HttpRequest) -> HttpResponse:
             return render(request, 'index.html', context=context)
         return render(request, 'edit.html', context={"form": form})
     return render(request, 'edit.html', context={"form": EditForm()})
+
+
+def delete_lessons(request: HttpRequest) -> HttpResponse:
+    if request.method == 'GET':
+        checks = request.GET.getlist('checks[]')
+        for lesson_id in checks:
+            Lesson.objects.filter(id=int(lesson_id)).delete()
+        context: dict = {}
+        context.update(generate_conflicts_context())
+        context.update(generate_full_schedule_context())
+        return render(request, 'index.html', context=context)
+    return render(request, 'index.html') #???????????????????????????????????????????????????????????????????????????????????
+

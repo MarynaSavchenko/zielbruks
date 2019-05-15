@@ -61,3 +61,4 @@ class EditForm(forms.Form):
         if len(professor.strip().split()) != 2:
             self.add_error('professor', 'Pass name and surname (separated by space).')
         return self.cleaned_data
+
