@@ -59,7 +59,7 @@ class Auditorium(models.Model):
         if self._meta.concrete_model != other._meta.concrete_model:
             return False
         my_pk = self.pk
-        return my_pk == other.pk and self.number == other.number and self.color == other.color
+        return my_pk == other.pk and self.number == other.number
 
 
 class Group(models.Model):
@@ -75,7 +75,7 @@ class Group(models.Model):
         if self._meta.concrete_model != other._meta.concrete_model:
             return False
         my_pk = self.pk
-        return my_pk == other.pk and self.number == other.number and self.color == other.color
+        return my_pk == other.pk and self.number == other.number
 
 
 class Lesson(models.Model):

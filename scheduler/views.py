@@ -44,7 +44,7 @@ def upload(request: HttpRequest) -> HttpResponse:
                                   {'error': "Error: Extension not supported"})
                 added_lessons, incorrect, duplicate = imp.parse_data(data, ext)
                 data_html = data.style \
-                    .set_table_attributes('class="table table-striped table-hover table-bordered"') \
+                    .set_table_attributes('class="table table-striped table-hover table-bordered"')\
                     .apply(lambda x: [('background: lightcoral' if x.name in incorrect else
                                        ('background: lightblue' if x.name in duplicate else ''))
                                       for i in x], axis=1) \
@@ -206,7 +206,7 @@ def edit(request: HttpRequest, lesson_id) -> HttpResponse:
             db_conflicts()
             context = get_full_context_with_date(form.cleaned_data['start_time'])
             current_conflicts = list(context['conflicts'])
-            print("was ",len(past_conflicts))
+            print("was ", len(past_conflicts))
             print("is ", len(current_conflicts))
             new_conflicts, removed_conflicts = conflicts_diff(past_conflicts, current_conflicts)
             print("--NEW--")
@@ -249,7 +249,7 @@ def create(request: HttpRequest) -> HttpResponse:
             db_conflicts()
             context = get_full_context_with_date(form.cleaned_data['start_time'])
             current_conflicts = list(context['conflicts'])
-            print("was ",len(past_conflicts))
+            print("was ", len(past_conflicts))
             print("is ", len(current_conflicts))
             new_conflicts, removed_conflicts = conflicts_diff(past_conflicts,
                                                               current_conflicts)
