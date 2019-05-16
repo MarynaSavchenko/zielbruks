@@ -11,7 +11,8 @@ from scheduler.models import Lesson, Professor, Auditorium, Group, Conflict
 def are_overlapping(lesson1: Lesson, lesson2: Lesson) -> bool:
     """
     Check if one lesson started or ended during other
-    :param lesson1, lesson2: Lesson object retrieved from database
+    :param lesson1: Lesson object retrieved from database
+    :param lesson2: Lesson object retrieved from database
     :return: bool if lessons are conflicting
     """
     if lesson1.start_time <= lesson2.start_time < lesson1.end_time:
@@ -23,14 +24,14 @@ def are_overlapping(lesson1: Lesson, lesson2: Lesson) -> bool:
     return False
 
 
-def check_lesson(index: int, lesson_list: List[Lesson]) -> List[Tuple[str, Lesson, Lesson, object]]:
+def check_lesson(index: int, lesson_list: List[Lesson]) -> List[Tuple[str, Lesson, Lesson, int]]:
     """
     This function searches db for other lessons sharing the same professor, auditorium and group
     And then checks if they are conflicting with each other using are_overlapping
     :param index: index of Lesson for which we are checking possible conflicts
     :param lesson_list: lessons list
     :return: List of tuples holding information about conflict.
-             Tuple[str, Lesson1, Lesson2, object]
+             Tuple[str, Lesson1, Lesson2, int]
              str helps to differentiate which conflict it is
              Lesson1 and Lesson2 are Lesson that are currently in conflict
              int is Model object id responsible for conflict (Professor,Auditorium,Group)
@@ -72,9 +73,14 @@ def db_conflicts():
             new_conflict.save()
 
 
-def conflicts_diff(past_conflicts: List[Conflict], current_conflicts: List[Conflict]):
+def conflicts_diff(past_conflicts: List[Conflict], current_conflicts: List[Conflict]) \
+        -> Tuple[List[Conflict], List[Conflict]]:
+    """
+    :param past_conflicts: list of conflicts before change
+    :param current_conflicts: list of conflicts after change
+    :return:
+    """
     removed_conflicts: List[Conflict] = []
-    added_conflicts: List[Conflict] = []
     current_conflicts_copy = copy.deepcopy(current_conflicts)
     for conflict in past_conflicts:
         perfect_match = False
@@ -84,6 +90,4 @@ def conflicts_diff(past_conflicts: List[Conflict], current_conflicts: List[Confl
                 current_conflicts_copy.remove(conflict2)
         if not perfect_match:
             removed_conflicts.append(conflict)
-    for cur_conflict in current_conflicts_copy:
-        added_conflicts.append(cur_conflict)
-    return added_conflicts, removed_conflicts
+    return current_conflicts_copy, removed_conflicts

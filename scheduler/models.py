@@ -105,9 +105,10 @@ class Lesson(models.Model):
         if self._meta.concrete_model != other._meta.concrete_model:
             return False
         my_pk = self.pk
-        if my_pk == other.pk and self.name == other.name and self.start_time == other.start_time and \
-                self.end_time == other.end_time:
-            if self.professor == other.professor and self.auditorium == other.auditorium and self.group == other.group:
+        if my_pk == other.pk and self.name == other.name and self.start_time == other.start_time \
+                and self.end_time == other.end_time:
+            if self.professor == other.professor and self.auditorium == other.auditorium \
+                    and self.group == other.group:
                 return True
         return False
 
@@ -149,8 +150,8 @@ class Conflict(models.Model):
     object_id = models.IntegerField()
 
     def __str__(self):
-        return str(self.first_lesson) + " and " + str(self.second_lesson) + " " + self.conflict_type + " " + str(
-            self.object_id)
+        return str(self.first_lesson) + " and " + str(self.second_lesson) + " " \
+               + self.conflict_type + " " + str(self.object_id)
 
     def __eq__(self, other):
         if not isinstance(other, models.Model):
@@ -158,8 +159,10 @@ class Conflict(models.Model):
         if self._meta.concrete_model != other._meta.concrete_model:
             return False
         if self.conflict_type == other.conflict_type and self.object_id == other.object_id:
-            if self.first_lesson == other.first_lesson and self.second_lesson == other.second_lesson:
+            if self.first_lesson == other.first_lesson \
+                    and self.second_lesson == other.second_lesson:
                 return True
-            if self.first_lesson == other.second_lesson and self.second_lesson == other.first_lesson:
+            if self.first_lesson == other.second_lesson \
+                    and self.second_lesson == other.first_lesson:
                 return True
         return False
