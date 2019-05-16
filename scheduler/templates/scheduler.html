@@ -42,6 +42,7 @@
             var dp = new DayPilot.Calendar("dp");
             dp.startDate = "{{ start_date }}";
             dp.viewType = "Days";
+            dp.headerDateFormat = "dddd, dd.MM.yyyy";
             dp.days = 2;
             dp.businessBeginsHour = 7;
             dp.events.list = [];
@@ -50,7 +51,8 @@
                     start: new DayPilot.Date("{{ e.0 }}"),
                     end: new DayPilot.Date("{{ e.1 }}"),
                     id: {{ e.8 }},
-                    text: "{{ e.2 }},\
+                    text: "{{ e.9 }}\
+                        {{ e.2 }},\
                         group: {{ e.3 }},\
                         place: {{ e.4 }},\
                         professor: {{ e.5 }}",

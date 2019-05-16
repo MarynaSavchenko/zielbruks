@@ -10,6 +10,7 @@ from django.urls import reverse
 from xlrd import XLRDError
 
 import scheduler.import_handlers as imp
+from scheduler import models
 from scheduler.calendar_util import get_start_date, generate_conflicts_context, \
     generate_full_schedule_context, get_full_context_with_date
 from scheduler.conflicts_checker import db_conflicts, conflicts_diff
@@ -79,10 +80,11 @@ def show_rooms_schedule(request: HttpRequest) -> HttpResponse:
                                         Group.objects.filter(id=q.group_id)[:1].get().number,
                                         room_number,
                                         (q.professor.name + " " + q.professor.surname),
-                                        Auditorium.objects.filter(id=q.auditorium_id)[:1]
-                                        .get().color,
-                                        Group.objects.filter(id=q.group_id)[:1].get().color,
-                                        q.id)
+                                        q.auditorium_color,
+                                        q.group_color,
+                                        q.id,
+                                        q.start_time.strftime("%H:%M") + "-"
+                                        + q.end_time.strftime("%H:%M"))
                                        for q in auditorium_lessons_query]
             context = {
                 'form': form,
@@ -112,10 +114,11 @@ def show_professors_schedule(request: HttpRequest) -> HttpResponse:
                                         Auditorium.objects.filter(id=q.auditorium_id)[:1]
                                         .get().number,
                                         (q.professor.name + " " + q.professor.surname),
-                                        Auditorium.objects.filter(id=q.auditorium_id)[:1]
-                                        .get().color,
-                                        Group.objects.filter(id=q.group_id)[:1].get().color,
-                                        q.id)
+                                        q.auditorium_color,
+                                        q.group_color,
+                                        q.id,
+                                        q.start_time.strftime("%H:%M") + "-"
+                                        + q.end_time.strftime("%H:%M"))
                                        for q in professors_lessons_query]
             context = {
                 'form': form,
@@ -145,9 +148,11 @@ def show_groups_schedule(request: HttpRequest) -> HttpResponse:
                                     group,
                                     Auditorium.objects.filter(id=q.auditorium_id)[:1].get().number,
                                     (q.professor.name + " " + q.professor.surname),
-                                    Auditorium.objects.filter(id=q.auditorium_id)[:1].get().color,
-                                    Group.objects.filter(id=q.group_id)[:1].get().color,
-                                    q.id)
+                                    q.auditorium_color,
+                                    q.group_color,
+                                    q.id,
+                                    q.start_time.strftime("%H:%M") + "-"
+                                    + q.end_time.strftime("%H:%M"))
                                    for q in groups_lessons_query]
             context = {
                 'form': form,
