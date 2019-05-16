@@ -1,6 +1,7 @@
 {% extends 'conflicts_list.html' %}
 
-{% block edit_conflicts %}
+{% block mass_conflict_edition %}
+
     <style>
         input[name="checks[]"]{
             display: inline;
@@ -15,19 +16,35 @@
      }
     }
 
-    function edit_lessons(source){
+    function mass_edit_lessons(command){
+        if(confirm('Are you sure you want to ' + command + ' selected lessons?')){
+            if(command == 'delete'){
+                document.form.action="{% url 'delete_lessons' %}";
+                document.form.method='POST';
+            } else {
+                document.form.action="{% url 'edit_lessons' %}";
+                document.form.method='POST';
+            }
 
-    }
-
-    function delete_lessons(){
-        if(confirm('Are you sure you want to delete selected lessons?')){
-            document.form.action="{% url 'delete_lessons' %}"
             document.form.submit()
         }
     }
     </script>
-
     <input type="checkbox" onClick="toggle(this)" />
-    <button type="button" class="edit_lessons btn btn-primary" onClick="edit_lessons(this)">Edit</button>
-    <input type="button" class="delete_lessons btn btn-primary" onClick="delete_lessons()" value="Delete"/>
+    <button type="button" class="edit_lessons btn btn-primary" onClick="mass_edit_lessons('edit')">Edit</button>
+    <input type="button" class="delete_lessons btn btn-primary" onClick="mass_edit_lessons('delete')" value="Delete"/>
+{% endblock mass_conflict_edition %}
+
+{% block edit_conflicts %}
+    <tr>
+        <td></td>
+        <td></td>
+        {% for field in form %}
+            <td>{{ field }}
+            {% for error in field.errors %}
+                    <p class="help-block">{{ error }}</p>
+            {% endfor %}
+            </td>
+        {% endfor %}
+    </tr>
 {% endblock edit_conflicts %}

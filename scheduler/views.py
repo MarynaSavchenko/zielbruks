@@ -14,7 +14,7 @@ from scheduler.calendar_util import get_start_date, generate_conflicts_context, 
     generate_full_schedule_context, get_full_context_with_date
 from scheduler.model_util import get_professor, get_auditorium, get_group
 from scheduler.models import Auditorium, Lesson, Group
-from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm, EditForm
+from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm, EditForm, MassEditForm
 
 
 def index(request: HttpRequest) -> HttpResponse:
@@ -22,6 +22,8 @@ def index(request: HttpRequest) -> HttpResponse:
     context: dict = {}
     context.update(generate_conflicts_context())
     context.update(generate_full_schedule_context())
+    form = MassEditForm()
+    context.update({'form': form})
     return render(request, 'index.html', context)
 
 
@@ -227,13 +229,49 @@ def create(request: HttpRequest) -> HttpResponse:
 
 
 def delete_lessons(request: HttpRequest) -> HttpResponse:
-    if request.method == 'GET':
-        checks = request.GET.getlist('checks[]')
+    if request.method == 'POST':
+        checks = request.POST.getlist('checks[]')
         for lesson_id in checks:
             Lesson.objects.filter(id=int(lesson_id)).delete()
+    return index(request)
+
+def edit_lessons(request: HttpRequest) -> HttpResponse:
+    if request.method == 'POST':
+        form = MassEditForm(request.POST)
+        if form.is_valid():
+            professor = None
+            auditorium = None
+            group = None
+            start = None
+            end = None
+            if form.cleaned_data['professor']:
+                professor = form.cleaned_data['professor'].strip().split()
+                professor = get_professor(professor[0], professor[1])
+            if form.cleaned_data['auditorium']:
+                auditorium = get_auditorium(form.cleaned_data['auditorium'])
+            if form.cleaned_data['group']:
+                group = get_group(form.cleaned_data['group'])
+            if form.cleaned_data['start_time']:
+                start = form.cleaned_data['start_time']
+            if form.cleaned_data['end_time']:
+                end = form.cleaned_data['end_time']
+            checks = request.POST.getlist('checks[]')
+            for lesson_id in checks:
+                lesson = Lesson.objects.filter(id=lesson_id)
+                if professor is not None:
+                    lesson.update(professor=professor)
+                if auditorium is not None:
+                    lesson.update(auditorium=auditorium)
+                if group is not None:
+                    lesson.update(group=group)
+                if start is not None:
+                    lesson.update(start_time=start)
+                if end is not None:
+                    lesson.update(end_time=end)
+            return index(request)
         context: dict = {}
         context.update(generate_conflicts_context())
         context.update(generate_full_schedule_context())
+        context.update({'form': form})
         return render(request, 'index.html', context=context)
-    return render(request, 'index.html') #???????????????????????????????????????????????????????????????????????????????????
-
+    return index(request)
