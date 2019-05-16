@@ -11,9 +11,11 @@
                     {% if email %}
                         <p><b>Enter email:</b>
                             {% if email == 'Noemail' %}
-                                <input type="email" name="email" size="35">
+                                <input type="email" name="email" size="35"
+                                       pattern="[a-z0-9A-Z._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,4}$">
                             {% else %}
-                                <input type="email" size="35" name="email" value="{{ email }}">
+                                <input type="email" size="35" name="email"
+                                       pattern="[a-z0-9A-Z._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,4}$" value="{{ email }}">
                             {% endif %}
                         </p>
                         <input type="submit" name="save" value="Save"/>
@@ -22,6 +24,7 @@
             </div>
         </form>
     </div>
+
 
     <div class="container">
         <div class="basic">

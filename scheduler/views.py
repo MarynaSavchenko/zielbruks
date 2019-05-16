@@ -231,6 +231,4 @@ def professors(request: HttpRequest) -> HttpResponse:
                 context = {'professors': professors_list, 'form': SelectProfessorForm()}
         else:
             return HttpResponse("AN ERROR OCCURRED")
-
-
     return render(request, "professors.html", context)
