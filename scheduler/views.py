@@ -186,6 +186,9 @@ def edit(request: HttpRequest, lesson_id) -> HttpResponse:
         form = EditForm(request.POST)
         if form.is_valid():
             past_conflicts = list(Conflict.objects.all())
+            if is_ajax(request):
+                return render(request, 'edit.html', context={"form": form})
+
             lesson = Lesson.objects.get(id=form.cleaned_data['id'])
             lesson.name = form.cleaned_data['name']
             professor = form.cleaned_data['professor'].strip().split()
@@ -251,3 +254,7 @@ def create(request: HttpRequest) -> HttpResponse:
             return render(request, 'index.html', context=context)
         return render(request, 'edit.html', context={"form": form})
     return render(request, 'edit.html', context={"form": EditForm()})
+
+
+def is_ajax(request: HttpRequest) -> HttpResponse:
+    return request.META.get('HTTP_X_REQUESTED_WITH', '').lower() == 'xmlhttprequest'
