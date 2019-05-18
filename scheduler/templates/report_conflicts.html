@@ -1,0 +1,33 @@
+<div class="container">
+
+
+    {% if removed_conflicts_flag %}
+    {% for conflict in removed_conflicts %}
+    <div class="alert alert-success">
+        <p>Removed conflict of: {{ conflict.conflict_type }}, {{ conflict.first_lesson.name }},
+            {{ conflict.first_lesson.professor }}, {{ conflict.first_lesson.auditorium }},
+            {{ conflict.first_lesson.group }}, {{ conflict.first_lesson.start_time }},
+            {{ conflict.first_lesson.end_time }}</p>
+        <p> and {{ conflict.second_lesson.name }}, {{ conflict.second_lesson.professor }},
+            {{ conflict.second_lesson.auditorium }}, {{ conflict.second_lesson.group }},
+            {{ conflict.second_lesson.start_time }}, {{ conflict.second_lesson.end_time }}</p>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    {% if new_conflicts_flag %}
+    <p style="...">
+        {% for conflict in new_conflicts %}
+        <div class="alert alert-danger">
+    <p>New conflict: {{ conflict.conflict_type }}, {{ conflict.first_lesson.name }},
+    {{ conflict.first_lesson.professor }},{{ conflict.first_lesson.auditorium }},
+    {{ conflict.first_lesson.group }},{{ conflict.first_lesson.start_time }},
+    {{ conflict.first_lesson.end_time }}</p>
+    <p> and {{ conflict.second_lesson.name }}, {{ conflict.second_lesson.professor }},
+        {{ conflict.second_lesson.auditorium }}, {{ conflict.second_lesson.group }},
+        {{ conflict.second_lesson.start_time }}, {{ conflict.second_lesson.end_time }}</p>
+</div>
+{% endfor %}
+</p>
+{% endif %}
+</div>
