@@ -3,7 +3,7 @@ import datetime
 
 from django.db.models import QuerySet
 
-from scheduler import conflicts_checker
+from scheduler import conflicts_checker, models
 from scheduler.models import Lesson, Auditorium, Group
 
 
@@ -27,9 +27,10 @@ def generate_full_schedule_context():
                      Group.objects.filter(id=q.group_id)[:1].get().number,
                      Auditorium.objects.filter(id=q.auditorium_id)[:1].get().number,
                      (q.professor.name + " " + q.professor.surname),
-                     Auditorium.objects.filter(id=q.auditorium_id)[:1].get().color,
-                     Group.objects.filter(id=q.group_id)[:1].get().color,
-                     q.id)
+                     q.auditorium_color,
+                     q.group_color,
+                     q.id,
+                     q.start_time.strftime("%H:%M") + "-" + q.end_time.strftime("%H:%M"))
                     for q in lessons_query]
     context = {
         'events': lessons_list,
@@ -52,4 +53,13 @@ def generate_conflicts_context():
         'conflicts_color': color,
         'conflicts_flag': bool(conflicts_list)
     }
+    return context
+
+
+def get_full_context_with_date(start_time):
+    """Returns full context dict and """
+    context: dict = {}
+    context.update(generate_conflicts_context())
+    context.update(generate_full_schedule_context())
+    context['start_date'] = start_time.isoformat(timespec='seconds')
     return context
