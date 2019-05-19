@@ -18,7 +18,20 @@
                                        pattern="[a-z0-9A-Z._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,4}$" value="{{ email }}">
                             {% endif %}
                         </p>
-                        <input type="submit" name="save" value="Save"/>
+                        <input type="submit" name="save" id="saveButton" value="Save"/>
+                        <script>
+                            var input = document.getElementsByName("email");
+                            var i;
+                            for (i = 0; i < input.length; i++) {
+                                input[i].addEventListener("keyup", function (event) {
+                                    if (event.keyCode === 13) {
+                                        event.preventDefault();
+                                        document.getElementById("saveButton").click();
+                                    }
+                                })
+                            }
+                            ;
+                        </script>
                     {% endif %}
                 </div>
             </div>
