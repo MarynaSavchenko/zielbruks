@@ -63,6 +63,7 @@ class EditForm(forms.Form):
         return self.cleaned_data
 
 class MassEditForm(forms.Form):
+    """ form to mass edit lessons"""
     lesson_name = forms.CharField(max_length=100, widget=forms.TextInput(
         attrs={'size': '30', 'class': 'inputText'}), required=False)
     professor = forms.CharField(max_length=100, required=False)
@@ -70,9 +71,11 @@ class MassEditForm(forms.Form):
         attrs={'size': '5'}), required=False)
     group = forms.IntegerField(min_value=1, max_value=9999, required=False)
     start_time = forms.SplitDateTimeField(widget=SplitDateTimeWidget(date_attrs={'type': 'date'},
-                                                                     time_attrs={'type': 'time'}), required=False)
+                                                                     time_attrs={'type': 'time'}),
+                                          required=False)
     end_time = forms.SplitDateTimeField(widget=SplitDateTimeWidget(date_attrs={'type': 'date'},
-                                                                   time_attrs={'type': 'time'}), required=False)
+                                                                   time_attrs={'type': 'time'}),
+                                        required=False)
 
     def clean(self):
         start = self.cleaned_data['start_time']

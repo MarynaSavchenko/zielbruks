@@ -14,7 +14,8 @@ from scheduler.calendar_util import get_start_date, generate_conflicts_context, 
     generate_full_schedule_context, get_full_context_with_date
 from scheduler.model_util import get_professor, get_auditorium, get_group
 from scheduler.models import Auditorium, Lesson, Group
-from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm, EditForm, MassEditForm
+from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm, \
+    EditForm, MassEditForm
 
 
 def index(request: HttpRequest) -> HttpResponse:
@@ -229,13 +230,16 @@ def create(request: HttpRequest) -> HttpResponse:
 
 
 def delete_lessons(request: HttpRequest) -> HttpResponse:
+    """Logic for mass delete of conflicts"""
     if request.method == 'POST':
         checks = request.POST.getlist('checks[]')
         for lesson_id in checks:
             Lesson.objects.filter(id=int(lesson_id)).delete()
     return index(request)
 
+
 def edit_lessons(request: HttpRequest) -> HttpResponse:
+    """Logic for mass edit of conflicts"""
     if request.method == 'POST':
         form = MassEditForm(request.POST)
         if form.is_valid():
