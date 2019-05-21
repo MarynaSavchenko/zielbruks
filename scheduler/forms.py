@@ -78,15 +78,19 @@ class MassEditForm(forms.Form):
                                         required=False)
 
     def clean(self):
-        start = self.cleaned_data['start_time']
-        end = self.cleaned_data['end_time']
         professor = self.cleaned_data['professor']
-        if end and start:
-            if end < start:
-                self.add_error('end_time', 'End date before start date.')
-            if end == start:
-                self.add_error('end_time', 'End date equals start date.')
         if professor:
             if len(professor.strip().split()) != 2:
                 self.add_error('professor', 'Pass name and surname (separated by space).')
+
+        start = self.cleaned_data.get('start_time', 0)
+        end = self.cleaned_data.get('end_time', 0)
+
+        if end != 0 and start != 0:
+            if end and start:
+                if end < start:
+                    self.add_error('end_time', 'End date before start date.')
+                if end == start:
+                    self.add_error('end_time', 'End date equals start date.')
+
         return self.cleaned_data
