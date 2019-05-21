@@ -248,11 +248,14 @@ def edit_lessons(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         form = MassEditForm(request.POST)
         if form.is_valid():
+            name = None
             professor = None
             auditorium = None
             group = None
             start = None
             end = None
+            if form.cleaned_data['lesson_name']:
+                name = form.cleaned_data['lesson_name']
             if form.cleaned_data['professor']:
                 professor = form.cleaned_data['professor'].strip().split()
                 professor = get_professor(professor[0], professor[1])
@@ -267,6 +270,8 @@ def edit_lessons(request: HttpRequest) -> HttpResponse:
             checks = request.POST.getlist('checks[]')
             for lesson_id in checks:
                 lesson = Lesson.objects.filter(id=lesson_id)
+                if name is not None:
+                    lesson.update(name=name)
                 if professor is not None:
                     lesson.update(professor=professor)
                 if auditorium is not None:
