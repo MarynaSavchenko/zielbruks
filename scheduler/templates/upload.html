@@ -48,12 +48,18 @@
                 {% csrf_token %}
                 Select a file:
                 <br>
-                <input type="file" name="myfile" class="btn btn-default" style="float: left;">
+                <input type="file" name="uploaded_file" class="btn btn-default" style="float: left;">
                 <input type="submit" value="Upload" class="btn btn-default" disabled/>
             </form>
             <br>
 
-            <p style="color:red;font-size:large">{{ error }}</p>
+            {% if error %}
+            <p style="...">
+                <div class="alert alert-danger">
+                    {{ error }}
+                </div>
+            </p>
+            {% endif %}
 
             {% if loaded_data %}
                 <p>

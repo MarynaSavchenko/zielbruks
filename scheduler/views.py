@@ -6,6 +6,7 @@ from django.core.files.storage import default_storage
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, redirect
 from django.template import loader
+from django.utils.datastructures import MultiValueDictKeyError
 from xlrd import XLRDError
 
 import scheduler.import_handlers as imp
@@ -26,16 +27,18 @@ def index(_request: HttpRequest) -> HttpResponse:
 
 def upload(request: HttpRequest) -> HttpResponse:
     """Render file upload page"""
-    if request.method == 'POST' and request.FILES['myfile']:
-        myfile = request.FILES['myfile']
-        if isinstance(myfile.name, str):
-            filename = default_storage.save(myfile.name, myfile)
-            try:
-                ext = os.path.splitext(myfile.name)[1]
+    filename = None
+    try:
+        if request.method == 'POST' and request.FILES['uploaded_file']:
+            file = request.FILES['uploaded_file']
+            if isinstance(file.name, str):
+                filename = default_storage.save(file.name, file)
+
+                ext = os.path.splitext(file.name)[1]
                 if ext == '.csv':
-                    data = pd.read_csv(myfile.name)
+                    data = pd.read_csv(file.name)
                 elif ext == '.xlsx':
-                    data = pd.read_excel(myfile.name)
+                    data = pd.read_excel(file.name)
                 else:
                     return render(request, "upload.html",
                                   {'error': "Error: Extension not supported"})
@@ -48,10 +51,13 @@ def upload(request: HttpRequest) -> HttpResponse:
                     .render()
                 return render(request, "upload.html",
                               {'loaded_data': data_html, 'added': added_lessons})
-            except XLRDError:
-                return render(request, "upload.html", {'error': "Error: Corrupted file"})
-            finally:
-                default_storage.delete(filename)
+    except MultiValueDictKeyError:
+        return render(request, "upload.html", {'error': "Error: You didn't select a file"})
+    except XLRDError:
+        return render(request, "upload.html", {'error': "Error: Corrupted file"})
+    finally:
+        if filename:
+            default_storage.delete(filename)
     return render(request, "upload.html")
 
 
