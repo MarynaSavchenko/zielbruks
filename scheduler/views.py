@@ -247,9 +247,10 @@ def create(request: HttpRequest) -> HttpResponse:
             current_conflicts = list(context['conflicts'])
             new_conflicts, removed_conflicts = conflicts_diff(past_conflicts,
                                                               current_conflicts)
+            print(new_conflicts)
             context['removed_conflicts'] = removed_conflicts
-            context['removed_conflicts_flag'] = bool(removed_conflicts)
-            context['new_conflicts_flag'] = bool(new_conflicts)
+            context['removed_conflicts_number'] = len(removed_conflicts)
+            context['new_conflicts_number'] = len(new_conflicts)
             context['new_conflicts'] = new_conflicts
             return render(request, 'index.html', context=context)
         return render(request, 'edit.html', context={"form": form})
