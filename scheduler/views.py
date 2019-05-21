@@ -1,9 +1,10 @@
 """Views gathering point"""
 import os.path
+from datetime import datetime
 
 import pandas as pd
 from django.core.files.storage import default_storage
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.template import loader
 from django.utils.datastructures import MultiValueDictKeyError
@@ -22,6 +23,13 @@ def index(_request: HttpRequest) -> HttpResponse:
     context: dict = {}
     context.update(generate_conflicts_context())
     context.update(generate_full_schedule_context())
+    return render(_request, 'index.html', context)
+
+
+def index_specific(_request: HttpRequest, date: str) -> HttpResponse:
+    """Render the main page with given date"""
+    date_as_datetime = datetime.strptime(date, '%Y-%m-%d')
+    context = get_full_context_with_date(date_as_datetime)
     return render(_request, 'index.html', context)
 
 
@@ -201,8 +209,9 @@ def edit(request: HttpRequest, lesson_id) -> HttpResponse:
             lesson.start_time = form.cleaned_data['start_time']
             lesson.end_time = form.cleaned_data['end_time']
             lesson.save()
-            context = get_full_context_with_date(form.cleaned_data['start_time'])
-            return render(request, 'index.html', context=context)
+            date = form.cleaned_data['start_time']
+            date_as_string = str(date.year) + "-" + str(date.month) + "-" + str(date.day)
+            return redirect('/calendar/' + date_as_string)
         return render(request, 'edit.html', context={"form": form})
     lesson = Lesson.objects.get(id=lesson_id)
     form = EditForm(
@@ -229,13 +238,20 @@ def create(request: HttpRequest) -> HttpResponse:
                 start_time=form.cleaned_data['start_time'],
                 end_time=form.cleaned_data['end_time']
             )
-            context = get_full_context_with_date(form.cleaned_data['start_time'])
-            return render(request, 'index.html', context=context)
+            date = form.cleaned_data['start_time']
+            date_as_string = str(date.year) + "-" + str(date.month) + "-" + str(date.day)
+            return redirect('/calendar/' + date_as_string)
         return render(request, 'edit.html', context={"form": form})
     return render(request, 'edit.html', context={"form": EditForm()})
 
 
 def remove(request: HttpRequest, lesson_id) -> HttpResponse:
-    """Remove event and render index page"""
-    Lesson.objects.get(id=lesson_id).delete()
-    return redirect("index")
+    """Remove event and redirect to index page"""
+    try:
+        lesson = Lesson.objects.get(id=lesson_id)
+        date = lesson.start_time
+        date_as_string = str(date.year) + "-" + str(date.month) + "-" + str(date.day)
+        lesson.delete()
+        return redirect('/calendar/' + date_as_string)
+    except Lesson.DoesNotExist:
+        return redirect('/calendar/')
