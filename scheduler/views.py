@@ -3,14 +3,12 @@ import os.path
 
 import pandas as pd
 from django.core.files.storage import default_storage
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import render, redirect
 from django.template import loader
-from django.urls import reverse
 from xlrd import XLRDError
 
 import scheduler.import_handlers as imp
-from scheduler import models
 from scheduler.calendar_util import get_start_date, generate_conflicts_context, \
     generate_full_schedule_context, get_full_context_with_date
 from scheduler.model_util import get_professor, get_auditorium, get_group
@@ -46,7 +44,7 @@ def upload(request: HttpRequest) -> HttpResponse:
                     .set_table_attributes('class="table table-striped table-hover table-bordered"')\
                     .apply(lambda x: [('background: lightcoral' if x.name in incorrect else
                                        ('background: lightblue' if x.name in duplicate else ''))
-                                      for i in x], axis=1) \
+                                      for _ in x], axis=1) \
                     .render()
                 return render(request, "upload.html",
                               {'loaded_data': data_html, 'added': added_lessons})
@@ -229,3 +227,9 @@ def create(request: HttpRequest) -> HttpResponse:
             return render(request, 'index.html', context=context)
         return render(request, 'edit.html', context={"form": form})
     return render(request, 'edit.html', context={"form": EditForm()})
+
+
+def remove(request: HttpRequest, lesson_id) -> HttpResponse:
+    """Remove event and render index page"""
+    Lesson.objects.get(id=lesson_id).delete()
+    return redirect("index")
