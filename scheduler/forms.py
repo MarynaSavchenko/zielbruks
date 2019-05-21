@@ -51,15 +51,18 @@ class EditForm(forms.Form):
     professor = forms.CharField(max_length=100)
 
     def clean(self):
-        start = self.cleaned_data['start_time']
-        end = self.cleaned_data['end_time']
-        professor = self.cleaned_data['professor']
-        if end < start:
-            self.add_error('end_time', 'End date before start date.')
-        if end == start:
-            self.add_error('end_time', 'End date equals start date.')
-        if len(professor.strip().split()) != 2:
-            self.add_error('professor', 'Pass name and surname (separated by space).')
+        try:
+            start = self.cleaned_data['start_time']
+            end = self.cleaned_data['end_time']
+            professor = self.cleaned_data['professor']
+            if end < start:
+                self.add_error('end_time', 'End date before start date.')
+            if end == start:
+                self.add_error('end_time', 'End date equals start date.')
+            if len(professor.strip().split()) != 2:
+                self.add_error('professor', 'Pass name and surname (separated by space).')
+        except KeyError:
+            raise forms.ValidationError("Fill all the fields!")
         return self.cleaned_data
 
 class MassEditForm(forms.Form):
