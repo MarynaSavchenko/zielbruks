@@ -9,10 +9,10 @@ https://docs.djangoproject.com/en/2.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.1/ref/settings/
 """
-
 import os
 from typing import List
 from celery.schedules import crontab
+from scheduler.task import notify_professors
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
@@ -124,6 +124,8 @@ TEMPLATE_DIRS = (
 
 STATIC_URL = '/static/'
 
+STATIC_ROOT = '/var/www/example.com/static'
+
 EMAIL_HOST = 'localhost'
 
 EMAIL_PORT = 1025
@@ -131,8 +133,6 @@ EMAIL_PORT = 1025
 EMAIL_USE_TLS = False
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    
-from scheduler.task import notify_professors
 
 CELERY_BROKER_URL = 'redis://localhost:6379'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379'
