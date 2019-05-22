@@ -9,6 +9,7 @@ from django.template import loader
 from django.urls import reverse
 from xlrd import XLRDError
 
+
 import scheduler.import_handlers as imp
 from scheduler.calendar_util import get_start_date, generate_conflicts_context, \
     generate_full_schedule_context, get_full_context_with_date

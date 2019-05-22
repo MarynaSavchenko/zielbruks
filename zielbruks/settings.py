@@ -12,10 +12,9 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 
 import os
 from typing import List
-
+from celery.schedules import crontab
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
@@ -37,6 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'bootstrap_modal_forms',
+    'djcelery_email',
     'scheduler',
 ]
 
@@ -118,6 +118,30 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
 )
 
+TEMPLATE_DIRS = (
+    os.path.join(BASE_DIR, 'templates'),
+)
+
 STATIC_URL = '/static/'
 
-STATIC_ROOT = '/var/www/example.com/static/'
+EMAIL_HOST = 'localhost'
+
+EMAIL_PORT = 1025
+
+EMAIL_USE_TLS = False
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    
+from scheduler.task import notify_professors
+
+CELERY_BROKER_URL = 'redis://localhost:6379'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_BEAT_SCHEDULE = {
+    'notify_professors': {
+        'task': 'notify_professors',
+        'schedule': crontab(minute='0', hour='0', day_of_week='monday')
+    }
+}
