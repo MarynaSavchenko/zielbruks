@@ -33,7 +33,11 @@
 </style>
 
 <div class="container">
-    <button class="collapsible">Conflicts removed ({{ removed_conflicts_number }})</button>
+    {% if removed_conflicts_number %}
+        <button class="collapsible">Conflicts removed ({{ removed_conflicts_number }})</button>
+    {% else %}
+         <button class="collapsible">Conflicts removed (0)</button>
+    {% endif %}
      <div class="content removed-conflicts">
         {% for conflict in removed_conflicts %}
             <p><u>Removed conflict of:</u></br><b> {{ conflict.conflict_type }} </b>, {{ conflict.first_lesson.name }},
@@ -45,7 +49,11 @@
         {% endfor %}
     </div>
 
-    <button class="collapsible">Conflicts added ({{ new_conflicts_number }})</button>
+    {% if new_conflicts_number %}
+        <button class="collapsible">Conflicts added ({{ new_conflicts_number }})</button>
+    {% else %}
+         <button class="collapsible">Conflicts added (0)</button>
+    {% endif %}
     <div class="content added-conflicts">
         {% for conflict in new_conflicts %}
             <p><u>New conflict:</u></br><b> {{ conflict.conflict_type }} </b>, {{ conflict.first_lesson.name }},
