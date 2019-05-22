@@ -238,8 +238,7 @@ def delete_lessons(request: HttpRequest) -> HttpResponse:
     """Logic for mass delete of conflicts"""
     if request.method == 'POST':
         checks = request.POST.getlist('checks[]')
-        for lesson_id in checks:
-            Lesson.objects.filter(id=int(lesson_id)).delete()
+        Lesson.objects.filter(id__in=checks).delete()
     return index(request)
 
 
