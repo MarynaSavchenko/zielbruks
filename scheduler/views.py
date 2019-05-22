@@ -248,40 +248,25 @@ def edit_lessons(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         form = MassEditForm(request.POST)
         if form.is_valid():
-            name = None
-            professor = None
-            auditorium = None
-            group = None
-            start = None
-            end = None
+            changes = {}
             if form.cleaned_data['lesson_name']:
-                name = form.cleaned_data['lesson_name']
+                changes['name'] = form.cleaned_data['lesson_name']
             if form.cleaned_data['professor']:
                 professor = form.cleaned_data['professor'].strip().split()
-                professor = get_professor(professor[0], professor[1])
+                changes['professor'] = get_professor(professor[0], professor[1])
             if form.cleaned_data['auditorium']:
-                auditorium = get_auditorium(form.cleaned_data['auditorium'])
+                changes['auditorium'] = get_auditorium(form.cleaned_data['auditorium'])
             if form.cleaned_data['group']:
-                group = get_group(form.cleaned_data['group'])
+                changes['group'] = get_group(form.cleaned_data['group'])
             if form.cleaned_data['start_time']:
-                start = form.cleaned_data['start_time']
+                changes['start_time'] = form.cleaned_data['start_time']
             if form.cleaned_data['end_time']:
-                end = form.cleaned_data['end_time']
+                changes['end_time'] = form.cleaned_data['end_time']
+
             checks = request.POST.getlist('checks[]')
-            for lesson_id in checks:
-                lesson = Lesson.objects.filter(id=lesson_id)
-                if name is not None:
-                    lesson.update(name=name)
-                if professor is not None:
-                    lesson.update(professor=professor)
-                if auditorium is not None:
-                    lesson.update(auditorium=auditorium)
-                if group is not None:
-                    lesson.update(group=group)
-                if start is not None:
-                    lesson.update(start_time=start)
-                if end is not None:
-                    lesson.update(end_time=end)
+            if changes != {}:
+                lessons = Lesson.objects.filter(id__in=checks)
+                lessons.update(**changes)
             return index(request)
         context: dict = {}
         context.update(generate_conflicts_context())
