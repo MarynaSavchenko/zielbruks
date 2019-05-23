@@ -31,6 +31,7 @@
             </thead>
             <tbody>
             {% block edit_conflicts %} {% endblock edit_conflicts %}
+            {% for conflict in conflicts%}
             {% get_color_tag forloop.counter0 as conflicts_color %}
             <tr class={{conflicts_color}}>
                 <td><input type="checkbox" name="checks[]" value={{ Lesson1.id }}/></td>

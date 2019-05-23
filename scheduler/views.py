@@ -215,6 +215,7 @@ def edit(request: HttpRequest, lesson_id) -> HttpResponse:
             context = get_full_context_with_date(form.cleaned_data['start_time'])
             current_conflicts = list(context['conflicts'])
             new_conflicts, removed_conflicts = conflicts_diff(past_conflicts, current_conflicts)
+            print(new_conflicts, removed_conflicts)
             return render(request, 'index.html', context=context)
         return render(request, 'edit.html', context={"form": form})
     lesson = Lesson.objects.get(id=lesson_id)
@@ -249,8 +250,8 @@ def create(request: HttpRequest) -> HttpResponse:
             db_conflicts()
             context = get_full_context_with_date(form.cleaned_data['start_time'])
             current_conflicts = list(context['conflicts'])
-            new_conflicts, removed_conflicts = conflicts_diff(past_conflicts,
-                                                              current_conflicts)
+            new_conflicts, removed_conflicts = conflicts_diff(past_conflicts, current_conflicts)
+            print(new_conflicts, removed_conflicts)
             return render(request, 'index.html', context=context)
         return render(request, 'edit.html', context={"form": form})
     return render(request, 'edit.html', context={"form": EditForm()})
