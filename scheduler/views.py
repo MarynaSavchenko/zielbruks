@@ -10,8 +10,8 @@ from xlrd import XLRDError
 
 import scheduler.import_handlers as imp
 from scheduler.calendar_util import get_start_date, generate_conflicts_context, \
-    generate_full_schedule_context, get_full_context_with_date, get_group_colors, \
-    get_auditoriums_colors
+    generate_full_schedule_context, generate_full_index_context_with_date, get_group_colors, \
+    get_auditoriums_colors, generate_full_index_context
 from scheduler.conflicts_checker import db_conflicts, conflicts_diff
 from scheduler.model_util import get_professor, get_auditorium, get_group
 from scheduler.models import Auditorium, Lesson, Group, Conflict
@@ -21,11 +21,7 @@ from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm, \
 
 def index(request: HttpRequest) -> HttpResponse:
     """Render the main page"""
-    context: dict = {}
-    context.update(generate_conflicts_context())
-    context.update(generate_full_schedule_context())
-    form = MassEditForm()
-    context.update({'form': form})
+    context = generate_full_index_context()
     return render(request, 'index.html', context)
 
 
@@ -212,7 +208,7 @@ def edit(request: HttpRequest, lesson_id) -> HttpResponse:
             lesson.end_time = form.cleaned_data['end_time']
             lesson.save()
             db_conflicts()
-            context = get_full_context_with_date(form.cleaned_data['start_time'])
+            context = generate_full_index_context_with_date(form.cleaned_data['start_time'])
             current_conflicts = list(context['conflicts'])
             new_conflicts, removed_conflicts = conflicts_diff(past_conflicts, current_conflicts)
             print(new_conflicts, removed_conflicts)
@@ -248,7 +244,7 @@ def create(request: HttpRequest) -> HttpResponse:
                 end_time=form.cleaned_data['end_time']
             )
             db_conflicts()
-            context = get_full_context_with_date(form.cleaned_data['start_time'])
+            context = generate_full_index_context_with_date(form.cleaned_data['start_time'])
             current_conflicts = list(context['conflicts'])
             new_conflicts, removed_conflicts = conflicts_diff(past_conflicts, current_conflicts)
             print(new_conflicts, removed_conflicts)
@@ -266,7 +262,10 @@ def delete_lessons(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         checks = request.POST.getlist('checks[]')
         Lesson.objects.filter(id__in=checks).delete()
-    return index(request)
+        context = generate_full_index_context()
+        return render(request, 'index.html', context=context)
+    context = generate_full_index_context()
+    return render(request, 'index.html', context=context)
 
 
 def edit_lessons(request: HttpRequest) -> HttpResponse:
@@ -275,6 +274,7 @@ def edit_lessons(request: HttpRequest) -> HttpResponse:
         form = MassEditForm(request.POST)
         if form.is_valid():
             changes = {}
+            past_conflicts = list(Conflict.objects.all())
             if form.cleaned_data['lesson_name']:
                 changes['name'] = form.cleaned_data['lesson_name']
             if form.cleaned_data['professor']:
@@ -293,7 +293,13 @@ def edit_lessons(request: HttpRequest) -> HttpResponse:
             if changes != {}:
                 lessons = Lesson.objects.filter(id__in=checks)
                 lessons.update(**changes)
-            return index(request)
+
+            db_conflicts()
+            context_after_edit = generate_full_index_context()
+            current_conflicts = list(context_after_edit['conflicts'])
+            new_conflicts, removed_conflicts = conflicts_diff(past_conflicts, current_conflicts)
+            print(new_conflicts, removed_conflicts)
+            return render(request, 'index.html', context=context_after_edit)
         context: dict = {}
         context.update(generate_conflicts_context())
         context.update(generate_full_schedule_context())

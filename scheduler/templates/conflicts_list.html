@@ -34,7 +34,7 @@
             {% for conflict in conflicts%}
             {% get_color_tag forloop.counter0 as conflicts_color %}
             <tr class={{conflicts_color}}>
-                <td><input type="checkbox" name="checks[]" value={{ Lesson1.id }}/></td>
+                <td><input type="checkbox" name="checks[]" value={{ conflict.first_lesson.id }}></td>
                 <td> {{ conflict.conflict_type }}</td>
                 <td> {{ conflict.first_lesson.name }}</td>
                 <td> {{ conflict.first_lesson.professor }}</td>
@@ -44,7 +44,7 @@
                 <td> {{ conflict.first_lesson.end_time }}</td>
             </tr>
             <tr class={{conflicts_color}}>
-                <td><input type="checkbox" name="checks[]" value={{ Lesson2.id }}/></td>
+                <td><input type="checkbox" name="checks[]" value={{ conflict.second_lesson.id }}></td>
                 <td></td>
                 <td> {{ conflict.second_lesson.name }}</td>
                 <td> {{ conflict.second_lesson.professor }}</td>

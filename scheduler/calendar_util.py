@@ -4,6 +4,7 @@ import datetime
 from django.db.models import QuerySet
 
 from scheduler import conflicts_checker, models
+from scheduler.forms import MassEditForm
 from scheduler.models import Lesson, Auditorium, Group, Conflict, color_from_id
 
 
@@ -58,12 +59,24 @@ def generate_conflicts_context():
     return context
 
 
-def get_full_context_with_date(start_time):
-    """Returns full context dict and """
+def generate_full_index_context_with_date(start_time):
+    """Returns full context dict with date for index page"""
     context: dict = {}
     context.update(generate_conflicts_context())
     context.update(generate_full_schedule_context())
     context['start_date'] = start_time.isoformat(timespec='seconds')
+    form = MassEditForm()
+    context.update({'form': form})
+    return context
+
+
+def generate_full_index_context():
+    """Returns full context dict for index page"""
+    context: dict = {}
+    context.update(generate_conflicts_context())
+    context.update(generate_full_schedule_context())
+    form = MassEditForm()
+    context.update({'form': form})
     return context
 
 
