@@ -14,15 +14,18 @@ from scheduler.calendar_util import get_start_date, generate_conflicts_context, 
     get_auditoriums_colors
 from scheduler.model_util import get_professor, get_auditorium, get_group
 from scheduler.models import Auditorium, Lesson, Group
-from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm, EditForm
+from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm, \
+    EditForm, MassEditForm
 
 
-def index(_request: HttpRequest) -> HttpResponse:
+def index(request: HttpRequest) -> HttpResponse:
     """Render the main page"""
     context: dict = {}
     context.update(generate_conflicts_context())
     context.update(generate_full_schedule_context())
-    return render(_request, 'index.html', context)
+    form = MassEditForm()
+    context.update({'form': form})
+    return render(request, 'index.html', context)
 
 
 def upload(request: HttpRequest) -> HttpResponse:
@@ -234,3 +237,44 @@ def create(request: HttpRequest) -> HttpResponse:
             return render(request, 'index.html', context=context)
         return render(request, 'edit.html', context={"form": form})
     return render(request, 'edit.html', context={"form": EditForm()})
+
+
+def delete_lessons(request: HttpRequest) -> HttpResponse:
+    """Logic for mass delete of conflicts"""
+    if request.method == 'POST':
+        checks = request.POST.getlist('checks[]')
+        Lesson.objects.filter(id__in=checks).delete()
+    return index(request)
+
+
+def edit_lessons(request: HttpRequest) -> HttpResponse:
+    """Logic for mass edit of conflicts"""
+    if request.method == 'POST':
+        form = MassEditForm(request.POST)
+        if form.is_valid():
+            changes = {}
+            if form.cleaned_data['lesson_name']:
+                changes['name'] = form.cleaned_data['lesson_name']
+            if form.cleaned_data['professor']:
+                professor = form.cleaned_data['professor'].strip().split()
+                changes['professor'] = get_professor(professor[0], professor[1])
+            if form.cleaned_data['auditorium']:
+                changes['auditorium'] = get_auditorium(form.cleaned_data['auditorium'])
+            if form.cleaned_data['group']:
+                changes['group'] = get_group(form.cleaned_data['group'])
+            if form.cleaned_data['start_time']:
+                changes['start_time'] = form.cleaned_data['start_time']
+            if form.cleaned_data['end_time']:
+                changes['end_time'] = form.cleaned_data['end_time']
+
+            checks = request.POST.getlist('checks[]')
+            if changes != {}:
+                lessons = Lesson.objects.filter(id__in=checks)
+                lessons.update(**changes)
+            return index(request)
+        context: dict = {}
+        context.update(generate_conflicts_context())
+        context.update(generate_full_schedule_context())
+        context.update({'form': form})
+        return render(request, 'index.html', context=context)
+    return index(request)
