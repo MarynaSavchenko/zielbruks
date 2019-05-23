@@ -12,7 +12,8 @@ from xlrd import XLRDError
 
 import scheduler.import_handlers as imp
 from scheduler.calendar_util import get_start_date, generate_conflicts_context, \
-    generate_full_schedule_context, get_full_context_with_date
+    generate_full_schedule_context, get_full_context_with_date, get_group_colors, \
+    get_auditoriums_colors
 from scheduler.model_util import get_professor, get_auditorium, get_group
 from scheduler.models import Auditorium, Lesson, Group
 from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm, EditForm
@@ -103,7 +104,9 @@ def show_rooms_schedule(request: HttpRequest) -> HttpResponse:
                 'type': 'auditorium',
                 'name': room_number,
                 'events': auditorium_lessons_list,
-                'start_date': get_start_date(auditorium_lessons_query)
+                'start_date': get_start_date(auditorium_lessons_query),
+                "groups_colors": get_group_colors(),
+                "auditoriums_colors": get_auditoriums_colors(),
             }
             return render(request, "room_schedule.html", context)
         return HttpResponse("AN ERROR OCCURRED")
@@ -138,7 +141,9 @@ def show_professors_schedule(request: HttpRequest) -> HttpResponse:
                 'type': 'professor',
                 'name': professor,
                 'lessons': Lesson.objects.all(),
-                'start_date': get_start_date(professors_lessons_query)
+                'start_date': get_start_date(professors_lessons_query),
+                "groups_colors": get_group_colors(),
+                "auditoriums_colors": get_auditoriums_colors(),
             }
             return render(request, "professors_scheduler.html", context)
         return HttpResponse("AN ERROR OCCURRED")
@@ -172,7 +177,9 @@ def show_groups_schedule(request: HttpRequest) -> HttpResponse:
                 'type': 'group',
                 'name': group,
                 'lessons': Lesson.objects.all(),
-                'start_date': get_start_date(groups_lessons_query)
+                'start_date': get_start_date(groups_lessons_query),
+                "groups_colors": get_group_colors(),
+                "auditoriums_colors": get_auditoriums_colors(),
             }
             return render(request, "groups_scheduler.html", context)
         return HttpResponse("AN ERROR OCCURRED")
