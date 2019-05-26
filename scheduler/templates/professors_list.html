@@ -1,5 +1,5 @@
 <div class="container">
-    <div class="jumbotron" style="height: 150px">
+    <div class="jumbotron" style="height: 200px">
         <form method="POST">
             {% csrf_token %}
             <div id="wrapperDiv">
@@ -9,12 +9,13 @@
                 </div>
                 <div id="div2" style="padding:20px;float:left">
                     {% if email %}
+                        {{ inform }}
                         <p><b>Enter email:</b>
                             {% if email == 'Noemail' %}
                                 <input type="email" name="email" size="35"
                                        pattern="[a-z0-9A-Z._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,4}$">
                             {% else %}
-                                <input type="email" size="35" name="email"
+                                <input type="email" name="email" size="35"
                                        pattern="[a-z0-9A-Z._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,4}$" value="{{ email }}">
                             {% endif %}
                         </p>
@@ -23,7 +24,7 @@
                             var input = document.getElementsByName("email");
                             var i;
                             for (i = 0; i < input.length; i++) {
-                                input[i].addEventListener("keyup", function (event) {
+                                input[i].addEventListener("keypress", function (event) {
                                     if (event.keyCode === 13) {
                                         event.preventDefault();
                                         document.getElementById("saveButton").click();
@@ -66,7 +67,7 @@
                     {% endfor %}
                 </tr>
             {% else %}
-                <p align="center" style="font-size:30px">There are no professors.</p>
+                <p align="center" style="font-size:30px">There are no professors yet.</p>
             {% endif %}
             </table>
         </div>

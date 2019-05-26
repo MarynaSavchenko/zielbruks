@@ -249,9 +249,20 @@ def professors(request: HttpRequest) -> HttpResponse:
             if form.is_valid():
                 email = request.POST.get('email')
                 professor = form.cleaned_data['professor']
-                professor.email = email
-                professor.save()
-                context = {'professors': professors_list, 'form': SelectProfessorForm()}
+                try:
+                    professor_with_email = Professor.objects.get(email=email)
+                    if professor != professor_with_email:
+                        context = {'professors': professors_list, 'form': form, 'email': email,
+                                   'inform': "This email is already in use"}
+                    else:
+                        professor.email = email
+                        professor.save()
+                        context = {'professors': professors_list, 'form': SelectProfessorForm()}
+                except Professor.DoesNotExist:
+                    professor.email = email
+                    professor.save()
+                    context = {'professors': professors_list, 'form': SelectProfessorForm()}
+
         else:
             return HttpResponse("AN ERROR OCCURRED")
     return render(request, "professors.html", context)
