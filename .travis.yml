@@ -5,13 +5,6 @@ python:
 
 cache: pip
 
-addons:
-  ssh_known_hosts: $DEPLOYMENT_HOST
-
-before_install:
-  - openssl aes-256-cbc -K $encrypted_cc51b64530dc_key -iv $encrypted_cc51b64530dc_iv
-    -in deployment/deployment-push.enc -out deployment/deployment-push.key -d
-
 install:
   - pip install -r requirements.txt
 
