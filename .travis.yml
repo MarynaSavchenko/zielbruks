@@ -20,3 +20,9 @@ jobs:
       script: "pylint scheduler zielbruks"
     - name: "type analysis"
       script: "mypy scheduler zielbruks"
+
+deploy:
+  - provider: script
+    script: ./deployment/deploy.sh staging
+    on:
+      branch: feature/ZIEL-39
