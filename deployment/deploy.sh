@@ -11,4 +11,4 @@ openssl aes-256-cbc -K $encrypted_cc51b64530dc_key -iv $encrypted_cc51b64530dc_i
 chmod 600 "$PRIVKEY"
 
 
-ssh -i deployment/deployment-push.key $DEPLOYMENT_HOST $1
+ssh -o IdentitiesOnly=yes -i deployment/deployment-push.key $DEPLOYMENT_USER@$DEPLOYMENT_HOST $1
