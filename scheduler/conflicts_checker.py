@@ -38,9 +38,9 @@ def check_lesson(index: int, lesson_list: List[Lesson]) -> List[Tuple[str, Lesso
     """
     conflicts: List[Tuple[str, Lesson, Lesson, int]] = []
     lesson = lesson_list[index]
-    for ind in range(index, len(lesson_list)):
+    for ind in range(index + 1, len(lesson_list)):
         lesson_2 = lesson_list[ind]
-        if lesson != lesson_2 and are_overlapping(lesson, lesson_2):
+        if are_overlapping(lesson, lesson_2):
             if lesson_2.professor == lesson.professor:
                 new_conflict = ("PROFESSOR", lesson, lesson_2, lesson.professor.id)
                 conflicts.append(new_conflict)

@@ -6,43 +6,57 @@
 
     {% load custom_filters %}
 
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th> ConflictType</th>
-            <th> Name</th>
-            <th> Professor</th>
-            <th> Auditorium</th>
-            <th> Group</th>
-            <th> Start time</th>
-            <th> End time</th>
-        </tr>
-        </thead>
-        <tr>
-            {% for conflict in conflicts %}
-            {% get_color_tag forloop.counter0 as conflicts_color %}
-        <tr class={{conflicts_color}}>
-            <td> {{ conflict.conflict_type }}</td>
-            <td> {{ conflict.first_lesson.name }}</td>
-            <td> {{ conflict.first_lesson.professor }}</td>
-            <td> {{ conflict.first_lesson.auditorium }}</td>
-            <td> {{ conflict.first_lesson.group }}</td>
-            <td> {{ conflict.first_lesson.start_time }}</td>
-            <td> {{ conflict.first_lesson.end_time }}</td>
-        </tr>
-        <tr class={{conflicts_color}}>
-            <td></td>
-            <td> {{ conflict.second_lesson.name }}</td>
-            <td> {{ conflict.second_lesson.professor }}</td>
-            <td> {{ conflict.second_lesson.auditorium }}</td>
-            <td> {{ conflict.second_lesson.group }}</td>
-            <td> {{ conflict.second_lesson.start_time }}</td>
-            <td> {{ conflict.second_lesson.end_time }}</td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    <style>
+        input[name="checks[]"] {
+            display: none;
+        }
+    </style>
 
+    <form name="form">
+        {% csrf_token %}
+        {% block mass_conflict_edition %}{% endblock mass_conflict_edition %}
+
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th></th>
+                <th> ConflictType</th>
+                <th> Name</th>
+                <th> Professor</th>
+                <th> Auditorium</th>
+                <th> Group</th>
+                <th> Start time</th>
+                <th> End time</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% block edit_conflicts %} {% endblock edit_conflicts %}
+            {% for conflict in conflicts%}
+            {% get_color_tag forloop.counter0 as conflicts_color %}
+            <tr class={{conflicts_color}}>
+                <td><input type="checkbox" name="checks[]" value={{ conflict.first_lesson.id }}></td>
+                <td> {{ conflict.conflict_type }}</td>
+                <td> {{ conflict.first_lesson.name }}</td>
+                <td> {{ conflict.first_lesson.professor }}</td>
+                <td> {{ conflict.first_lesson.auditorium }}</td>
+                <td> {{ conflict.first_lesson.group }}</td>
+                <td> {{ conflict.first_lesson.start_time }}</td>
+                <td> {{ conflict.first_lesson.end_time }}</td>
+            </tr>
+            <tr class={{conflicts_color}}>
+                <td><input type="checkbox" name="checks[]" value={{ conflict.second_lesson.id }}></td>
+                <td></td>
+                <td> {{ conflict.second_lesson.name }}</td>
+                <td> {{ conflict.second_lesson.professor }}</td>
+                <td> {{ conflict.second_lesson.auditorium }}</td>
+                <td> {{ conflict.second_lesson.group }}</td>
+                <td> {{ conflict.second_lesson.start_time }}</td>
+                <td> {{ conflict.second_lesson.end_time }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </form>
 
     {% else %}
     <p style="...">

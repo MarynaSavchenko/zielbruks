@@ -3,20 +3,20 @@ import os.path
 
 import pandas as pd
 from django.core.files.storage import default_storage
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.template import loader
-from django.urls import reverse
 from xlrd import XLRDError
 
 import scheduler.import_handlers as imp
-from scheduler import models
 from scheduler.calendar_util import get_start_date, generate_conflicts_context, \
-    generate_full_schedule_context, get_full_context_with_date
+    generate_full_schedule_context, generate_full_index_context_with_date, get_group_colors, \
+    get_auditoriums_colors, generate_full_index_context
 from scheduler.conflicts_checker import db_conflicts, conflicts_diff
 from scheduler.model_util import get_professor, get_auditorium, get_group
 from scheduler.models import Auditorium, Lesson, Group, Conflict
-from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm, EditForm
+from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm, \
+    EditForm, MassEditForm
 
 
 def index(_request: HttpRequest) -> HttpResponse:
@@ -24,6 +24,7 @@ def index(_request: HttpRequest) -> HttpResponse:
     context: dict = {}
     context.update(generate_conflicts_context())
     context.update(generate_full_schedule_context())
+    context['form'] = MassEditForm()
     return render(_request, 'index.html', context)
 
 
@@ -93,7 +94,9 @@ def show_rooms_schedule(request: HttpRequest) -> HttpResponse:
                 'type': 'auditorium',
                 'name': room_number,
                 'events': auditorium_lessons_list,
-                'start_date': get_start_date(auditorium_lessons_query)
+                'start_date': get_start_date(auditorium_lessons_query),
+                "groups_colors": get_group_colors(),
+                "auditoriums_colors": get_auditoriums_colors(),
             }
             return render(request, "room_schedule.html", context)
         return HttpResponse("AN ERROR OCCURRED")
@@ -128,7 +131,9 @@ def show_professors_schedule(request: HttpRequest) -> HttpResponse:
                 'type': 'professor',
                 'name': professor,
                 'lessons': Lesson.objects.all(),
-                'start_date': get_start_date(professors_lessons_query)
+                'start_date': get_start_date(professors_lessons_query),
+                "groups_colors": get_group_colors(),
+                "auditoriums_colors": get_auditoriums_colors(),
             }
             return render(request, "professors_scheduler.html", context)
         return HttpResponse("AN ERROR OCCURRED")
@@ -162,7 +167,9 @@ def show_groups_schedule(request: HttpRequest) -> HttpResponse:
                 'type': 'group',
                 'name': group,
                 'lessons': Lesson.objects.all(),
-                'start_date': get_start_date(groups_lessons_query)
+                'start_date': get_start_date(groups_lessons_query),
+                "groups_colors": get_group_colors(),
+                "auditoriums_colors": get_auditoriums_colors(),
             }
             return render(request, "groups_scheduler.html", context)
         return HttpResponse("AN ERROR OCCURRED")
@@ -204,7 +211,7 @@ def edit(request: HttpRequest, lesson_id) -> HttpResponse:
             lesson.end_time = form.cleaned_data['end_time']
             lesson.save()
             db_conflicts()
-            context = get_full_context_with_date(form.cleaned_data['start_time'])
+            context = generate_full_index_context_with_date(form.cleaned_data['start_time'])
             current_conflicts = list(context['conflicts'])
             new_conflicts, removed_conflicts = conflicts_diff(past_conflicts, current_conflicts)
             context['removed_conflicts'] = removed_conflicts
@@ -243,11 +250,9 @@ def create(request: HttpRequest) -> HttpResponse:
                 end_time=form.cleaned_data['end_time']
             )
             db_conflicts()
-            context = get_full_context_with_date(form.cleaned_data['start_time'])
+            context = generate_full_index_context_with_date(form.cleaned_data['start_time'])
             current_conflicts = list(context['conflicts'])
-            new_conflicts, removed_conflicts = conflicts_diff(past_conflicts,
-                                                              current_conflicts)
-            print(new_conflicts)
+            new_conflicts, removed_conflicts = conflicts_diff(past_conflicts, current_conflicts)
             context['removed_conflicts'] = removed_conflicts
             context['removed_conflicts_number'] = len(removed_conflicts)
             context['new_conflicts_number'] = len(new_conflicts)
@@ -259,3 +264,57 @@ def create(request: HttpRequest) -> HttpResponse:
 
 def is_ajax(request: HttpRequest) -> bool:
     return request.META.get('HTTP_X_REQUESTED_WITH', '').lower() == 'xmlhttprequest'
+
+
+def delete_lessons(request: HttpRequest) -> HttpResponse:
+    """Logic for mass delete of conflicts"""
+    if request.method == 'POST':
+        checks = request.POST.getlist('checks[]')
+        Lesson.objects.filter(id__in=checks).delete()
+        context = generate_full_index_context()
+        return render(request, 'index.html', context=context)
+    context = generate_full_index_context()
+    return render(request, 'index.html', context=context)
+
+
+def edit_lessons(request: HttpRequest) -> HttpResponse:
+    """Logic for mass edit of conflicts"""
+    if request.method == 'POST':
+        form = MassEditForm(request.POST)
+        if form.is_valid():
+            changes = {}
+            past_conflicts = list(Conflict.objects.all())
+            if form.cleaned_data['lesson_name']:
+                changes['name'] = form.cleaned_data['lesson_name']
+            if form.cleaned_data['professor']:
+                professor = form.cleaned_data['professor'].strip().split()
+                changes['professor'] = get_professor(professor[0], professor[1])
+            if form.cleaned_data['auditorium']:
+                changes['auditorium'] = get_auditorium(form.cleaned_data['auditorium'])
+            if form.cleaned_data['group']:
+                changes['group'] = get_group(form.cleaned_data['group'])
+            if form.cleaned_data['start_time']:
+                changes['start_time'] = form.cleaned_data['start_time']
+            if form.cleaned_data['end_time']:
+                changes['end_time'] = form.cleaned_data['end_time']
+
+            checks = request.POST.getlist('checks[]')
+            if changes != {}:
+                lessons = Lesson.objects.filter(id__in=checks)
+                lessons.update(**changes)
+
+            db_conflicts()
+            context_after_edit = generate_full_index_context()
+            current_conflicts = list(context_after_edit['conflicts'])
+            new_conflicts, removed_conflicts = conflicts_diff(past_conflicts, current_conflicts)
+            context_after_edit['removed_conflicts'] = removed_conflicts
+            context_after_edit['removed_conflicts_number'] = len(removed_conflicts)
+            context_after_edit['new_conflicts_number'] = len(new_conflicts)
+            context_after_edit['new_conflicts'] = new_conflicts
+            return render(request, 'index.html', context=context_after_edit)
+        context: dict = {}
+        context.update(generate_conflicts_context())
+        context.update(generate_full_schedule_context())
+        context.update({'form': form})
+        return render(request, 'index.html', context=context)
+    return index(request)
