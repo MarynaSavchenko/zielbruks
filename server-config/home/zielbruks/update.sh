@@ -9,6 +9,8 @@ if [[ "$SITE" != "staging" ]] && [[ "$SITE" != "production" ]]; then
 	exit 2
 fi
 
+echo "Updating the $SITE environment"
+
 PIP="$HOME/venv/$SITE/bin/pip"
 PYTHON="$HOME/venv/$SITE/bin/python"
 CODEDIR="$HOME/$SITE/zielbruks"
