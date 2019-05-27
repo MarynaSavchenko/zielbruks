@@ -34,6 +34,8 @@ def index_specific(_request: HttpRequest, date: str) -> HttpResponse:
     """Render the main page with given date"""
     date_as_datetime = datetime.strptime(date, '%Y-%m-%d')
     context = get_full_context_with_date(date_as_datetime)
+    form = MassEditForm()
+    context.update({'form': form})
     return render(_request, 'index.html', context)
 
 
