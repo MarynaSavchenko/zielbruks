@@ -29,4 +29,8 @@ jobs:
         - provider: script
           script: ./deployment/deploy.sh staging
           on:
-            branch: feature/ZIEL-39
+            branch: develop
+        - provider: script
+          script: ./deployment/deploy.sh production
+          on:
+            branch: master
