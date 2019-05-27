@@ -19,10 +19,13 @@ from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm, \
     EditForm, MassEditForm
 
 
-def index(request: HttpRequest) -> HttpResponse:
+def index(_request: HttpRequest) -> HttpResponse:
     """Render the main page"""
-    context = generate_full_index_context()
-    return render(request, 'index.html', context)
+    context: dict = {}
+    context.update(generate_conflicts_context())
+    context.update(generate_full_schedule_context())
+    context['form'] = MassEditForm()
+    return render(_request, 'index.html', context)
 
 
 def upload(request: HttpRequest) -> HttpResponse:
@@ -211,7 +214,10 @@ def edit(request: HttpRequest, lesson_id) -> HttpResponse:
             context = generate_full_index_context_with_date(form.cleaned_data['start_time'])
             current_conflicts = list(context['conflicts'])
             new_conflicts, removed_conflicts = conflicts_diff(past_conflicts, current_conflicts)
-            print(new_conflicts, removed_conflicts)
+            context['removed_conflicts'] = removed_conflicts
+            context['removed_conflicts_number'] = len(removed_conflicts)
+            context['new_conflicts_number'] = len(new_conflicts)
+            context['new_conflicts'] = new_conflicts
             return render(request, 'index.html', context=context)
         return render(request, 'edit.html', context={"form": form})
     lesson = Lesson.objects.get(id=lesson_id)
@@ -247,7 +253,10 @@ def create(request: HttpRequest) -> HttpResponse:
             context = generate_full_index_context_with_date(form.cleaned_data['start_time'])
             current_conflicts = list(context['conflicts'])
             new_conflicts, removed_conflicts = conflicts_diff(past_conflicts, current_conflicts)
-            print(new_conflicts, removed_conflicts)
+            context['removed_conflicts'] = removed_conflicts
+            context['removed_conflicts_number'] = len(removed_conflicts)
+            context['new_conflicts_number'] = len(new_conflicts)
+            context['new_conflicts'] = new_conflicts
             return render(request, 'index.html', context=context)
         return render(request, 'edit.html', context={"form": form})
     return render(request, 'edit.html', context={"form": EditForm()})
@@ -298,7 +307,10 @@ def edit_lessons(request: HttpRequest) -> HttpResponse:
             context_after_edit = generate_full_index_context()
             current_conflicts = list(context_after_edit['conflicts'])
             new_conflicts, removed_conflicts = conflicts_diff(past_conflicts, current_conflicts)
-            print(new_conflicts, removed_conflicts)
+            context_after_edit['removed_conflicts'] = removed_conflicts
+            context_after_edit['removed_conflicts_number'] = len(removed_conflicts)
+            context_after_edit['new_conflicts_number'] = len(new_conflicts)
+            context_after_edit['new_conflicts'] = new_conflicts
             return render(request, 'index.html', context=context_after_edit)
         context: dict = {}
         context.update(generate_conflicts_context())
