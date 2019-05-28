@@ -209,6 +209,8 @@ def log_in(request: HttpRequest) -> HttpResponse:
 
 def edit(request: HttpRequest, lesson_id) -> HttpResponse:
     """Render the edit page"""
+    if request.META.get('HTTP_REFERER') is None:
+        return redirect('/calendar/')
     if request.method == 'POST':
         form = EditForm(request.POST)
         if form.is_valid():
@@ -235,6 +237,8 @@ def edit(request: HttpRequest, lesson_id) -> HttpResponse:
 
 def create(request: HttpRequest) -> HttpResponse:
     """Render the edit page"""
+    if request.META.get('HTTP_REFERER') is None:
+        return redirect('/calendar/')
     if request.method == 'POST':
         form = EditForm(request.POST)
         if form.is_valid():
@@ -260,11 +264,13 @@ def create(request: HttpRequest) -> HttpResponse:
 def remove(request: HttpRequest, lesson_id) -> HttpResponse:
     """Remove event and redirect to index page"""
     try:
-        lesson = Lesson.objects.get(id=lesson_id)
-        date = lesson.start_time
-        date_as_string = str(date.year) + "-" + str(date.month) + "-" + str(date.day)
-        lesson.delete()
-        return redirect('/calendar/' + date_as_string)
+        if request.method == 'POST':
+            lesson = Lesson.objects.get(id=lesson_id)
+            date = lesson.start_time
+            date_as_string = str(date.year) + "-" + str(date.month) + "-" + str(date.day)
+            lesson.delete()
+            return redirect('/calendar/' + date_as_string)
+        return redirect('/calendar/')
     except Lesson.DoesNotExist:
         return redirect('/calendar/')
 
