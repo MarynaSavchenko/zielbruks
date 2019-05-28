@@ -1,0 +1,15 @@
+server {
+    listen 80;
+    server_name zielbruks.tk 178.128.195.249;
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location /static/ {
+        root /home/zielbruks/production/zielbruks;
+    }
+
+    location / {
+        #include proxy_params;
+        include my_proxy_params;
+        proxy_pass http://unix:/run/gunicorn-production.sock;
+    }
+}
