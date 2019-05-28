@@ -237,6 +237,8 @@ def edit(request: HttpRequest, lesson_id) -> HttpResponse:
 
 def create(request: HttpRequest) -> HttpResponse:
     """Render the edit page"""
+    if request.META.get('HTTP_REFERER') is None:
+        return redirect('/calendar/')
     if request.method == 'POST':
         form = EditForm(request.POST)
         if form.is_valid():
