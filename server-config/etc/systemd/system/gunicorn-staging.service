@@ -1,0 +1,17 @@
+[Unit]
+Description=gunicorn-staging daemon
+Requires=gunicorn-staging.socket
+After=network.target
+
+[Service]
+User=zielbruks
+Group=zielbruks
+WorkingDirectory=/home/zielbruks/staging/zielbruks
+ExecStart=/home/zielbruks/venv/staging/bin/gunicorn \
+          --access-logfile - \
+          --workers 3 \
+          --bind unix:/run/gunicorn-staging.sock \
+          zielbruks.wsgi:application
+
+[Install]
+WantedBy=multi-user.target

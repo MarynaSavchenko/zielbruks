@@ -16,7 +16,7 @@ from scheduler.calendar_util import get_start_date, generate_conflicts_context, 
     get_auditoriums_colors, generate_full_index_context
 from scheduler.conflicts_checker import db_conflicts, conflicts_diff
 from scheduler.model_util import get_professor, get_auditorium, get_group
-from scheduler.models import Auditorium, Lesson, Group, Conflict
+from scheduler.models import Auditorium, Lesson, Group, Conflict, Professor
 from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm, \
     EditForm, MassEditForm
 
@@ -210,6 +210,8 @@ def log_in(request: HttpRequest) -> HttpResponse:
 
 def edit(request: HttpRequest, lesson_id) -> HttpResponse:
     """Render the edit page"""
+    if request.META.get('HTTP_REFERER') is None:
+        return redirect('/calendar/')
     if request.method == 'POST':
         form = EditForm(request.POST)
         if form.is_valid():
@@ -247,6 +249,8 @@ def edit(request: HttpRequest, lesson_id) -> HttpResponse:
 
 def create(request: HttpRequest) -> HttpResponse:
     """Render the create page"""
+    if request.META.get('HTTP_REFERER') is None:
+        return redirect('/calendar/')
     if request.method == 'POST':
         form = EditForm(request.POST)
         if form.is_valid():
@@ -282,11 +286,13 @@ def create(request: HttpRequest) -> HttpResponse:
 def remove(request: HttpRequest, lesson_id) -> HttpResponse:
     """Remove event and redirect to index page"""
     try:
-        lesson = Lesson.objects.get(id=lesson_id)
-        date = lesson.start_time
-        date_as_string = str(date.year) + "-" + str(date.month) + "-" + str(date.day)
-        lesson.delete()
-        return redirect('/calendar/' + date_as_string)
+        if request.method == 'POST':
+            lesson = Lesson.objects.get(id=lesson_id)
+            date = lesson.start_time
+            date_as_string = str(date.year) + "-" + str(date.month) + "-" + str(date.day)
+            lesson.delete()
+            return redirect('/calendar/' + date_as_string)
+        return redirect('/calendar/')
     except Lesson.DoesNotExist:
         return redirect('/calendar/')
 
@@ -347,3 +353,40 @@ def edit_lessons(request: HttpRequest) -> HttpResponse:
         context.update({'form': form})
         return render(request, 'index.html', context=context)
     return index(request)
+
+
+def professors(request: HttpRequest) -> HttpResponse:
+    """Render the professors page"""
+    professors_list = Professor.objects.all()
+    context = {'professors': professors_list, 'form': SelectProfessorForm()}
+    if request.method == 'POST':
+        if 'choose' in request.POST:
+            form = SelectProfessorForm(request.POST)
+            if form.is_valid():
+                professor = form.cleaned_data['professor']
+                email = professor.email
+                if not email:
+                    email = "Noemail"
+                context = {'professors': professors_list, 'form': form, 'email': email}
+        elif 'save' in request.POST:
+            form = SelectProfessorForm(request.POST)
+            if form.is_valid():
+                email = request.POST.get('email')
+                professor = form.cleaned_data['professor']
+                try:
+                    professor_with_email = Professor.objects.get(email=email)
+                    if professor != professor_with_email:
+                        context = {'professors': professors_list, 'form': form, 'email': email,
+                                   'inform': "This email is already in use"}
+                    else:
+                        professor.email = email
+                        professor.save()
+                        context = {'professors': professors_list, 'form': SelectProfessorForm()}
+                except Professor.DoesNotExist:
+                    professor.email = email
+                    professor.save()
+                    context = {'professors': professors_list, 'form': SelectProfessorForm()}
+
+        else:
+            return HttpResponse("AN ERROR OCCURRED")
+    return render(request, "professors.html", context)

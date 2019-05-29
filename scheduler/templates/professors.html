@@ -1,8 +1,4 @@
 {% extends 'base.html' %}
-{% block static %}
-    {% load static %}
-    <script src="{% static 'js/daypilot/daypilot-all.min.js' %}" type="text/javascript"></script>
-{% endblock static %}
 
 {% block navbar %}
         <ul class="nav navbar-nav">
@@ -10,16 +6,15 @@
             <li><a href="{% url 'upload' %}">Upload</a></li>
             <li><a href="{% url 'show_schedule' %}">Full calendar</a></li>
             <li><a href="{% url 'show_room_schedule' %}">Room's calendar</a></li>
-            <li class="active"><a href="{% url 'show_professors_schedule' %}">Professor's calendar</a></li>
+            <li><a href="{% url 'show_professors_schedule' %}">Professor's calendar</a></li>
             <li><a href="{% url 'show_groups_schedule' %}">Group's calendar</a></li>
             <li><a href="{% url 'conflicts' %}">Conflicts</a></li>
-            <li><a href="{% url 'professors' %}">Professors</a></li>
+            <li class="active"><a href="{% url 'professors' %}">Professors</a></li>
         </ul>
 {% endblock navbar %}
 
 {% block content %}
 <div class="basic">
-    {% include "filtered_schedule.html" %}
+    {% include "professors_list.html" %}
 </div>
 {% endblock content %}
-

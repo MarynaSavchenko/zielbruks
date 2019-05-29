@@ -1,0 +1,75 @@
+<div class="container">
+    <div class="jumbotron" style="height: 200px">
+        <form method="POST">
+            {% csrf_token %}
+            <div id="wrapperDiv">
+                <div id="div1" style="padding:20px;float:left">
+                    {{ form.as_p }}
+                    <input type="submit" name="choose" value="Choose"/>
+                </div>
+                <div id="div2" style="padding:20px;float:left">
+                    {% if email %}
+                        {{ inform }}
+                        <p><b>Enter email:</b>
+                            {% if email == 'Noemail' %}
+                                <input type="email" name="email" size="35"
+                                       pattern="[a-z0-9A-Z._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,4}$">
+                            {% else %}
+                                <input type="email" name="email" size="35"
+                                       pattern="[a-z0-9A-Z._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,4}$" value="{{ email }}">
+                            {% endif %}
+                        </p>
+                        <input type="submit" name="save" id="saveButton" value="Save"/>
+                        <script>
+                            var input = document.getElementsByName("email");
+                            var i;
+                            for (i = 0; i < input.length; i++) {
+                                input[i].addEventListener("keypress", function (event) {
+                                    if (event.keyCode === 13) {
+                                        event.preventDefault();
+                                        document.getElementById("saveButton").click();
+                                    }
+                                })
+                            }
+                            ;
+                        </script>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+    <div class="container">
+        <div class="basic">
+            {% if professors %}
+                <h2>Professors</h2>
+                <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th> Name</th>
+                    <th> Surname</th>
+                    <th> Email</th>
+                </tr>
+                </thead>
+                <tr>
+                    {% for professor in professors %}
+                        <tr>
+                            <td>{{ professor.name }}</td>
+                            <td>{{ professor.surname }}</td>
+                            <td>{% if not professor.email %}
+                                Email is not set.
+                            {% else %}
+                                {{ professor.email }}
+                            {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tr>
+            {% else %}
+                <p align="center" style="font-size:30px">There are no professors yet.</p>
+            {% endif %}
+            </table>
+        </div>
+    </div>
+</div>

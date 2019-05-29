@@ -25,7 +25,7 @@ SECRET_KEY = 'hmw*j+x*54t2bjud*(tdfl$no@m5w$d%k*gbzi3cf^usdq87wj'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTSL: List[str] = []
+ALLOWED_HOSTS: List[str] = ['localhost', '127.0.0.1']
 
 # Application definition
 

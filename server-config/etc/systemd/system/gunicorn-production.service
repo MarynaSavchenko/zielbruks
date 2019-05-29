@@ -1,0 +1,17 @@
+[Unit]
+Description=gunicorn daemon
+Requires=gunicorn-production.socket
+After=network.target
+
+[Service]
+User=zielbruks
+Group=zielbruks
+WorkingDirectory=/home/zielbruks/production/zielbruks
+ExecStart=/home/zielbruks/venv/production/bin/gunicorn \
+          --access-logfile - \
+          --workers 3 \
+          --bind unix:/run/gunicorn-production.sock \
+          zielbruks.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
