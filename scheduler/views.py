@@ -235,8 +235,6 @@ def edit(request: HttpRequest, lesson_id) -> HttpResponse:
             context['removed_conflicts_number'] = len(removed_conflicts)
             context['new_conflicts_number'] = len(new_conflicts)
             context['new_conflicts'] = new_conflicts
-            date = form.cleaned_data['start_time']
-            date_as_string = str(date.year) + "-" + str(date.month) + "-" + str(date.day)
             return render(request, 'index.html', context=context)
         return render(request, 'edit.html', context={"form": form})
     lesson = Lesson.objects.get(id=lesson_id)
