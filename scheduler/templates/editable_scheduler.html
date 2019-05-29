@@ -2,7 +2,7 @@
 
 {% block add_event %}
     <style type="text/css">
-        #edit_button {
+        #edit_button, #remove_button {
             display: none;
         }
 
@@ -16,6 +16,7 @@
     </div>
     <p align="right" id="p_with_buttons">
         <button class="edit btn btn-primary" type="button" name="button" id="edit_button">Edit event</button>
+        <button class="btn btn-primary" type="button" name="button" id="remove_button">Remove event</button>
         <button class="create btn btn-primary" type="button" name="button">Create event</button>
     </p>
     <script type="text/javascript">
@@ -27,19 +28,31 @@
 
 {% block edit_event %}
     dp.onEventClicked = function (args) {
-    document.getElementById("details").innerText = args.e.text();
+        document.getElementById("details").innerText = args.e.text();
 
-    var old_btn = document.getElementById('edit_button');
-    old_btn.parentNode.removeChild(old_btn);
+        var old_btn = document.getElementById('edit_button');
+        old_btn.parentNode.removeChild(old_btn);
 
-    var new_btn = document.createElement("button");
-    new_btn.setAttribute("id", "edit_button");
-    new_btn.setAttribute("class","edit btn btn-primary");
-    new_btn.innerHTML = "Edit event";
-    document.getElementById('p_with_buttons').appendChild(new_btn);
-    $('#edit_button').show();
-    $("#edit_button").modalForm({formURL: "{% url 'edit' lesson_id=123 %}".replace(/123/, args.e.id())});
+        var new_btn = document.createElement("button");
+        new_btn.setAttribute("id", "edit_button");
+        new_btn.setAttribute("class","edit btn btn-primary");
+        new_btn.innerHTML = "Edit event";
+        document.getElementById('p_with_buttons').appendChild(new_btn);
+        $('#edit_button').show();
+        $("#edit_button").modalForm({formURL: "{% url 'edit' lesson_id=123 %}".replace(/123/, args.e.id())});
 
+        var old_btn = document.getElementById('remove_button');
+        old_btn.parentNode.removeChild(old_btn);
+
+        var remove_btn = document.createElement("button");
+        remove_btn.setAttribute("id", "remove_button");
+        remove_btn.setAttribute("class","btn btn-danger");
+        remove_btn.innerHTML = "Remove event";
+        remove_btn.onclick = function(e) { if(!confirm('Do you want to remove this lesson?'))
+                                                e.preventDefault();
+                                           else location.href="{% url 'remove' lesson_id=123 %}".replace(/123/, args.e.id());}
+        document.getElementById('p_with_buttons').appendChild(remove_btn);
+        $('#remove_button').show();
     };
 {% endblock edit_event %}
 

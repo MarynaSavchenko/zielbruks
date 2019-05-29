@@ -1,11 +1,13 @@
 """Views gathering point"""
 import os.path
+from datetime import datetime
 
 import pandas as pd
 from django.core.files.storage import default_storage
-from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.shortcuts import render, redirect
 from django.template import loader
+from django.utils.datastructures import MultiValueDictKeyError
 from xlrd import XLRDError
 
 import scheduler.import_handlers as imp
@@ -19,27 +21,38 @@ from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm, \
     EditForm, MassEditForm
 
 
-def index(_request: HttpRequest) -> HttpResponse:
+def index(request: HttpRequest) -> HttpResponse:
     """Render the main page"""
     context: dict = {}
     context.update(generate_conflicts_context())
     context.update(generate_full_schedule_context())
     context['form'] = MassEditForm()
+    return render(request, 'index.html', context)
+
+
+def index_specific(_request: HttpRequest, date: str) -> HttpResponse:
+    """Render the main page with given date"""
+    date_as_datetime = datetime.strptime(date, '%Y-%m-%d')
+    context = generate_full_index_context_with_date(date_as_datetime)
+    form = MassEditForm()
+    context.update({'form': form})
     return render(_request, 'index.html', context)
 
 
 def upload(request: HttpRequest) -> HttpResponse:
     """Render file upload page"""
-    if request.method == 'POST' and request.FILES['myfile']:
-        myfile = request.FILES['myfile']
-        if isinstance(myfile.name, str):
-            filename = default_storage.save(myfile.name, myfile)
-            try:
-                ext = os.path.splitext(myfile.name)[1]
+    filename = None
+    try:
+        if request.method == 'POST' and request.FILES['uploaded_file']:
+            file = request.FILES['uploaded_file']
+            if isinstance(file.name, str):
+                filename = default_storage.save(file.name, file)
+
+                ext = os.path.splitext(file.name)[1]
                 if ext == '.csv':
-                    data = pd.read_csv(myfile.name)
+                    data = pd.read_csv(file.name)
                 elif ext == '.xlsx':
-                    data = pd.read_excel(myfile.name)
+                    data = pd.read_excel(file.name)
                 else:
                     return render(request, "upload.html",
                                   {'error': "Error: Extension not supported"})
@@ -48,15 +61,18 @@ def upload(request: HttpRequest) -> HttpResponse:
                     .set_table_attributes('class="table table-striped table-hover table-bordered"')\
                     .apply(lambda x: [('background: lightcoral' if x.name in incorrect else
                                        ('background: lightblue' if x.name in duplicate else ''))
-                                      for i in x], axis=1) \
+                                      for _ in x], axis=1) \
                     .render()
                 db_conflicts()
                 return render(request, "upload.html",
                               {'loaded_data': data_html, 'added': added_lessons})
-            except XLRDError:
-                return render(request, "upload.html", {'error': "Error: Corrupted file"})
-            finally:
-                default_storage.delete(filename)
+    except MultiValueDictKeyError:
+        return render(request, "upload.html", {'error': "Error: You didn't select a file"})
+    except XLRDError:
+        return render(request, "upload.html", {'error': "Error: Corrupted file"})
+    finally:
+        if filename:
+            default_storage.delete(filename)
     return render(request, "upload.html")
 
 
@@ -214,10 +230,13 @@ def edit(request: HttpRequest, lesson_id) -> HttpResponse:
             context = generate_full_index_context_with_date(form.cleaned_data['start_time'])
             current_conflicts = list(context['conflicts'])
             new_conflicts, removed_conflicts = conflicts_diff(past_conflicts, current_conflicts)
+            print(new_conflicts, removed_conflicts)
             context['removed_conflicts'] = removed_conflicts
             context['removed_conflicts_number'] = len(removed_conflicts)
             context['new_conflicts_number'] = len(new_conflicts)
             context['new_conflicts'] = new_conflicts
+            date = form.cleaned_data['start_time']
+            date_as_string = str(date.year) + "-" + str(date.month) + "-" + str(date.day)
             return render(request, 'index.html', context=context)
         return render(request, 'edit.html', context={"form": form})
     lesson = Lesson.objects.get(id=lesson_id)
@@ -260,6 +279,18 @@ def create(request: HttpRequest) -> HttpResponse:
             return render(request, 'index.html', context=context)
         return render(request, 'edit.html', context={"form": form})
     return render(request, 'edit.html', context={"form": EditForm()})
+
+
+def remove(request: HttpRequest, lesson_id) -> HttpResponse:
+    """Remove event and redirect to index page"""
+    try:
+        lesson = Lesson.objects.get(id=lesson_id)
+        date = lesson.start_time
+        date_as_string = str(date.year) + "-" + str(date.month) + "-" + str(date.day)
+        lesson.delete()
+        return redirect('/calendar/' + date_as_string)
+    except Lesson.DoesNotExist:
+        return redirect('/calendar/')
 
 
 def is_ajax(request: HttpRequest) -> bool:
