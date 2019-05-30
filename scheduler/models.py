@@ -14,7 +14,8 @@ palette = ["#be7349", "#7977ec", "#73e36e", "#dd50b4", "#59ac2e", "#ab70e1", "#b
            "#eb92a2", "#738c4e", "#ce5f46", "#a0b87a", "#c36c6a", "#969448", "#f29278",
            "#89834d", "#e2c988", "#a68347", "#dea573"]
 
-def color_from_id(numeric_id, shuffle = False):
+def color_from_id(numeric_id, shuffle=False):
+    """Selects color by entity id"""
     if shuffle:
         colors = palette[len(palette) // 2:] + palette[:len(palette) // 2]
     else:
