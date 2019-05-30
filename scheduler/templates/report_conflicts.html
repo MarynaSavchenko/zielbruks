@@ -40,9 +40,9 @@
     {% endif %}
      <div class="content removed-conflicts">
         {% for conflict in removed_conflicts %}
-            <p><u>Removed conflict of:</u></br>
+            <p><u>Removed conflict of:</u></br> <b> {{ conflict.conflict_type }} </b>,
                 {% if conflict.first_lesson %}
-                    <b> {{ conflict.conflict_type }} </b>, {{ conflict.first_lesson.name }},
+                    {{ conflict.first_lesson.name }},
                     {{ conflict.first_lesson.professor }}, {{ conflict.first_lesson.auditorium }},
                     {{ conflict.first_lesson.group }}, {{ conflict.first_lesson.start_time }},
                     {{ conflict.first_lesson.end_time }}

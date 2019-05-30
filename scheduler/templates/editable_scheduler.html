@@ -59,7 +59,7 @@
         remove_btn.setAttribute("type", "submit");
         remove_btn.setAttribute("style", "display: inline; float: right;");
         remove_btn.setAttribute("class", "btn btn-danger");
-        remove_btn.setAttribute("value", "Remove event");
+        remove_btn.setAttribute("value", "Delete event");
         remove_btn.onclick = function(e) { if(!confirm('Do you want to remove this lesson?'))
                                                 e.preventDefault();
                                            else this.form.submit();}
