@@ -277,11 +277,14 @@ def remove(request: HttpRequest, lesson_id) -> HttpResponse:
     """Remove event and redirect to index page"""
     try:
         if request.method == 'POST':
+            past_conflicts = list(Conflict.objects.all())
             lesson = Lesson.objects.get(id=lesson_id)
-            date = lesson.start_time
-            date_as_string = str(date.year) + "-" + str(date.month) + "-" + str(date.day)
             lesson.delete()
-            return redirect('/calendar/' + date_as_string)
+            db_conflicts()
+            context = generate_full_index_context()
+            current_conflicts = list(context['conflicts'])
+            context.update(generate_context_for_conflicts_report(past_conflicts, current_conflicts))
+            return render(request, 'index.html', context=context)
         return redirect('/calendar/')
     except Lesson.DoesNotExist:
         return redirect('/calendar/')
