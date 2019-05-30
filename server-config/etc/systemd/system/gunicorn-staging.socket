@@ -1,0 +1,8 @@
+[Unit]
+Description=gunicorn-staging socket
+
+[Socket]
+ListenStream=/run/gunicorn-staging.sock
+
+[Install]
+WantedBy=sockets.target

@@ -1,0 +1,14 @@
+/* Make border with group color wider */
+
+.calendar_default_event_bar {
+  width: 10px !important;
+}
+
+.calendar_default_event_bar_inner {
+  width: 100% !important;
+}
+
+.calendar_default_event_inner {
+  padding-left: 16px !important;
+  color: #fff !important;
+}

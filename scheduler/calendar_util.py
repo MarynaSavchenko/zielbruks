@@ -3,8 +3,10 @@ import datetime
 
 from django.db.models import QuerySet
 
-from scheduler import conflicts_checker
-from scheduler.models import Lesson, Auditorium, Group
+from scheduler import conflicts_checker, models
+from scheduler.conflicts_checker import conflicts_diff
+from scheduler.forms import MassEditForm
+from scheduler.models import Lesson, Auditorium, Group, Conflict, color_from_id
 
 
 def get_start_date(lessons: QuerySet):
@@ -27,8 +29,10 @@ def generate_full_schedule_context():
                      Group.objects.filter(id=q.group_id)[:1].get().number,
                      Auditorium.objects.filter(id=q.auditorium_id)[:1].get().number,
                      (q.professor.name + " " + q.professor.surname),
-                     Auditorium.objects.filter(id=q.auditorium_id)[:1].get().color,
-                     Group.objects.filter(id=q.group_id)[:1].get().color)
+                     q.auditorium_color,
+                     q.group_color,
+                     q.id,
+                     q.start_time.strftime("%H:%M") + "-" + q.end_time.strftime("%H:%M"))
                     for q in lessons_query]
     context = {
         'events': lessons_list,
@@ -37,18 +41,62 @@ def generate_full_schedule_context():
         'chosen_flag': True,
         'events_flag': bool(lessons_list),
         'type': 'all',
-        'name': 'lessons'
+        'name': 'lessons',
+        "groups_colors": get_group_colors(),
+        "auditoriums_colors": get_auditoriums_colors(),
     }
     return context
 
 
 def generate_conflicts_context():
     """Returns context dict for conflicts"""
-    conflicts_list = conflicts_checker.db_conflicts()
+    conflicts_list = Conflict.objects.all()
     color = ''
     context = {
         'conflicts': conflicts_list,
         'conflicts_color': color,
         'conflicts_flag': bool(conflicts_list)
     }
+    return context
+
+
+def generate_full_index_context_with_date(start_time):
+    """Returns full context dict with date for index page"""
+    context: dict = {}
+    context.update(generate_conflicts_context())
+    context.update(generate_full_schedule_context())
+    context['start_date'] = start_time.isoformat(timespec='seconds')
+    form = MassEditForm()
+    context.update({'form': form})
+    return context
+
+
+def generate_full_index_context():
+    """Returns full context dict for index page"""
+    context: dict = {}
+    context.update(generate_conflicts_context())
+    context.update(generate_full_schedule_context())
+    form = MassEditForm()
+    context.update({'form': form})
+    return context
+
+
+def get_auditoriums_colors():
+    """Returns list of tuples of auditoriums names and colors"""
+    return [(a.number, color_from_id(a.id))
+            for a in Auditorium.objects.all()]
+
+
+def get_group_colors():
+    """Returns list of tuples of groups names and colors"""
+    return [(g.number, color_from_id(g.id, True))
+            for g in Group.objects.all()]
+
+def generate_context_for_conflicts_report(past_conflicts, current_conflicts):
+    """Returns context dict based on list of past conflicts and current conflicts"""
+    new_conflicts, removed_conflicts = conflicts_diff(past_conflicts, current_conflicts)
+    context = {'removed_conflicts': removed_conflicts,
+               'removed_conflicts_number': len(removed_conflicts),
+               'new_conflicts_number': len(new_conflicts),
+               'new_conflicts': new_conflicts}
     return context

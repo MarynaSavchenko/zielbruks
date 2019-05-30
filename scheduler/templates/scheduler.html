@@ -4,20 +4,47 @@
 
         <h2>Schedule for {{ type }} {{ name }}</h2>
 
-        <div style="float:left; width: 150px;">
-            <div id="nav"></div>
+        {% block add_event %}{% endblock add_event %}
+
+        <div>
+            <div style="float:left; width: 150px; ">
+                <div id="nav"></div>
+            </div>
+            <div style="float:right; width: 160px; padding: 5px; height: 460px; overflow-y: scroll;" class="panel panel-default" class="panel panel-default">
+                <div class="col-sm-9">
+                    <h4 class="title">Legend</h4>
+                    <p class="text">
+                        Auditoriums <br/>
+                        (background): <br/>
+                    <ul>
+                        {% for a in auditoriums_colors %}
+                            <li style="color:{{ a.1 }}; font-size: 150%;"><span
+                                    style="color:black; font-size: 50%;">{{ a.0 }}</span></li>
+                        {% endfor %}
+                    </ul>
+                    Groups<br/>
+                    (left bar): <br/>
+                    <ul>
+                        {% for g in groups_colors %}
+                            <li style="color:{{ g.1 }}; font-size: 150%;"><span
+                                    style="color:black; font-size: 50%;">{{ g.0 }}</span></li>
+                        {% endfor %}
+                        </p>
+                    </ul>
+                </div>
+            </div>
         </div>
-        <div style="margin-left: 150px;">
+        <div style="float:none; overflow: hidden">
             <div id="dp"></div>
         </div>
-
+        </div>
         {% if events_flag %}
             <p style="...">
             <div id="details" class="alert alert-info">
                 Select an event to show the details.
             </div>
             </p>
-            {% else %}
+        {% else %}
             <p style="...">
             <div class="alert alert-danger">
                 There are no lessons.
@@ -27,7 +54,7 @@
 
         <script type="text/javascript">
             var nav = new DayPilot.Navigator("nav");
-            nav.showMonths = 2;
+            nav.showMonths = 1;
             nav.selectMode = "day";
             nav.startDate = "{{ start_date }}";
             nav.onTimeRangeSelected = function (args) {
@@ -39,24 +66,26 @@
             var dp = new DayPilot.Calendar("dp");
             dp.startDate = "{{ start_date }}";
             dp.viewType = "Days";
+            dp.headerDateFormat = "dddd, dd.MM.yyyy";
             dp.days = 2;
             dp.businessBeginsHour = 7;
-            dp.events.list = [];
+            dp.events.list = [
             {% for e in events %}
-                var e = {
+                {
                     start: new DayPilot.Date("{{ e.0 }}"),
                     end: new DayPilot.Date("{{ e.1 }}"),
-                    id: DayPilot.guid(),
-                    text: "{{ e.2 }},\
+                    id: {{ e.8 }},
+                    text: "{{ e.9 }}\
+                        {{ e.2 }},\
                         group: {{ e.3 }},\
                         place: {{ e.4 }},\
                         professor: {{ e.5 }}",
                     backColor: "{{ e.6 }}",
-                    barColor: "{{ e.7 }}"
-                };
-                dp.events.list.push(e);
+                    barColor: "{{ e.7 }}",
+                    barBackColor: "{{ e.7 }}"
+                },
             {% endfor %}
-
+            ];
             dp.eventClickHandling = "Enabled";
             dp.eventMoveHandling = "Disabled";
             dp.eventResizeHandling = "Disabled";
@@ -64,7 +93,9 @@
                 document.getElementById("details").innerText = args.e.text();
             };
 
-            dp.init();
+            {% block edit_event %}{% endblock edit_event %}
+
+            dp.init()
 
         </script>
     {% endif %}
