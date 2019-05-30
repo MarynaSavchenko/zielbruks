@@ -164,10 +164,13 @@ class Conflict(models.Model):
         if self._meta.concrete_model != other._meta.concrete_model:
             return False
         if self.conflict_type == other.conflict_type and self.object_id == other.object_id:
-            if self.first_lesson == other.first_lesson \
-                    and self.second_lesson == other.second_lesson:
-                return True
-            if self.first_lesson == other.second_lesson \
-                    and self.second_lesson == other.first_lesson:
-                return True
+            try:
+                if self.first_lesson == other.first_lesson \
+                        and self.second_lesson == other.second_lesson:
+                    return True
+                if self.first_lesson == other.second_lesson \
+                        and self.second_lesson == other.first_lesson:
+                    return True
+            except Lesson.DoesNotExist:
+                return False
         return False
