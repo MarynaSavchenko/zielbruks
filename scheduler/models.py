@@ -14,8 +14,12 @@ palette = ["#be7349", "#7977ec", "#73e36e", "#dd50b4", "#59ac2e", "#ab70e1", "#b
            "#eb92a2", "#738c4e", "#ce5f46", "#a0b87a", "#c36c6a", "#969448", "#f29278",
            "#89834d", "#e2c988", "#a68347", "#dea573"]
 
-def color_from_id(numeric_id):
-    return palette[numeric_id % len(palette)]
+def color_from_id(numeric_id, shuffle = False):
+    if shuffle:
+        colors = palette[len(palette) // 2:] + palette[:len(palette) // 2]
+    else:
+        colors = palette
+    return colors[numeric_id % len(colors)]
 
 class Professor(models.Model):
     """Person lecturing in a Lesson"""
@@ -95,7 +99,7 @@ class Lesson(models.Model):
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
 
-    group_color = property(lambda self: color_from_id(self.group_id))
+    group_color = property(lambda self: color_from_id(self.group_id, True))
     auditorium_color = property(lambda self: color_from_id(self.auditorium_id))
 
     class Meta:

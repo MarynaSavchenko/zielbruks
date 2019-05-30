@@ -89,7 +89,7 @@ def get_auditoriums_colors():
 
 def get_group_colors():
     """Returns list of tuples of groups names and colors"""
-    return [(g.number, color_from_id(g.id))
+    return [(g.number, color_from_id(g.id, True))
             for g in Group.objects.all()]
 
 def generate_context_for_conflicts_report(past_conflicts, current_conflicts):
