@@ -4,6 +4,7 @@ import datetime
 from django.db.models import QuerySet
 
 from scheduler import conflicts_checker, models
+from scheduler.conflicts_checker import conflicts_diff
 from scheduler.forms import MassEditForm
 from scheduler.models import Lesson, Auditorium, Group, Conflict, color_from_id
 
@@ -90,3 +91,12 @@ def get_group_colors():
     """Returns list of tuples of groups names and colors"""
     return [(g.number, color_from_id(g.id))
             for g in Group.objects.all()]
+
+def generate_context_for_conflicts_report(past_conflicts, current_conflicts):
+    """Returns context dict based on list of past conflicts and current conflicts"""
+    new_conflicts, removed_conflicts = conflicts_diff(past_conflicts, current_conflicts)
+    context = {'removed_conflicts': removed_conflicts,
+               'removed_conflicts_number': len(removed_conflicts),
+               'new_conflicts_number': len(new_conflicts),
+               'new_conflicts': new_conflicts}
+    return context

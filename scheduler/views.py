@@ -13,7 +13,7 @@ from xlrd import XLRDError
 import scheduler.import_handlers as imp
 from scheduler.calendar_util import get_start_date, generate_conflicts_context, \
     generate_full_schedule_context, generate_full_index_context_with_date, get_group_colors, \
-    get_auditoriums_colors, generate_full_index_context
+    get_auditoriums_colors, generate_full_index_context, generate_context_for_conflicts_report
 from scheduler.conflicts_checker import db_conflicts, conflicts_diff
 from scheduler.model_util import get_professor, get_auditorium, get_group
 from scheduler.models import Auditorium, Lesson, Group, Conflict, Professor
@@ -207,7 +207,6 @@ def log_in(request: HttpRequest) -> HttpResponse:
     """Render the login page"""
     return render(request, "still_working.html")
 
-
 def edit(request: HttpRequest, lesson_id) -> HttpResponse:
     """Render the edit page"""
     if request.META.get('HTTP_REFERER') is None:
@@ -231,12 +230,7 @@ def edit(request: HttpRequest, lesson_id) -> HttpResponse:
             db_conflicts()
             context = generate_full_index_context_with_date(form.cleaned_data['start_time'])
             current_conflicts = list(context['conflicts'])
-            new_conflicts, removed_conflicts = conflicts_diff(past_conflicts, current_conflicts)
-            print(new_conflicts, removed_conflicts)
-            context['removed_conflicts'] = removed_conflicts
-            context['removed_conflicts_number'] = len(removed_conflicts)
-            context['new_conflicts_number'] = len(new_conflicts)
-            context['new_conflicts'] = new_conflicts
+            context.update(generate_context_for_conflicts_report(past_conflicts, current_conflicts))
             return render(request, 'index.html', context=context)
         return render(request, 'edit.html', context={"form": form})
     lesson = Lesson.objects.get(id=lesson_id)
@@ -273,11 +267,7 @@ def create(request: HttpRequest) -> HttpResponse:
             db_conflicts()
             context = generate_full_index_context_with_date(form.cleaned_data['start_time'])
             current_conflicts = list(context['conflicts'])
-            new_conflicts, removed_conflicts = conflicts_diff(past_conflicts, current_conflicts)
-            context['removed_conflicts'] = removed_conflicts
-            context['removed_conflicts_number'] = len(removed_conflicts)
-            context['new_conflicts_number'] = len(new_conflicts)
-            context['new_conflicts'] = new_conflicts
+            context.update(generate_context_for_conflicts_report(past_conflicts, current_conflicts))
             return render(request, 'index.html', context=context)
         return render(request, 'edit.html', context={"form": form})
     return render(request, 'edit.html', context={"form": EditForm()})
@@ -304,9 +294,13 @@ def is_ajax(request: HttpRequest) -> bool:
 def delete_lessons(request: HttpRequest) -> HttpResponse:
     """Logic for mass delete of conflicts"""
     if request.method == 'POST':
+        past_conflicts = list(Conflict.objects.all())
         checks = request.POST.getlist('checks[]')
         Lesson.objects.filter(id__in=checks).delete()
+        db_conflicts()
         context = generate_full_index_context()
+        current_conflicts = list(context['conflicts'])
+        context.update(generate_context_for_conflicts_report(past_conflicts, current_conflicts))
         return render(request, 'index.html', context=context)
     context = generate_full_index_context()
     return render(request, 'index.html', context=context)
@@ -341,11 +335,7 @@ def edit_lessons(request: HttpRequest) -> HttpResponse:
             db_conflicts()
             context_after_edit = generate_full_index_context()
             current_conflicts = list(context_after_edit['conflicts'])
-            new_conflicts, removed_conflicts = conflicts_diff(past_conflicts, current_conflicts)
-            context_after_edit['removed_conflicts'] = removed_conflicts
-            context_after_edit['removed_conflicts_number'] = len(removed_conflicts)
-            context_after_edit['new_conflicts_number'] = len(new_conflicts)
-            context_after_edit['new_conflicts'] = new_conflicts
+            context_after_edit.update(generate_context_for_conflicts_report(past_conflicts, current_conflicts))
             return render(request, 'index.html', context=context_after_edit)
         context: dict = {}
         context.update(generate_conflicts_context())
