@@ -335,7 +335,8 @@ def edit_lessons(request: HttpRequest) -> HttpResponse:
             db_conflicts()
             context_after_edit = generate_full_index_context()
             current_conflicts = list(context_after_edit['conflicts'])
-            context_after_edit.update(generate_context_for_conflicts_report(past_conflicts, current_conflicts))
+            context_after_edit.update(
+                generate_context_for_conflicts_report(past_conflicts, current_conflicts))
             return render(request, 'index.html', context=context_after_edit)
         context: dict = {}
         context.update(generate_conflicts_context())
