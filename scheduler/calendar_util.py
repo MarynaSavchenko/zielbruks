@@ -4,7 +4,9 @@ import datetime
 from django.db.models import QuerySet
 
 from scheduler import conflicts_checker, models
-from scheduler.models import Lesson, Auditorium, Group, color_from_id
+from scheduler.conflicts_checker import conflicts_diff
+from scheduler.forms import MassEditForm
+from scheduler.models import Lesson, Auditorium, Group, Conflict, color_from_id
 
 
 def get_start_date(lessons: QuerySet):
@@ -48,7 +50,7 @@ def generate_full_schedule_context():
 
 def generate_conflicts_context():
     """Returns context dict for conflicts"""
-    conflicts_list = conflicts_checker.db_conflicts()
+    conflicts_list = Conflict.objects.all()
     color = ''
     context = {
         'conflicts': conflicts_list,
@@ -58,12 +60,24 @@ def generate_conflicts_context():
     return context
 
 
-def get_full_context_with_date(start_time):
-    """Returns full context dict and """
+def generate_full_index_context_with_date(start_time):
+    """Returns full context dict with date for index page"""
     context: dict = {}
     context.update(generate_conflicts_context())
     context.update(generate_full_schedule_context())
     context['start_date'] = start_time.isoformat(timespec='seconds')
+    form = MassEditForm()
+    context.update({'form': form})
+    return context
+
+
+def generate_full_index_context():
+    """Returns full context dict for index page"""
+    context: dict = {}
+    context.update(generate_conflicts_context())
+    context.update(generate_full_schedule_context())
+    form = MassEditForm()
+    context.update({'form': form})
     return context
 
 
@@ -77,3 +91,12 @@ def get_group_colors():
     """Returns list of tuples of groups names and colors"""
     return [(g.number, color_from_id(g.id))
             for g in Group.objects.all()]
+
+def generate_context_for_conflicts_report(past_conflicts, current_conflicts):
+    """Returns context dict based on list of past conflicts and current conflicts"""
+    new_conflicts, removed_conflicts = conflicts_diff(past_conflicts, current_conflicts)
+    context = {'removed_conflicts': removed_conflicts,
+               'removed_conflicts_number': len(removed_conflicts),
+               'new_conflicts_number': len(new_conflicts),
+               'new_conflicts': new_conflicts}
+    return context

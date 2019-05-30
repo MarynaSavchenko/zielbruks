@@ -19,11 +19,18 @@
 {% endblock navbar %}
 
 {% block content %}
-    <div class="container">
-        <div class="basic">
-            {% include "editable_scheduler.html" %}
-        </div>
+
+<div class="container">
+    <div class="basic">
+        {% include "report_conflicts.html" %}
     </div>
+</div>
+
+<div class="container">
+    <div class="basic">
+        {% include "editable_scheduler.html" %}
+    </div>
+</div>
 
     <div class="container">
         <div class="basic">

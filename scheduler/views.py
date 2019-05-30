@@ -12,10 +12,11 @@ from xlrd import XLRDError
 
 import scheduler.import_handlers as imp
 from scheduler.calendar_util import get_start_date, generate_conflicts_context, \
-    generate_full_schedule_context, get_full_context_with_date, get_group_colors, \
-    get_auditoriums_colors
+    generate_full_schedule_context, generate_full_index_context_with_date, get_group_colors, \
+    get_auditoriums_colors, generate_full_index_context, generate_context_for_conflicts_report
+from scheduler.conflicts_checker import db_conflicts, conflicts_diff
 from scheduler.model_util import get_professor, get_auditorium, get_group
-from scheduler.models import Auditorium, Lesson, Group, Professor
+from scheduler.models import Auditorium, Lesson, Group, Conflict, Professor
 from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm, \
     EditForm, MassEditForm
 
@@ -25,15 +26,14 @@ def index(request: HttpRequest) -> HttpResponse:
     context: dict = {}
     context.update(generate_conflicts_context())
     context.update(generate_full_schedule_context())
-    form = MassEditForm()
-    context.update({'form': form})
+    context['form'] = MassEditForm()
     return render(request, 'index.html', context)
 
 
 def index_specific(_request: HttpRequest, date: str) -> HttpResponse:
     """Render the main page with given date"""
     date_as_datetime = datetime.strptime(date, '%Y-%m-%d')
-    context = get_full_context_with_date(date_as_datetime)
+    context = generate_full_index_context_with_date(date_as_datetime)
     form = MassEditForm()
     context.update({'form': form})
     return render(_request, 'index.html', context)
@@ -63,6 +63,7 @@ def upload(request: HttpRequest) -> HttpResponse:
                                        ('background: lightblue' if x.name in duplicate else ''))
                                       for _ in x], axis=1) \
                     .render()
+                db_conflicts()
                 return render(request, "upload.html",
                               {'loaded_data': data_html, 'added': added_lessons})
     except MultiValueDictKeyError:
@@ -206,7 +207,6 @@ def log_in(request: HttpRequest) -> HttpResponse:
     """Render the login page"""
     return render(request, "still_working.html")
 
-
 def edit(request: HttpRequest, lesson_id) -> HttpResponse:
     """Render the edit page"""
     if request.META.get('HTTP_REFERER') is None:
@@ -214,6 +214,10 @@ def edit(request: HttpRequest, lesson_id) -> HttpResponse:
     if request.method == 'POST':
         form = EditForm(request.POST)
         if form.is_valid():
+            if is_ajax(request):
+                return render(request, 'edit.html', context={"form": form})
+
+            past_conflicts = list(Conflict.objects.all())
             lesson = Lesson.objects.get(id=form.cleaned_data['id'])
             lesson.name = form.cleaned_data['name']
             professor = form.cleaned_data['professor'].strip().split()
@@ -223,9 +227,11 @@ def edit(request: HttpRequest, lesson_id) -> HttpResponse:
             lesson.start_time = form.cleaned_data['start_time']
             lesson.end_time = form.cleaned_data['end_time']
             lesson.save()
-            date = form.cleaned_data['start_time']
-            date_as_string = str(date.year) + "-" + str(date.month) + "-" + str(date.day)
-            return redirect('/calendar/' + date_as_string)
+            db_conflicts()
+            context = generate_full_index_context_with_date(form.cleaned_data['start_time'])
+            current_conflicts = list(context['conflicts'])
+            context.update(generate_context_for_conflicts_report(past_conflicts, current_conflicts))
+            return render(request, 'index.html', context=context)
         return render(request, 'edit.html', context={"form": form})
     lesson = Lesson.objects.get(id=lesson_id)
     form = EditForm(
@@ -236,12 +242,16 @@ def edit(request: HttpRequest, lesson_id) -> HttpResponse:
 
 
 def create(request: HttpRequest) -> HttpResponse:
-    """Render the edit page"""
+    """Render the create page"""
     if request.META.get('HTTP_REFERER') is None:
         return redirect('/calendar/')
     if request.method == 'POST':
         form = EditForm(request.POST)
         if form.is_valid():
+            if is_ajax(request):
+                return render(request, 'edit.html', context={"form": form})
+
+            past_conflicts = list(Conflict.objects.all())
             professor = form.cleaned_data['professor'].strip().split()
             professor = get_professor(professor[0], professor[1])
             auditorium = get_auditorium(form.cleaned_data['auditorium'])
@@ -254,9 +264,11 @@ def create(request: HttpRequest) -> HttpResponse:
                 start_time=form.cleaned_data['start_time'],
                 end_time=form.cleaned_data['end_time']
             )
-            date = form.cleaned_data['start_time']
-            date_as_string = str(date.year) + "-" + str(date.month) + "-" + str(date.day)
-            return redirect('/calendar/' + date_as_string)
+            db_conflicts()
+            context = generate_full_index_context_with_date(form.cleaned_data['start_time'])
+            current_conflicts = list(context['conflicts'])
+            context.update(generate_context_for_conflicts_report(past_conflicts, current_conflicts))
+            return render(request, 'index.html', context=context)
         return render(request, 'edit.html', context={"form": form})
     return render(request, 'edit.html', context={"form": EditForm()})
 
@@ -275,12 +287,23 @@ def remove(request: HttpRequest, lesson_id) -> HttpResponse:
         return redirect('/calendar/')
 
 
+def is_ajax(request: HttpRequest) -> bool:
+    return request.META.get('HTTP_X_REQUESTED_WITH', '').lower() == 'xmlhttprequest'
+
+
 def delete_lessons(request: HttpRequest) -> HttpResponse:
     """Logic for mass delete of conflicts"""
     if request.method == 'POST':
+        past_conflicts = list(Conflict.objects.all())
         checks = request.POST.getlist('checks[]')
         Lesson.objects.filter(id__in=checks).delete()
-    return index(request)
+        db_conflicts()
+        context = generate_full_index_context()
+        current_conflicts = list(context['conflicts'])
+        context.update(generate_context_for_conflicts_report(past_conflicts, current_conflicts))
+        return render(request, 'index.html', context=context)
+    context = generate_full_index_context()
+    return render(request, 'index.html', context=context)
 
 
 def edit_lessons(request: HttpRequest) -> HttpResponse:
@@ -289,6 +312,7 @@ def edit_lessons(request: HttpRequest) -> HttpResponse:
         form = MassEditForm(request.POST)
         if form.is_valid():
             changes = {}
+            past_conflicts = list(Conflict.objects.all())
             if form.cleaned_data['lesson_name']:
                 changes['name'] = form.cleaned_data['lesson_name']
             if form.cleaned_data['professor']:
@@ -307,7 +331,13 @@ def edit_lessons(request: HttpRequest) -> HttpResponse:
             if changes != {}:
                 lessons = Lesson.objects.filter(id__in=checks)
                 lessons.update(**changes)
-            return index(request)
+
+            db_conflicts()
+            context_after_edit = generate_full_index_context()
+            current_conflicts = list(context_after_edit['conflicts'])
+            context_after_edit.update(
+                generate_context_for_conflicts_report(past_conflicts, current_conflicts))
+            return render(request, 'index.html', context=context_after_edit)
         context: dict = {}
         context.update(generate_conflicts_context())
         context.update(generate_full_schedule_context())
