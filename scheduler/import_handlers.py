@@ -3,7 +3,9 @@ import datetime
 from typing import List, Tuple
 from numpy import nan
 import pandas as pd
-from scheduler.models import Professor, Auditorium, Group, Lesson
+
+from scheduler.model_util import get_professor, get_auditorium, get_group
+from scheduler.models import Lesson
 
 
 def parse_data(data: pd.DataFrame, ext: str) -> Tuple[int, List[int], List[int]]:
@@ -43,7 +45,7 @@ def import_csv(data: pd.DataFrame) -> Tuple[int, List[int], List[int]]:
         except ValueError:
             incorrect.append(row[0])
             continue
-        professor_data = row[5].split(" ")
+        professor_data = row[5].strip().split()
         if len(date) == 3 and len(start_t) == 2 and len(end_t) == 2 and len(professor_data) == 2:
             date[2] += 2000
             start_date = datetime.datetime(date[2], date[1], date[0], start_t[0], start_t[1])
@@ -85,7 +87,7 @@ def import_excel(data: pd.DataFrame) -> Tuple[int, List[int], List[int]]:
         if row.count(nan) != 0 or not check_types_excel(row):
             incorrect.append(row[0])
             continue
-        professor_data = row[5].split(" ")
+        professor_data = row[5].strip().split()
         if len(professor_data) == 2:
             start_time = datetime.timedelta(hours=row[2].hour, minutes=row[2].minute)
             end_time = datetime.timedelta(hours=row[3].hour, minutes=row[3].minute)
@@ -144,21 +146,3 @@ def check_types_excel(row: tuple) -> bool:
         # 3.27, 3.27a and 137 should all be supported
         return False
     return True
-
-
-def get_professor(name: str, surname: str) -> Professor:
-    """Gets professor from database or creates a new object and returns it"""
-    professor, _created = Professor.objects.get_or_create(name=name, surname=surname)
-    return professor
-
-
-def get_auditorium(number: str) -> Auditorium:
-    """Gets auditorium from database or creates a new object and returns it"""
-    auditorium, _created = Auditorium.objects.get_or_create(number=number)
-    return auditorium
-
-
-def get_group(number: int) -> Group:
-    """Gets group from database or creates a new object and returns it"""
-    group, _created = Group.objects.get_or_create(number=number)
-    return group

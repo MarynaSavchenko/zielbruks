@@ -4,11 +4,15 @@
     <title>Calendar Example</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    {% load static %}
+
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}"/>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
 
-    {% load static %}
     <link rel="shortcut icon" type="image/x-icon" href="{% static 'favicon.ico' %}"/>
 
     {% block static %}{% endblock static %}
@@ -16,14 +20,14 @@
 
     <style>
         .footer {
-           position: fixed;
-           left: 0;
-           bottom: 0;
-           width: 100%;
-           background-color: GhostWhite;
-           color: grey;
-           text-align: center;
-           font-size: 11px;
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: GhostWhite;
+            color: grey;
+            text-align: center;
+            font-size: 10px;
         }
     </style>
 
@@ -48,9 +52,9 @@
 {% endblock content %}
 
 <footer>
-<div class="footer">&copy; Copyright 2019,
-    <a href="https://zielbruks.tk/">ZIELBRUKS</a>. All rights reserved.
-  </div>
+    <div class="footer">&copy; Copyright 2019,
+        <a href="https://zielbruks.tk/">ZIELBRUKS</a>. All rights reserved.
+    </div>
 </footer>
 </body>
 </html>

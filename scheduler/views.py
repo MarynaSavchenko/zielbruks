@@ -1,41 +1,58 @@
 """Views gathering point"""
 import os.path
+from datetime import datetime
 
 import pandas as pd
 from django.core.files.storage import default_storage
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.template import loader
-from django.urls import reverse
+from django.utils.datastructures import MultiValueDictKeyError
 from xlrd import XLRDError
 
 import scheduler.import_handlers as imp
 from scheduler.calendar_util import get_start_date, generate_conflicts_context, \
-    generate_full_schedule_context
-from scheduler.models import Auditorium, Lesson, Group
-from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm, EditForm
+    generate_full_schedule_context, generate_full_index_context_with_date, get_group_colors, \
+    get_auditoriums_colors, generate_full_index_context, generate_context_for_conflicts_report
+from scheduler.conflicts_checker import db_conflicts, conflicts_diff
+from scheduler.model_util import get_professor, get_auditorium, get_group
+from scheduler.models import Auditorium, Lesson, Group, Conflict, Professor
+from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm, \
+    EditForm, MassEditForm
 
 
-def index(_request: HttpRequest) -> HttpResponse:
+def index(request: HttpRequest) -> HttpResponse:
     """Render the main page"""
     context: dict = {}
     context.update(generate_conflicts_context())
     context.update(generate_full_schedule_context())
+    context['form'] = MassEditForm()
+    return render(request, 'index.html', context)
+
+
+def index_specific(_request: HttpRequest, date: str) -> HttpResponse:
+    """Render the main page with given date"""
+    date_as_datetime = datetime.strptime(date, '%Y-%m-%d')
+    context = generate_full_index_context_with_date(date_as_datetime)
+    form = MassEditForm()
+    context.update({'form': form})
     return render(_request, 'index.html', context)
 
 
 def upload(request: HttpRequest) -> HttpResponse:
     """Render file upload page"""
-    if request.method == 'POST' and request.FILES['myfile']:
-        myfile = request.FILES['myfile']
-        if isinstance(myfile.name, str):
-            filename = default_storage.save(myfile.name, myfile)
-            try:
-                ext = os.path.splitext(myfile.name)[1]
+    filename = None
+    try:
+        if request.method == 'POST' and request.FILES['uploaded_file']:
+            file = request.FILES['uploaded_file']
+            if isinstance(file.name, str):
+                filename = default_storage.save(file.name, file)
+
+                ext = os.path.splitext(file.name)[1]
                 if ext == '.csv':
-                    data = pd.read_csv(myfile.name)
+                    data = pd.read_csv(file.name)
                 elif ext == '.xlsx':
-                    data = pd.read_excel(myfile.name)
+                    data = pd.read_excel(file.name)
                 else:
                     return render(request, "upload.html",
                                   {'error': "Error: Extension not supported"})
@@ -44,14 +61,18 @@ def upload(request: HttpRequest) -> HttpResponse:
                     .set_table_attributes('class="table table-striped table-hover table-bordered"')\
                     .apply(lambda x: [('background: lightcoral' if x.name in incorrect else
                                        ('background: lightblue' if x.name in duplicate else ''))
-                                      for i in x], axis=1) \
+                                      for _ in x], axis=1) \
                     .render()
+                db_conflicts()
                 return render(request, "upload.html",
                               {'loaded_data': data_html, 'added': added_lessons})
-            except XLRDError:
-                return render(request, "upload.html", {'error': "Error: Corrupted file"})
-            finally:
-                default_storage.delete(filename)
+    except MultiValueDictKeyError:
+        return render(request, "upload.html", {'error': "Error: You didn't select a file"})
+    except XLRDError:
+        return render(request, "upload.html", {'error': "Error: Corrupted file"})
+    finally:
+        if filename:
+            default_storage.delete(filename)
     return render(request, "upload.html")
 
 
@@ -76,9 +97,11 @@ def show_rooms_schedule(request: HttpRequest) -> HttpResponse:
                                         Group.objects.filter(id=q.group_id)[:1].get().number,
                                         room_number,
                                         (q.professor.name + " " + q.professor.surname),
-                                        Auditorium.objects.filter(id=q.auditorium_id)[:1]
-                                        .get().color,
-                                        Group.objects.filter(id=q.group_id)[:1].get().color)
+                                        q.auditorium_color,
+                                        q.group_color,
+                                        q.id,
+                                        q.start_time.strftime("%H:%M") + "-"
+                                        + q.end_time.strftime("%H:%M"))
                                        for q in auditorium_lessons_query]
             context = {
                 'form': form,
@@ -87,7 +110,9 @@ def show_rooms_schedule(request: HttpRequest) -> HttpResponse:
                 'type': 'auditorium',
                 'name': room_number,
                 'events': auditorium_lessons_list,
-                'start_date': get_start_date(auditorium_lessons_query)
+                'start_date': get_start_date(auditorium_lessons_query),
+                "groups_colors": get_group_colors(),
+                "auditoriums_colors": get_auditoriums_colors(),
             }
             return render(request, "room_schedule.html", context)
         return HttpResponse("AN ERROR OCCURRED")
@@ -108,9 +133,11 @@ def show_professors_schedule(request: HttpRequest) -> HttpResponse:
                                         Auditorium.objects.filter(id=q.auditorium_id)[:1]
                                         .get().number,
                                         (q.professor.name + " " + q.professor.surname),
-                                        Auditorium.objects.filter(id=q.auditorium_id)[:1]
-                                        .get().color,
-                                        Group.objects.filter(id=q.group_id)[:1].get().color)
+                                        q.auditorium_color,
+                                        q.group_color,
+                                        q.id,
+                                        q.start_time.strftime("%H:%M") + "-"
+                                        + q.end_time.strftime("%H:%M"))
                                        for q in professors_lessons_query]
             context = {
                 'form': form,
@@ -120,7 +147,9 @@ def show_professors_schedule(request: HttpRequest) -> HttpResponse:
                 'type': 'professor',
                 'name': professor,
                 'lessons': Lesson.objects.all(),
-                'start_date': get_start_date(professors_lessons_query)
+                'start_date': get_start_date(professors_lessons_query),
+                "groups_colors": get_group_colors(),
+                "auditoriums_colors": get_auditoriums_colors(),
             }
             return render(request, "professors_scheduler.html", context)
         return HttpResponse("AN ERROR OCCURRED")
@@ -140,8 +169,11 @@ def show_groups_schedule(request: HttpRequest) -> HttpResponse:
                                     group,
                                     Auditorium.objects.filter(id=q.auditorium_id)[:1].get().number,
                                     (q.professor.name + " " + q.professor.surname),
-                                    Auditorium.objects.filter(id=q.auditorium_id)[:1].get().color,
-                                    Group.objects.filter(id=q.group_id)[:1].get().color)
+                                    q.auditorium_color,
+                                    q.group_color,
+                                    q.id,
+                                    q.start_time.strftime("%H:%M") + "-"
+                                    + q.end_time.strftime("%H:%M"))
                                    for q in groups_lessons_query]
             context = {
                 'form': form,
@@ -151,7 +183,9 @@ def show_groups_schedule(request: HttpRequest) -> HttpResponse:
                 'type': 'group',
                 'name': group,
                 'lessons': Lesson.objects.all(),
-                'start_date': get_start_date(groups_lessons_query)
+                'start_date': get_start_date(groups_lessons_query),
+                "groups_colors": get_group_colors(),
+                "auditoriums_colors": get_auditoriums_colors(),
             }
             return render(request, "groups_scheduler.html", context)
         return HttpResponse("AN ERROR OCCURRED")
@@ -173,33 +207,180 @@ def log_in(request: HttpRequest) -> HttpResponse:
     """Render the login page"""
     return render(request, "still_working.html")
 
-
 def edit(request: HttpRequest, lesson_id) -> HttpResponse:
     """Render the edit page"""
+    if request.META.get('HTTP_REFERER') is None:
+        return redirect('/calendar/')
     if request.method == 'POST':
         form = EditForm(request.POST)
         if form.is_valid():
-            return HttpResponseRedirect(reverse('index'))
-        return render(request, 'edit.html', context={"form": form})
+            if is_ajax(request):
+                return render(request, 'edit.html', context={"form": form})
 
+            past_conflicts = list(Conflict.objects.all())
+            lesson = Lesson.objects.get(id=form.cleaned_data['id'])
+            lesson.name = form.cleaned_data['name']
+            professor = form.cleaned_data['professor'].strip().split()
+            lesson.professor = get_professor(professor[0], professor[1])
+            lesson.auditorium = get_auditorium(form.cleaned_data['auditorium'])
+            lesson.group = get_group(form.cleaned_data['group'])
+            lesson.start_time = form.cleaned_data['start_time']
+            lesson.end_time = form.cleaned_data['end_time']
+            lesson.save()
+            db_conflicts()
+            context = generate_full_index_context_with_date(form.cleaned_data['start_time'])
+            current_conflicts = list(context['conflicts'])
+            context.update(generate_context_for_conflicts_report(past_conflicts, current_conflicts))
+            return render(request, 'index.html', context=context)
+        return render(request, 'edit.html', context={"form": form})
     lesson = Lesson.objects.get(id=lesson_id)
     form = EditForm(
-        initial={'id': lesson_id, 'name': lesson.name, 'professor': lesson.professor,
+        initial={'id': lesson.id, 'name': lesson.name, 'professor': lesson.professor,
                  'auditorium': lesson.auditorium, 'group': lesson.group,
                  'start_time': lesson.start_time, 'end_time': lesson.end_time})
     return render(request, 'edit.html', context={"form": form})
 
 
 def create(request: HttpRequest) -> HttpResponse:
-    """Render the edit page"""
+    """Render the create page"""
+    if request.META.get('HTTP_REFERER') is None:
+        return redirect('/calendar/')
     if request.method == 'POST':
         form = EditForm(request.POST)
         if form.is_valid():
-            start_date = form.cleaned_data['start_time']
-            context: dict = {}
-            context.update(generate_conflicts_context())
-            context.update(generate_full_schedule_context())
-            context['start_date'] = start_date.isoformat(timespec='seconds')
+            if is_ajax(request):
+                return render(request, 'edit.html', context={"form": form})
+
+            past_conflicts = list(Conflict.objects.all())
+            professor = form.cleaned_data['professor'].strip().split()
+            professor = get_professor(professor[0], professor[1])
+            auditorium = get_auditorium(form.cleaned_data['auditorium'])
+            group = get_group(form.cleaned_data['group'])
+            Lesson.objects.get_or_create(
+                name=form.cleaned_data['name'],
+                professor=professor,
+                auditorium=auditorium,
+                group=group,
+                start_time=form.cleaned_data['start_time'],
+                end_time=form.cleaned_data['end_time']
+            )
+            db_conflicts()
+            context = generate_full_index_context_with_date(form.cleaned_data['start_time'])
+            current_conflicts = list(context['conflicts'])
+            context.update(generate_context_for_conflicts_report(past_conflicts, current_conflicts))
             return render(request, 'index.html', context=context)
         return render(request, 'edit.html', context={"form": form})
     return render(request, 'edit.html', context={"form": EditForm()})
+
+
+def remove(request: HttpRequest, lesson_id) -> HttpResponse:
+    """Remove event and redirect to index page"""
+    try:
+        if request.method == 'POST':
+            past_conflicts = list(Conflict.objects.all())
+            lesson = Lesson.objects.get(id=lesson_id)
+            lesson.delete()
+            db_conflicts()
+            context = generate_full_index_context()
+            current_conflicts = list(context['conflicts'])
+            context.update(generate_context_for_conflicts_report(past_conflicts, current_conflicts))
+            return render(request, 'index.html', context=context)
+        return redirect('/calendar/')
+    except Lesson.DoesNotExist:
+        return redirect('/calendar/')
+
+
+def is_ajax(request: HttpRequest) -> bool:
+    return request.META.get('HTTP_X_REQUESTED_WITH', '').lower() == 'xmlhttprequest'
+
+
+def delete_lessons(request: HttpRequest) -> HttpResponse:
+    """Logic for mass delete of conflicts"""
+    if request.method == 'POST':
+        past_conflicts = list(Conflict.objects.all())
+        checks = request.POST.getlist('checks[]')
+        Lesson.objects.filter(id__in=checks).delete()
+        db_conflicts()
+        context = generate_full_index_context()
+        current_conflicts = list(context['conflicts'])
+        context.update(generate_context_for_conflicts_report(past_conflicts, current_conflicts))
+        return render(request, 'index.html', context=context)
+    context = generate_full_index_context()
+    return render(request, 'index.html', context=context)
+
+
+def edit_lessons(request: HttpRequest) -> HttpResponse:
+    """Logic for mass edit of conflicts"""
+    if request.method == 'POST':
+        form = MassEditForm(request.POST)
+        if form.is_valid():
+            changes = {}
+            past_conflicts = list(Conflict.objects.all())
+            if form.cleaned_data['lesson_name']:
+                changes['name'] = form.cleaned_data['lesson_name']
+            if form.cleaned_data['professor']:
+                professor = form.cleaned_data['professor'].strip().split()
+                changes['professor'] = get_professor(professor[0], professor[1])
+            if form.cleaned_data['auditorium']:
+                changes['auditorium'] = get_auditorium(form.cleaned_data['auditorium'])
+            if form.cleaned_data['group']:
+                changes['group'] = get_group(form.cleaned_data['group'])
+            if form.cleaned_data['start_time']:
+                changes['start_time'] = form.cleaned_data['start_time']
+            if form.cleaned_data['end_time']:
+                changes['end_time'] = form.cleaned_data['end_time']
+
+            checks = request.POST.getlist('checks[]')
+            if changes != {}:
+                lessons = Lesson.objects.filter(id__in=checks)
+                lessons.update(**changes)
+
+            db_conflicts()
+            context_after_edit = generate_full_index_context()
+            current_conflicts = list(context_after_edit['conflicts'])
+            context_after_edit.update(
+                generate_context_for_conflicts_report(past_conflicts, current_conflicts))
+            return render(request, 'index.html', context=context_after_edit)
+        context: dict = {}
+        context.update(generate_conflicts_context())
+        context.update(generate_full_schedule_context())
+        context.update({'form': form})
+        return render(request, 'index.html', context=context)
+    return index(request)
+
+
+def professors(request: HttpRequest) -> HttpResponse:
+    """Render the professors page"""
+    professors_list = Professor.objects.all()
+    context = {'professors': professors_list, 'form': SelectProfessorForm()}
+    if request.method == 'POST':
+        if 'choose' in request.POST:
+            form = SelectProfessorForm(request.POST)
+            if form.is_valid():
+                professor = form.cleaned_data['professor']
+                email = professor.email
+                if not email:
+                    email = "Noemail"
+                context = {'professors': professors_list, 'form': form, 'email': email}
+        elif 'save' in request.POST:
+            form = SelectProfessorForm(request.POST)
+            if form.is_valid():
+                email = request.POST.get('email')
+                professor = form.cleaned_data['professor']
+                try:
+                    professor_with_email = Professor.objects.get(email=email)
+                    if professor != professor_with_email:
+                        context = {'professors': professors_list, 'form': form, 'email': email,
+                                   'inform': "This email is already in use"}
+                    else:
+                        professor.email = email
+                        professor.save()
+                        context = {'professors': professors_list, 'form': SelectProfessorForm()}
+                except Professor.DoesNotExist:
+                    professor.email = email
+                    professor.save()
+                    context = {'professors': professors_list, 'form': SelectProfessorForm()}
+
+        else:
+            return HttpResponse("AN ERROR OCCURRED")
+    return render(request, "professors.html", context)
