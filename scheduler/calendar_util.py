@@ -3,7 +3,6 @@ import datetime
 
 from django.db.models import QuerySet
 
-from scheduler import conflicts_checker, models
 from scheduler.conflicts_checker import conflicts_diff
 from scheduler.forms import MassEditForm
 from scheduler.models import Lesson, Auditorium, Group, Conflict, color_from_id
@@ -26,7 +25,7 @@ def generate_full_schedule_context():
     lessons_list = [(q.start_time.strftime("%Y-%m-%dT%H:%M:%S"),
                      q.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
                      q.name,
-                     Group.objects.filter(id=q.group_id)[:1].get().number,
+                     Group.objects.filter(id=q.group_id)[:1].get().name,
                      Auditorium.objects.filter(id=q.auditorium_id)[:1].get().number,
                      (q.professor.name + " " + q.professor.surname),
                      q.auditorium_color,
@@ -89,7 +88,7 @@ def get_auditoriums_colors():
 
 def get_group_colors():
     """Returns list of tuples of groups names and colors"""
-    return [(g.number, color_from_id(g.id, True))
+    return [(g.name, color_from_id(g.id, True))
             for g in Group.objects.all()]
 
 def generate_context_for_conflicts_report(past_conflicts, current_conflicts):
