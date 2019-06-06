@@ -48,6 +48,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'scheduler.middleware.LoginRequiredMiddleware',
 ]
 
 ROOT_URLCONF = 'zielbruks.urls'
@@ -97,6 +98,12 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+LOGIN_URL = 'login'
+
+LOGIN_REDIRECT_URL = '/'
+
+LOGIN_EXEMPT_URLS = ('/login',)
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/

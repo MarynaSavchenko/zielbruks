@@ -3,6 +3,7 @@ import os.path
 from datetime import datetime
 
 import pandas as pd
+from django.contrib.auth import authenticate
 from django.core.files.storage import default_storage
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
@@ -17,8 +18,29 @@ from scheduler.calendar_util import get_start_date, generate_conflicts_context, 
 from scheduler.conflicts_checker import db_conflicts, conflicts_diff
 from scheduler.model_util import get_professor, get_auditorium, get_group
 from scheduler.models import Auditorium, Lesson, Group, Conflict, Professor
+from zielbruks.settings import LOGIN_REDIRECT_URL
 from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm, \
-    EditForm, MassEditForm
+    EditForm, MassEditForm, LoginForm
+
+
+def login(request: HttpRequest) -> HttpResponse:
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['login']
+            password = request.POST['password']
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                from django.contrib.auth import login as log
+                log(request, user)
+                # Redirect to a success page.
+                return HttpResponseRedirect(LOGIN_REDIRECT_URL)
+            else:
+                context = {'error': "Incorrect login", 'form': form}
+                render(request, 'login.html', context)
+        return render(request, 'edit.html', context={"form": form})
+    context = {'form': LoginForm()}
+    return render(request, 'login.html', context)
 
 
 def index(request: HttpRequest) -> HttpResponse:
@@ -206,6 +228,7 @@ def sign_up(request: HttpRequest) -> HttpResponse:
 def log_in(request: HttpRequest) -> HttpResponse:
     """Render the login page"""
     return render(request, "still_working.html")
+
 
 def edit(request: HttpRequest, lesson_id) -> HttpResponse:
     """Render the edit page"""

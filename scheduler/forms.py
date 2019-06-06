@@ -7,6 +7,12 @@ from django.forms.widgets import SplitDateTimeWidget
 from .models import Auditorium, Professor, Group
 
 
+class LoginForm(forms.Form):
+    """ form to render on login page """
+    login = forms.CharField()
+    password = forms.CharField(widget=forms.PasswordInput())
+
+
 class SelectAuditoriumForm(forms.ModelForm):
     """ form to choose auditorium to show"""
     auditorium = forms.ModelChoiceField(queryset=Auditorium.objects.all(), to_field_name='number')
@@ -64,6 +70,7 @@ class EditForm(forms.Form):
         except KeyError:
             raise forms.ValidationError("Fill all the fields!")
         return self.cleaned_data
+
 
 class MassEditForm(forms.Form):
     """ form to mass edit lessons"""
