@@ -71,10 +71,10 @@ class OverlappingLessonsConflictsTestCase(TestCase):
         """Test when times of lessons do not overlap"""
         db_conflicts()
         self.assertQuerysetEqual(Conflict.objects.filter(first_lesson=self.first_lesson,
-                                                 second_lesson=self.last_lesson,
-                                                 conflict_type='PROFESSOR',
-                                                 object_id=self.professor.id),
-                         Conflict.objects.none())
+                                                         second_lesson=self.last_lesson,
+                                                         conflict_type='PROFESSOR',
+                                                         object_id=self.professor.id),
+                                 Conflict.objects.none())
 
     def test_lesson_starts_and_ends_during_another(self):
         """Test when one lesson starts and ends during another"""
