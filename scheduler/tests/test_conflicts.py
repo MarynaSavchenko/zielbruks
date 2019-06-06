@@ -4,15 +4,15 @@ import datetime
 
 from django.test import TestCase
 
-from scheduler.models import Lesson, Professor, Group, Auditorium
-from scheduler.conflicts_checker import db_conflicts, ConflictType
+from scheduler.models import Lesson, Professor, Group, Auditorium, Conflict
+from scheduler.conflicts_checker import db_conflicts
 
 class NoConflictsTestCase(TestCase):
     """Class testing finding conflicts in database that does not have them"""
     def test_clean_database(self):
         """Test on a clean database"""
-        list_of_conflicts = db_conflicts()
-        self.assertEqual(list_of_conflicts, [])
+        db_conflicts()
+        self.assertQuerysetEqual(Conflict.objects.all(), Conflict.objects.none())
 
     def test_database_with_no_conflicts(self):
         """Test on a database with two lessons that are not overlapping"""
@@ -35,8 +35,8 @@ class NoConflictsTestCase(TestCase):
             start_time=datetime.datetime(2019, 5, 11, 14, 00),
             end_time=datetime.datetime(2019, 5, 11, 16, 30)
         )
-        list_of_conflicts = db_conflicts()
-        self.assertEqual(list_of_conflicts, [])
+        db_conflicts()
+        self.assertQuerysetEqual(Conflict.objects.all(), Conflict.objects.none())
 
 class OverlappingLessonsConflictsTestCase(TestCase):
     """Class testing conflicts for the times the lessons overlap"""
@@ -69,24 +69,30 @@ class OverlappingLessonsConflictsTestCase(TestCase):
 
     def test_not_overlapping_lessons(self):
         """Test when times of lessons do not overlap"""
-        list_of_conflicts = db_conflicts()
-        self.assertEqual(list_of_conflicts
-                         .__contains__((ConflictType.PROFESSOR, self.first_lesson,
-                                        self.last_lesson, self.professor)), False)
+        db_conflicts()
+        self.assertQuerysetEqual(Conflict.objects.filter(first_lesson=self.first_lesson,
+                                                 second_lesson=self.last_lesson,
+                                                 conflict_type='PROFESSOR',
+                                                 object_id=self.professor.id),
+                         Conflict.objects.none())
 
     def test_lesson_starts_and_ends_during_another(self):
         """Test when one lesson starts and ends during another"""
-        list_of_conflicts = db_conflicts()
-        self.assertEqual(list_of_conflicts
-                         .__contains__((ConflictType.PROFESSOR, self.middle_lesson,
-                                        self.last_lesson, self.professor)), True)
+        db_conflicts()
+        self.assertEqual(len(Conflict.objects.filter(first_lesson=self.middle_lesson,
+                                                     second_lesson=self.last_lesson,
+                                                     conflict_type='PROFESSOR',
+                                                     object_id=self.professor.id)),
+                         1)
 
     def test_lesson_overlaps_another(self):
         """Test when one lesson starts before another and then overlaps at it"""
-        list_of_conflicts = db_conflicts()
-        self.assertEqual(list_of_conflicts
-                         .__contains__((ConflictType.PROFESSOR, self.first_lesson,
-                                        self.middle_lesson, self.professor)), True)
+        db_conflicts()
+        self.assertEqual(len(Conflict.objects.filter(first_lesson=self.first_lesson,
+                                                     second_lesson=self.middle_lesson,
+                                                     conflict_type='PROFESSOR',
+                                                     object_id=self.professor.id)),
+                         1)
 
 class OverlappingConflictsTypeTestCase(TestCase):
     """Class testing conflicts for the conflict types that are listed"""
@@ -113,24 +119,30 @@ class OverlappingConflictsTypeTestCase(TestCase):
 
     def test_overlapping_professor(self):
         """Test when conflict is for professor"""
-        list_of_conflicts = db_conflicts()
-        self.assertEqual(list_of_conflicts
-                         .__contains__((ConflictType.PROFESSOR, self.first_lesson,
-                                        self.second_lesson, self.professor)), True)
+        db_conflicts()
+        self.assertEqual(len(Conflict.objects.filter(first_lesson=self.first_lesson,
+                                                     second_lesson=self.second_lesson,
+                                                     conflict_type='PROFESSOR',
+                                                     object_id=self.professor.id)),
+                         1)
 
     def test_overlapping_auditorium(self):
         """Test when conflict is for auditorium"""
-        list_of_conflicts = db_conflicts()
-        self.assertEqual(list_of_conflicts
-                         .__contains__((ConflictType.AUDITORIUM, self.first_lesson,
-                                        self.second_lesson, self.auditorium)), True)
+        db_conflicts()
+        self.assertEqual(len(Conflict.objects.filter(first_lesson=self.first_lesson,
+                                                     second_lesson=self.second_lesson,
+                                                     conflict_type='AUDITORIUM',
+                                                     object_id=self.auditorium.id)),
+                         1)
 
     def test_overlapping_group(self):
         """Test when conflict is for group"""
-        list_of_conflicts = db_conflicts()
-        self.assertEqual(list_of_conflicts
-                         .__contains__((ConflictType.GROUP, self.first_lesson,
-                                        self.second_lesson, self.group)), True)
+        db_conflicts()
+        self.assertEqual(len(Conflict.objects.filter(first_lesson=self.first_lesson,
+                                                     second_lesson=self.second_lesson,
+                                                     conflict_type='GROUP',
+                                                     object_id=self.group.id)),
+                         1)
 
 class CorrectnessOfAmountOfIncorrectDataListedTestCase(TestCase):
     """Class testing if the amount of conflicts is correct"""
@@ -155,6 +167,15 @@ class CorrectnessOfAmountOfIncorrectDataListedTestCase(TestCase):
 
     def test_duplication_of_conflicts(self):
         """Test if the conflicts are not duplicated when found"""
-        list_of_conflicts = db_conflicts()
-        self.assertEqual(list_of_conflicts, ([(ConflictType.PROFESSOR, self.first_lesson,
-                                               self.second_lesson, self.professor)]))
+        db_conflicts()
+        self.assertEqual(len(Conflict.objects.filter(first_lesson=self.first_lesson,
+                                                     second_lesson=self.second_lesson,
+                                                     conflict_type='PROFESSOR',
+                                                     object_id=self.professor.id))
+                         +
+                         len(Conflict.objects.filter(first_lesson=self.second_lesson,
+                                                     second_lesson=self.first_lesson,
+                                                     conflict_type='PROFESSOR',
+                                                     object_id=self.professor.id))
+                         ,
+                         1)
