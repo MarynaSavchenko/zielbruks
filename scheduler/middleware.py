@@ -1,12 +1,14 @@
-from django.http import HttpResponseRedirect
+"""Module for application middleware"""
+from re import compile as comp
+
+from django.http import HttpResponseRedirect, HttpResponse
 from django.conf import settings
-from re import compile
 
 from django.utils.deprecation import MiddlewareMixin
 
-EXEMPT_URLS = [compile(settings.LOGIN_URL.lstrip('/'))]
+EXEMPT_URLS = [comp(settings.LOGIN_URL.lstrip('/'))]
 if hasattr(settings, 'LOGIN_EXEMPT_URLS'):
-    EXEMPT_URLS += [compile(expr) for expr in settings.LOGIN_EXEMPT_URLS]
+    EXEMPT_URLS += [comp(expr) for expr in settings.LOGIN_EXEMPT_URLS]
 
 
 class LoginRequiredMiddleware(MiddlewareMixin):
@@ -16,12 +18,22 @@ class LoginRequiredMiddleware(MiddlewareMixin):
     in settings via a list of regular expressions in LOGIN_EXEMPT_URLS (which
     you can copy from your urls.py).
     """
+
+    @staticmethod
+    def get_exempt_urls():
+        """Fetches urls that do not require login"""
+        exempt_urls = [comp(settings.LOGIN_URL.lstrip('/'))]
+        if hasattr(settings, 'LOGIN_EXEMPT_URLS'):
+            exempt_urls += [comp(expr) for expr in settings.LOGIN_EXEMPT_URLS]
+        return exempt_urls
+
     def process_request(self, request):
-        assert hasattr(request, 'user'), """
-        The Login Required middleware needs to be after AuthenticationMiddleware.
-        Also make sure to include the template context_processor:
-        'django.contrib.auth.context_processors.auth'."""
+        """Method checking if user is authenticated"""
+        assert hasattr(request, 'user')
+
         if not request.user.is_authenticated:
             path = request.path_info.lstrip('/')
-            if not any(m.match(path) for m in EXEMPT_URLS):
+            if not any(m.match(path) for m in self.get_exempt_urls()):
                 return HttpResponseRedirect(settings.LOGIN_URL)
+        # required by pylint
+        return None
