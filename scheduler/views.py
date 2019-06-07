@@ -32,9 +32,10 @@ def login(request: HttpRequest) -> HttpResponse:
             password = request.POST['password']
             user = authenticate(request, username=username, password=password)
             if user is not None:
-                log(request, user)
-                # Redirect to a success page.
-                return HttpResponseRedirect(LOGIN_REDIRECT_URL)
+                if user.is_superuser:
+                    log(request, user)
+                    # Redirect to a success page.
+                    return HttpResponseRedirect(LOGIN_REDIRECT_URL)
             context = {'error': "Incorrect login or password", 'form': form}
             return render(request, 'login.html', context)
         return render(request, 'login.html', context={"form": form})
