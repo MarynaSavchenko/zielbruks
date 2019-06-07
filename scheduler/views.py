@@ -219,16 +219,6 @@ def show_schedule(request: HttpRequest) -> HttpResponse:
     return render(request, "full_schedule.html", context)
 
 
-def sign_up(request: HttpRequest) -> HttpResponse:
-    """Render the signup page"""
-    return render(request, "still_working.html")
-
-
-def log_in(request: HttpRequest) -> HttpResponse:
-    """Render the login page"""
-    return render(request, "still_working.html")
-
-
 def edit(request: HttpRequest, lesson_id) -> HttpResponse:
     """Render the edit page"""
     if request.META.get('HTTP_REFERER') is None:

@@ -11,8 +11,7 @@ class LoginRequiredMiddleware(MiddlewareMixin):
     """
     Middleware that requires a user to be authenticated to view any page other
     than LOGIN_URL. Exemptions to this requirement can optionally be specified
-    in settings via a list of regular expressions in LOGIN_EXEMPT_URLS (which
-    you can copy from your urls.py).
+    in settings via a list of regular expressions in LOGIN_EXEMPT_URLS
     """
 
     @staticmethod
