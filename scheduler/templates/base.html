@@ -41,8 +41,12 @@
         </div>
         {% block navbar %}{% endblock navbar %}
         <ul class="nav navbar-nav navbar-right">
-            <li><a href="{% url 'admin:index' %}"><span class=" glyphicon glyphicon-user"></span> Admin Page</a></li>
-            <li><a href="{% url 'admin:logout' %}"><span class=" glyphicon glyphicon-log-in"></span> Logout</a></li>
+            {% if user.is_authenticated %}
+                <li><a href="{% url 'admin:index' %}"><span class=" glyphicon glyphicon-user"></span> Admin Page</a></li>
+                <li><a href="{% url 'admin:logout' %}"><span class=" glyphicon glyphicon-log-out"></span> Log out</a></li>
+            {% else %}
+                <li><a href="{% url 'admin:login' %}"><span class=" glyphicon glyphicon-log-in"></span> Log in</a></li>
+            {% endif %}
         </ul>
     </div>
 </nav>

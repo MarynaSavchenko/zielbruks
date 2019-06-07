@@ -35,7 +35,7 @@ def login(request: HttpRequest) -> HttpResponse:
                 log(request, user)
                 # Redirect to a success page.
                 return HttpResponseRedirect(LOGIN_REDIRECT_URL)
-            context = {'error': "Incorrect login", 'form': form}
+            context = {'error': "Incorrect login or password", 'form': form}
             return render(request, 'login.html', context)
         return render(request, 'login.html', context={"form": form})
     context = {'form': LoginForm()}
