@@ -1,14 +1,10 @@
 """Module for application middleware"""
 from re import compile as comp
 
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect
 from django.conf import settings
 
 from django.utils.deprecation import MiddlewareMixin
-
-EXEMPT_URLS = [comp(settings.LOGIN_URL.lstrip('/'))]
-if hasattr(settings, 'LOGIN_EXEMPT_URLS'):
-    EXEMPT_URLS += [comp(expr) for expr in settings.LOGIN_EXEMPT_URLS]
 
 
 class LoginRequiredMiddleware(MiddlewareMixin):
