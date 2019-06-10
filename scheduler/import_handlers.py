@@ -89,21 +89,25 @@ def import_excel(data: pd.DataFrame) -> Tuple[int, List[int], List[int]]:
             continue
         professor_data = row[5].strip().split()
         if len(professor_data) == 2:
-            if isinstance(row[2], str):
-                tmp_time = dt.datetime.strptime(row[2], "%H:%M:%S")
-                start_time = dt.timedelta(hours=tmp_time.hour, minutes=tmp_time.minute)
-                tmp_time = dt.datetime.strptime(row[3], "%H:%M:%S")
-                end_time = dt.timedelta(hours=tmp_time.hour, minutes=tmp_time.minute)
-            else:
-                start_time = dt.timedelta(hours=row[2].hour, minutes=row[2].minute)
-                end_time = dt.timedelta(hours=row[3].hour, minutes=row[3].minute)
-            if isinstance(row[1], str):
-                date = dt.datetime.strptime(row[1], "%Y-%m-%d")
-                start_date = date + start_time
-                end_date = date + end_time
-            else:
-                start_date = row[1].to_pydatetime() + start_time
-                end_date = row[1].to_pydatetime() + end_time
+            try:
+                if isinstance(row[2], str):
+                    tmp_time = dt.datetime.strptime(row[2], "%H:%M:%S")
+                    start_time = dt.timedelta(hours=tmp_time.hour, minutes=tmp_time.minute)
+                    tmp_time = dt.datetime.strptime(row[3], "%H:%M:%S")
+                    end_time = dt.timedelta(hours=tmp_time.hour, minutes=tmp_time.minute)
+                else:
+                    start_time = dt.timedelta(hours=row[2].hour, minutes=row[2].minute)
+                    end_time = dt.timedelta(hours=row[3].hour, minutes=row[3].minute)
+                if isinstance(row[1], str):
+                    date = dt.datetime.strptime(row[1], "%Y-%m-%d")
+                    start_date = date + start_time
+                    end_date = date + end_time
+                else:
+                    start_date = row[1].to_pydatetime() + start_time
+                    end_date = row[1].to_pydatetime() + end_time
+            except ValueError:
+                incorrect.append(row[0])
+                continue
             if start_date > end_date:
                 incorrect.append(row[0])
                 continue
