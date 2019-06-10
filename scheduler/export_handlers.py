@@ -9,14 +9,14 @@ from scheduler.models import Lesson, Group, Auditorium
 def export_to_csv(start_time, end_time):
     data_frame = get_lessons(start_time, end_time)
     temp_file = NamedTemporaryFile(suffix='.csv', delete=False)
-    data_frame.to_csv(temp_file.name)
+    data_frame.to_csv(temp_file.name, index=False)
     return temp_file
 
 
 def export_to_excel(start_time, end_time):
     data_frame = get_lessons(start_time, end_time)
     temp_file = NamedTemporaryFile(suffix='.xlsx', delete=False)
-    data_frame.to_csv(temp_file.name)
+    data_frame.to_csv(temp_file.name, index=False)
     return temp_file
 
 
