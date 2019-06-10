@@ -1,11 +1,8 @@
 """module responsible for finding conflicts in database"""
 import copy
 from typing import List, Tuple
-from enum import Enum
 
-from django.db.models.query import QuerySet
-
-from scheduler.models import Lesson, Professor, Auditorium, Group, Conflict
+from scheduler.models import Lesson, Conflict
 
 
 def are_overlapping(lesson1: Lesson, lesson2: Lesson) -> bool:

@@ -3,6 +3,7 @@ import os.path
 from datetime import datetime
 
 import pandas as pd
+from django.contrib.auth import authenticate, login as log
 from django.core.files.storage import default_storage
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
@@ -14,11 +15,32 @@ import scheduler.import_handlers as imp
 from scheduler.calendar_util import get_start_date, generate_conflicts_context, \
     generate_full_schedule_context, generate_full_index_context_with_date, get_group_colors, \
     get_auditoriums_colors, generate_full_index_context, generate_context_for_conflicts_report
-from scheduler.conflicts_checker import db_conflicts, conflicts_diff
+from scheduler.conflicts_checker import db_conflicts
 from scheduler.model_util import get_professor, get_auditorium, get_group
 from scheduler.models import Auditorium, Lesson, Group, Conflict, Professor
+from zielbruks.settings import LOGIN_REDIRECT_URL
 from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm, \
-    EditForm, MassEditForm
+    EditForm, MassEditForm, LoginForm
+
+
+def login(request: HttpRequest) -> HttpResponse:
+    """Render the login page"""
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['login']
+            password = request.POST['password']
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                if user.is_superuser:
+                    log(request, user)
+                    # Redirect to a success page.
+                    return HttpResponseRedirect(LOGIN_REDIRECT_URL)
+            context = {'error': "Incorrect login or password", 'form': form}
+            return render(request, 'login.html', context)
+        return render(request, 'login.html', context={"form": form})
+    context = {'form': LoginForm()}
+    return render(request, 'login.html', context)
 
 
 def index(request: HttpRequest) -> HttpResponse:
@@ -197,15 +219,6 @@ def show_schedule(request: HttpRequest) -> HttpResponse:
     context = generate_full_schedule_context()
     return render(request, "full_schedule.html", context)
 
-
-def sign_up(request: HttpRequest) -> HttpResponse:
-    """Render the signup page"""
-    return render(request, "still_working.html")
-
-
-def log_in(request: HttpRequest) -> HttpResponse:
-    """Render the login page"""
-    return render(request, "still_working.html")
 
 def edit(request: HttpRequest, lesson_id) -> HttpResponse:
     """Render the edit page"""
