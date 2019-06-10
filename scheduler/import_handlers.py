@@ -1,5 +1,5 @@
 """Data import functions"""
-import datetime
+import datetime as dt
 from typing import List, Tuple
 from numpy import nan
 import pandas as pd
@@ -48,8 +48,8 @@ def import_csv(data: pd.DataFrame) -> Tuple[int, List[int], List[int]]:
         professor_data = row[5].strip().split()
         if len(date) == 3 and len(start_t) == 2 and len(end_t) == 2 and len(professor_data) == 2:
             date[2] += 2000
-            start_date = datetime.datetime(date[2], date[1], date[0], start_t[0], start_t[1])
-            end_date = datetime.datetime(date[2], date[1], date[0], end_t[0], end_t[1])
+            start_date = dt.datetime(date[2], date[1], date[0], start_t[0], start_t[1])
+            end_date = dt.datetime(date[2], date[1], date[0], end_t[0], end_t[1])
             if start_date > end_date:
                 incorrect.append(row[0])
                 continue
@@ -89,10 +89,21 @@ def import_excel(data: pd.DataFrame) -> Tuple[int, List[int], List[int]]:
             continue
         professor_data = row[5].strip().split()
         if len(professor_data) == 2:
-            start_time = datetime.timedelta(hours=row[2].hour, minutes=row[2].minute)
-            end_time = datetime.timedelta(hours=row[3].hour, minutes=row[3].minute)
-            start_date = row[1].to_pydatetime() + start_time
-            end_date = row[1].to_pydatetime() + end_time
+            if isinstance(row[2], str):
+                tmp_time = dt.datetime.strptime(row[2], "%H:%M:%S")
+                start_time = dt.timedelta(hours=tmp_time.hour, minutes=tmp_time.minute)
+                tmp_time = dt.datetime.strptime(row[3], "%H:%M:%S")
+                end_time = dt.timedelta(hours=tmp_time.hour, minutes=tmp_time.minute)
+            else:
+                start_time = dt.timedelta(hours=row[2].hour, minutes=row[2].minute)
+                end_time = dt.timedelta(hours=row[3].hour, minutes=row[3].minute)
+            if isinstance(row[1], str):
+                date = dt.datetime.strptime(row[1], "%Y-%m-%d")
+                start_date = date + start_time
+                end_date = date + end_time
+            else:
+                start_date = row[1].to_pydatetime() + start_time
+                end_date = row[1].to_pydatetime() + end_time
             if start_date > end_date:
                 incorrect.append(row[0])
                 continue
@@ -132,9 +143,10 @@ def check_types_csv(row: tuple) -> bool:
 
 def check_types_excel(row: tuple) -> bool:
     """Returns true if row from excel file has correct types"""
-    if not isinstance(row[1], pd.Timestamp):
+    if not isinstance(row[1], (pd.Timestamp, str)):
         return False
-    if not (isinstance(row[2], datetime.time) and isinstance(row[3], datetime.time)):
+    if not ((isinstance(row[2], dt.time) and isinstance(row[3], dt.time)) or
+            (isinstance(row[2], str) and isinstance(row[3], str))):
         return False
     if not (isinstance(row[4], str) and isinstance(row[5], str)):
         return False
