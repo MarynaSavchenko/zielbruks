@@ -4,15 +4,15 @@ from django import forms
 from django.utils import timezone
 from django.forms.widgets import SplitDateTimeWidget
 
-from .models import Auditorium, Professor, Group
+from .models import Room, Professor, Group
 
 
-class SelectAuditoriumForm(forms.ModelForm):
-    """ form to choose auditorium to show"""
-    auditorium = forms.ModelChoiceField(queryset=Auditorium.objects.all(), to_field_name='number')
+class SelectRoomForm(forms.ModelForm):
+    """ form to choose room to show"""
+    room = forms.ModelChoiceField(queryset=Room.objects.all(), to_field_name='number')
 
     class Meta:
-        model = Auditorium
+        model = Room
         fields: list = []
 
 
@@ -46,7 +46,7 @@ class EditForm(forms.Form):
     end_time = forms.SplitDateTimeField(initial=timezone.now().replace(second=0),
                                         widget=SplitDateTimeWidget(date_attrs={'type': 'date'},
                                                                    time_attrs={'type': 'time'}))
-    auditorium = forms.CharField(max_length=100)
+    room = forms.CharField(max_length=100)
     group = forms.IntegerField(min_value=1)
     professor = forms.CharField(max_length=100)
 
@@ -65,12 +65,13 @@ class EditForm(forms.Form):
             raise forms.ValidationError("Fill all the fields!")
         return self.cleaned_data
 
+
 class MassEditForm(forms.Form):
     """ form to mass edit lessons"""
     lesson_name = forms.CharField(max_length=100, widget=forms.TextInput(
         attrs={'size': '30', 'class': 'inputText'}), required=False)
     professor = forms.CharField(max_length=100, required=False)
-    auditorium = forms.CharField(max_length=100, widget=forms.TextInput(
+    room = forms.CharField(max_length=100, widget=forms.TextInput(
         attrs={'size': '5'}), required=False)
     group = forms.IntegerField(min_value=1, max_value=9999, required=False)
     start_time = forms.SplitDateTimeField(widget=SplitDateTimeWidget(date_attrs={'type': 'date'},

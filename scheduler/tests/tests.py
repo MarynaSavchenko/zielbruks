@@ -6,7 +6,7 @@ from django.test import TestCase
 import pandas as pd
 
 from scheduler.import_handlers import parse_data, import_csv, import_excel
-from scheduler.models import Lesson, Professor, Auditorium, Group
+from scheduler.models import Lesson, Professor, Room, Group
 
 
 class ImportHandlersTest(TestCase):
@@ -17,7 +17,7 @@ class ImportHandlersTest(TestCase):
         Lesson.objects.create(
             name="Existing",
             professor=Professor.objects.create(name="John", surname="Doe"),
-            auditorium=Auditorium.objects.create(number="1.11a"),
+            room=Room.objects.create(number="1.11a"),
             group=Group.objects.create(number=1),
             start_time=datetime.datetime(2019, 5, 11, 12, 00),
             end_time=datetime.datetime(2019, 5, 11, 13, 30)

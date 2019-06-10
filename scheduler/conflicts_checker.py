@@ -5,7 +5,7 @@ from enum import Enum
 
 from django.db.models.query import QuerySet
 
-from scheduler.models import Lesson, Professor, Auditorium, Group, Conflict
+from scheduler.models import Lesson, Professor, Room, Group, Conflict
 
 
 def are_overlapping(lesson1: Lesson, lesson2: Lesson) -> bool:
@@ -26,7 +26,7 @@ def are_overlapping(lesson1: Lesson, lesson2: Lesson) -> bool:
 
 def check_lesson(index: int, lesson_list: List[Lesson]) -> List[Tuple[str, Lesson, Lesson, int]]:
     """
-    This function searches db for other lessons sharing the same professor, auditorium and group
+    This function searches db for other lessons sharing the same professor, room and group
     And then checks if they are conflicting with each other using are_overlapping
     :param index: index of Lesson for which we are checking possible conflicts
     :param lesson_list: lessons list
@@ -34,7 +34,7 @@ def check_lesson(index: int, lesson_list: List[Lesson]) -> List[Tuple[str, Lesso
              Tuple[str, Lesson1, Lesson2, int]
              str helps to differentiate which conflict it is
              Lesson1 and Lesson2 are Lesson that are currently in conflict
-             int is Model object id responsible for conflict (Professor,Auditorium,Group)
+             int is Model object id responsible for conflict (Professor, Room, Group)
     """
     conflicts: List[Tuple[str, Lesson, Lesson, int]] = []
     lesson = lesson_list[index]
@@ -44,8 +44,8 @@ def check_lesson(index: int, lesson_list: List[Lesson]) -> List[Tuple[str, Lesso
             if lesson_2.professor == lesson.professor:
                 new_conflict = ("PROFESSOR", lesson, lesson_2, lesson.professor.id)
                 conflicts.append(new_conflict)
-            if lesson_2.auditorium == lesson.auditorium:
-                new_conflict = ('AUDITORIUM', lesson, lesson_2, lesson.auditorium.id)
+            if lesson_2.room == lesson.room:
+                new_conflict = ('ROOM', lesson, lesson_2, lesson.room.id)
                 conflicts.append(new_conflict)
             if lesson_2.group == lesson.group:
                 new_conflict = ("GROUP", lesson, lesson_2, lesson.group.id)

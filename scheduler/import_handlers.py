@@ -4,7 +4,7 @@ from typing import List, Tuple
 from numpy import nan
 import pandas as pd
 
-from scheduler.model_util import get_professor, get_auditorium, get_group
+from scheduler.model_util import get_professor, get_room, get_group
 from scheduler.models import Lesson
 
 
@@ -12,7 +12,7 @@ def parse_data(data: pd.DataFrame, ext: str) -> Tuple[int, List[int], List[int]]
     """
     Parse basic info, process extension and pass to designated function
     :param data: DataFrame with lessons
-        Accepted format: date | start_time | end_time | Subject | Professor | Group | Auditorium
+        Accepted format: date | start_time | end_time | Subject | Professor | Group | Room
     :param ext: File extension: .csv or .xlsx
     :return: number of lessons added
     """
@@ -54,12 +54,12 @@ def import_csv(data: pd.DataFrame) -> Tuple[int, List[int], List[int]]:
                 incorrect.append(row[0])
                 continue
             professor = get_professor(professor_data[0], professor_data[1])
-            auditorium = get_auditorium(str(row[7]))
+            room = get_room(str(row[7]))
             group = get_group(row[6])
             _lesson, created = Lesson.objects.get_or_create(
                 name=row[4],
                 professor=professor,
-                auditorium=auditorium,
+                room=room,
                 group=group,
                 start_time=start_date,
                 end_time=end_date
@@ -97,12 +97,12 @@ def import_excel(data: pd.DataFrame) -> Tuple[int, List[int], List[int]]:
                 incorrect.append(row[0])
                 continue
             professor = get_professor(professor_data[0], professor_data[1])
-            auditorium = get_auditorium(str(row[7]))
+            room = get_room(str(row[7]))
             group = get_group(row[6])
             _lesson, created = Lesson.objects.get_or_create(
                 name=row[4],
                 professor=professor,
-                auditorium=auditorium,
+                room=room,
                 group=group,
                 start_time=start_date,
                 end_time=end_date
