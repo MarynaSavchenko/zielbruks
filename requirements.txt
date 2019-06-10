@@ -1,4 +1,4 @@
-django==2.1.7
+django==2.1.9
 
 # development dependencies:
 pylint==2.3.1
