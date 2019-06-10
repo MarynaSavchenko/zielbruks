@@ -31,7 +31,7 @@
 {% block edit_event %}
     dp.onEventClicked = function (args) {
         // update details
-        document.getElementById("details").innerText = args.e.text();
+        document.getElementById("details").innerText = "Selected event: " + args.e.text() + ", start: "+   args.e.start().toString("HH:mm") + ", end: " + args.e.end().toString("HH:mm");
 
         // remove old buttons
         if(document.getElementById('remove_button') != null){
