@@ -18,7 +18,7 @@ class NoConflictsTestCase(TestCase):
         """Test on a database with two lessons that are not overlapping"""
         auditorium = Auditorium.objects.create(number="1.11a")
         professor = Professor.objects.create(name="John", surname="Doe")
-        group = Group.objects.create(number=1)
+        group = Group.objects.create(name="1")
         Lesson.objects.create(
             name="Lesson1",
             professor=professor,
@@ -46,7 +46,7 @@ class OverlappingLessonsConflictsTestCase(TestCase):
             name="First lesson",
             professor=self.professor,
             auditorium=Auditorium.objects.create(number="1.11a"),
-            group=Group.objects.create(number=1),
+            group=Group.objects.create(name="1"),
             start_time=datetime.datetime(2019, 5, 11, 12, 00),
             end_time=datetime.datetime(2019, 5, 11, 13, 30)
         )
@@ -54,7 +54,7 @@ class OverlappingLessonsConflictsTestCase(TestCase):
             name="Middle lesson",
             professor=self.professor,
             auditorium=Auditorium.objects.create(number="1.11b"),
-            group=Group.objects.create(number=2),
+            group=Group.objects.create(name="2"),
             start_time=datetime.datetime(2019, 5, 11, 13, 00),
             end_time=datetime.datetime(2019, 5, 11, 17, 00)
         )
@@ -62,7 +62,7 @@ class OverlappingLessonsConflictsTestCase(TestCase):
             name="Last lesson",
             professor=self.professor,
             auditorium=Auditorium.objects.create(number="1.11c"),
-            group=Group.objects.create(number=3),
+            group=Group.objects.create(name="3"),
             start_time=datetime.datetime(2019, 5, 11, 15, 00),
             end_time=datetime.datetime(2019, 5, 11, 16, 30)
         )
@@ -99,7 +99,7 @@ class OverlappingConflictsTypeTestCase(TestCase):
     def setUp(self):
         self.professor = Professor.objects.create(name="John", surname="Doe")
         self.auditorium = Auditorium.objects.create(number="1.11a")
-        self.group = Group.objects.create(number=1)
+        self.group = Group.objects.create(name="1")
         self.first_lesson = Lesson.objects.create(
             name="First lesson",
             professor=self.professor,
@@ -152,7 +152,7 @@ class CorrectnessOfAmountOfIncorrectDataListedTestCase(TestCase):
             name="First lesson",
             professor=self.professor,
             auditorium=Auditorium.objects.create(number="1.11a"),
-            group=Group.objects.create(number=1),
+            group=Group.objects.create(name="1"),
             start_time=datetime.datetime(2019, 5, 11, 12, 00),
             end_time=datetime.datetime(2019, 5, 11, 13, 30)
         )
@@ -160,7 +160,7 @@ class CorrectnessOfAmountOfIncorrectDataListedTestCase(TestCase):
             name="Second lesson",
             professor=self.professor,
             auditorium=Auditorium.objects.create(number="1.11b"),
-            group=Group.objects.create(number=2),
+            group=Group.objects.create(name="2"),
             start_time=datetime.datetime(2019, 5, 11, 13, 00),
             end_time=datetime.datetime(2019, 5, 11, 15, 00)
         )
