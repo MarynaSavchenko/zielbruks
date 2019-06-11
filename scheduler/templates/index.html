@@ -8,12 +8,24 @@
 {% block navbar %}
     <ul class="nav navbar-nav">
         <li class="active"><a href="{% url 'index' %}">Home</a></li>
-        <li><a href="{% url 'upload_schedule' %}">Upload schedule</a></li>
-        <li><a href="{% url 'upload_students' %}">Upload students</a></li>
+        <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Upload
+                <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="{% url 'upload_schedule' %}">Upload schedule</a></li>
+                <li><a href="{% url 'upload_students' %}">Upload students</a></li>
+            </ul>
+        </li>
         <li><a href="{% url 'show_schedule' %}">Full calendar</a></li>
-        <li><a href="{% url 'show_room_schedule' %}">Room's calendar</a></li>
-        <li><a href="{% url 'show_professors_schedule' %}">Professor's calendar</a></li>
-        <li><a href="{% url 'show_groups_schedule' %}">Group's calendar</a></li>
+        <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Specific schedule
+                <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="{% url 'show_room_schedule' %}">Room's calendar</a></li>
+                <li><a href="{% url 'show_professors_schedule' %}">Professor's calendar</a></li>
+                <li><a href="{% url 'show_groups_schedule' %}">Group's calendar</a></li>
+            </ul>
+        </li>
         <li><a href="{% url 'conflicts' %}">Conflicts</a></li>
         <li><a href="{% url 'professors' %}">Professors</a></li>
     </ul>
@@ -21,17 +33,17 @@
 
 {% block content %}
 
-<div class="container">
-    <div class="basic">
-        {% include "report_conflicts.html" %}
+    <div class="container">
+        <div class="basic">
+            {% include "report_conflicts.html" %}
+        </div>
     </div>
-</div>
 
-<div class="container">
-    <div class="basic">
-        {% include "editable_scheduler.html" %}
+    <div class="container">
+        <div class="basic">
+            {% include "editable_scheduler.html" %}
+        </div>
     </div>
-</div>
 
     <div class="container">
         <div class="basic">

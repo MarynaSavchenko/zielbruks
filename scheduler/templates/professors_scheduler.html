@@ -5,22 +5,34 @@
 {% endblock static %}
 
 {% block navbar %}
-        <ul class="nav navbar-nav">
-            <li><a href="{% url 'index' %}">Home</a></li>
-            <li><a href="{% url 'upload_schedule' %}">Upload schedule</a></li>
-            <li><a href="{% url 'upload_students' %}">Upload students</a></li>
-            <li><a href="{% url 'show_schedule' %}">Full calendar</a></li>
-            <li><a href="{% url 'show_room_schedule' %}">Room's calendar</a></li>
-            <li class="active"><a href="{% url 'show_professors_schedule' %}">Professor's calendar</a></li>
-            <li><a href="{% url 'show_groups_schedule' %}">Group's calendar</a></li>
-            <li><a href="{% url 'conflicts' %}">Conflicts</a></li>
-            <li><a href="{% url 'professors' %}">Professors</a></li>
-        </ul>
+    <ul class="nav navbar-nav">
+        <li><a href="{% url 'index' %}">Home</a></li>
+        <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Upload
+                <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="{% url 'upload_schedule' %}">Upload schedule</a></li>
+                <li><a href="{% url 'upload_students' %}">Upload students</a></li>
+            </ul>
+        </li>
+        <li><a href="{% url 'show_schedule' %}">Full calendar</a></li>
+        <li class="dropdown active">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Specific schedule
+                <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="{% url 'show_room_schedule' %}">Room's calendar</a></li>
+                <li class="active"><a href="{% url 'show_professors_schedule' %}">Professor's calendar</a></li>
+                <li><a href="{% url 'show_groups_schedule' %}">Group's calendar</a></li>
+            </ul>
+        </li>
+        <li><a href="{% url 'conflicts' %}">Conflicts</a></li>
+        <li><a href="{% url 'professors' %}">Professors</a></li>
+    </ul>
 {% endblock navbar %}
 
 {% block content %}
-<div class="basic">
-    {% include "filtered_schedule.html" %}
-</div>
+    <div class="basic">
+        {% include "filtered_schedule.html" %}
+    </div>
 {% endblock content %}
 
