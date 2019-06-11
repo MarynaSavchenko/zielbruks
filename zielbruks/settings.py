@@ -124,13 +124,10 @@ TEMPLATE_DIRS = (
 
 STATIC_URL = '/static/'
 
-STATIC_ROOT = '/var/www/example.com/static'
-
 EMAIL_HOST = 'localhost'
-
-EMAIL_PORT = 1025
-
+EMAIL_PORT = '1025'
 EMAIL_USE_TLS = False
+EMAIL_USE_SSL = False
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
@@ -142,6 +139,7 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_BEAT_SCHEDULE = {
     'notify_professors': {
         'task': 'notify_professors',
-        'schedule': crontab(minute='0', hour='0', day_of_week='monday')
+        'schedule': crontab()
     }
 }
+# 'schedule': crontab(minute='0', hour='0', day_of_week='monday')

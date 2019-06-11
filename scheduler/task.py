@@ -1,10 +1,11 @@
 ''' Module definig task to perform '''
 from __future__ import absolute_import, unicode_literals
 from datetime import datetime, timedelta, time
+import collections
+from operator import itemgetter
 from celery import task
 from scheduler.celery import app
 from scheduler.mailer import Mailer
-
 
 @app.task(name="notify_professors")
 def notify_professors():
@@ -27,5 +28,6 @@ def notify_professors():
             if lesson.professor == professor:
                 professor_lessons.append(lesson)
         if(professor_lessons and professor.email):
+            sorted_lessons = sorted(professor_lessons, key=lambda k: k.start_time)
             mail.send_messages(subject='Lesson notification', template='email.html',\
-            	context={'lessons': professor_lessons}, to_emails=[professor.email])
+            context={'lessons': sorted_lessons}, to_emails=[professor.email])
