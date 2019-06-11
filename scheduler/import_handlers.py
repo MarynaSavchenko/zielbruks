@@ -169,7 +169,7 @@ def check_types_excel(row: tuple) -> bool:
         return False
     if not all((isinstance(x, str) for x in row[4:5])):
         return False
-    if not isinstance(row[6], (int, str)):
+    if not isinstance(row[6], (str, int)):
         return False
     if not isinstance(row[7], (str, int, float)):
         # 3.27, 3.27a and 137 should all be supported
@@ -199,7 +199,7 @@ def import_students(data: pd.DataFrame) -> Tuple[int, List[int], List[int]]:
                     name=full_name[0],
                     surname=full_name[1],
                     group=group,
-                    index=int(row[3])
+                    index=int(row[1])
                 )
                 if created:
                     added_columns += 1
@@ -221,8 +221,7 @@ def students_check_types(row: tuple) -> bool:
     except ValueError:
         return False
     if not isinstance(row[2], str):
-        print(row[1])
         return False
-    if not isinstance(row[3], int):
+    if not isinstance(row[3], (str, int)):
         return False
     return True
