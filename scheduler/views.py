@@ -64,7 +64,7 @@ def index_specific(_request: HttpRequest, date: str) -> HttpResponse:
 def upload(request: HttpRequest) -> HttpResponse:
     """Render file upload page"""
     filename = None
-    context = {}
+    context: dict = {}
     try:
         if request.method == 'POST' and request.FILES['uploaded_file']:
             file = request.FILES['uploaded_file']
@@ -105,7 +105,7 @@ def upload(request: HttpRequest) -> HttpResponse:
 def upload_students(request: HttpRequest) -> HttpResponse:
     """Render file upload page"""
     filename = None
-    context = {}
+    context: dict = {}
     try:
         if request.method == 'POST' and request.FILES['uploaded_file']:
             file = request.FILES['uploaded_file']

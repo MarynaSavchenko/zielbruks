@@ -12,6 +12,10 @@ class ImportSizeException(Exception):
     pass
 
 
+class ImportExtensionException(Exception):
+    pass
+
+
 def parse_data(data: pd.DataFrame, ext: str) -> Tuple[int, List[int], List[int]]:
     """
     Parse basic info, process extension and pass to designated function
@@ -25,6 +29,7 @@ def parse_data(data: pd.DataFrame, ext: str) -> Tuple[int, List[int], List[int]]
             return import_csv(data)
         if ext == '.xlsx':
             return import_excel(data)
+        raise ImportExtensionException
     raise ImportSizeException
 
 
@@ -53,10 +58,9 @@ def import_csv(data: pd.DataFrame) -> Tuple[int, List[int], List[int]]:
                     incorrect.append(row[0])
                     continue
                 if len(date[0]) == 2:
-                    date[2] += 2000
-                    start_date = dt.datetime(int(date[2]), int(date[1]), int(date[0]),
+                    start_date = dt.datetime(int(date[2]) + 2000, int(date[1]), int(date[0]),
                                              int(start_t[0]), int(start_t[1]))
-                    end_date = dt.datetime(int(date[2]), int(date[1]), int(date[0]),
+                    end_date = dt.datetime(int(date[2]) + 2000, int(date[1]), int(date[0]),
                                            int(end_t[0]), int(end_t[1]))
                 elif len(date[0]) == 4:
                     start_date = dt.datetime(int(date[0]), int(date[1]), int(date[2]),
