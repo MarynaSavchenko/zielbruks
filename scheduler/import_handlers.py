@@ -20,7 +20,7 @@ def parse_data(data: pd.DataFrame, ext: str) -> Tuple[int, List[int], List[int]]
     """
     Parse basic info, process extension and pass to designated function
     :param data: DataFrame with lessons
-        Accepted format: date | start_time | end_time | Subject | Professor | Group | Auditorium
+        Accepted format: date | start_time | end_time | Subject | Professor | Group | Room
     :param ext: File extension: .csv or .xlsx
     :return: number of lessons added
     """
@@ -100,7 +100,7 @@ def import_excel(data: pd.DataFrame) -> Tuple[int, List[int], List[int]]:
     """
     Parse excel data from DataFrame and add to database
     :param data: consists of complex types for date etc.
-        Date: YYYY-MM-DD  Time: HH:MM:SS
+        Date: YYYY-MM-DD  Time: HH:MM(:SS)
     :return: number of lessons added
     """
     added_columns = 0
@@ -114,9 +114,11 @@ def import_excel(data: pd.DataFrame) -> Tuple[int, List[int], List[int]]:
         if len(professor_data) == 2:
             try:
                 if isinstance(row[2], str):
-                    tmp_time = dt.datetime.strptime(row[2], "%H:%M:%S")
+                    tmp_time = dt.datetime.strptime(row[2], ("%H:%M:%S" if len(row[2].split(":"))
+                                                             == 3 else "%H:%M"))
                     start_time = dt.timedelta(hours=tmp_time.hour, minutes=tmp_time.minute)
-                    tmp_time = dt.datetime.strptime(row[3], "%H:%M:%S")
+                    tmp_time = dt.datetime.strptime(row[3], ("%H:%M:%S" if len(row[3].split(":"))
+                                                             == 3 else "%H:%M"))
                     end_time = dt.timedelta(hours=tmp_time.hour, minutes=tmp_time.minute)
                 else:
                     start_time = dt.timedelta(hours=row[2].hour, minutes=row[2].minute)
