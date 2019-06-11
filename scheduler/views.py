@@ -4,8 +4,9 @@ from datetime import datetime
 from wsgiref.util import FileWrapper
 
 import pandas as pd
+from django.contrib.auth import authenticate, login as log
 from django.core.files.storage import default_storage
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.template import loader
 from django.utils.datastructures import MultiValueDictKeyError
@@ -19,8 +20,29 @@ from scheduler.conflicts_checker import db_conflicts
 from scheduler.export_handlers import export_to_csv, export_to_excel
 from scheduler.model_util import get_professor, get_auditorium, get_group
 from scheduler.models import Auditorium, Lesson, Group, Conflict, Professor
+from zielbruks.settings import LOGIN_REDIRECT_URL
 from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm, \
-    EditForm, MassEditForm, ExportForm
+    EditForm, MassEditForm, LoginForm, ExportForm
+
+
+def login(request: HttpRequest) -> HttpResponse:
+    """Render the login page"""
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['login']
+            password = request.POST['password']
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                if user.is_superuser:
+                    log(request, user)
+                    # Redirect to a success page.
+                    return HttpResponseRedirect(LOGIN_REDIRECT_URL)
+            context = {'error': "Incorrect login or password", 'form': form}
+            return render(request, 'login.html', context)
+        return render(request, 'login.html', context={"form": form})
+    context = {'form': LoginForm()}
+    return render(request, 'login.html', context)
 
 
 def index(request: HttpRequest) -> HttpResponse:
@@ -96,7 +118,7 @@ def show_rooms_schedule(request: HttpRequest) -> HttpResponse:
             auditorium_lessons_list = [(q.start_time.isoformat(timespec='seconds'),
                                         q.end_time.isoformat(timespec='seconds'),
                                         q.name,
-                                        Group.objects.filter(id=q.group_id)[:1].get().number,
+                                        Group.objects.filter(id=q.group_id)[:1].get().name,
                                         room_number,
                                         (q.professor.name + " " + q.professor.surname),
                                         q.auditorium_color,
@@ -131,7 +153,7 @@ def show_professors_schedule(request: HttpRequest) -> HttpResponse:
             professors_lessons_list = [(q.start_time.isoformat(timespec='seconds'),
                                         q.end_time.isoformat(timespec='seconds'),
                                         q.name,
-                                        Group.objects.filter(id=q.group_id)[:1].get().number,
+                                        Group.objects.filter(id=q.group_id)[:1].get().name,
                                         Auditorium.objects.filter(id=q.auditorium_id)[:1]
                                         .get().number,
                                         (q.professor.name + " " + q.professor.surname),
@@ -198,16 +220,6 @@ def show_schedule(request: HttpRequest) -> HttpResponse:
     """Render the schedule page"""
     context = generate_full_schedule_context()
     return render(request, "full_schedule.html", context)
-
-
-def sign_up(request: HttpRequest) -> HttpResponse:
-    """Render the signup page"""
-    return render(request, "still_working.html")
-
-
-def log_in(request: HttpRequest) -> HttpResponse:
-    """Render the login page"""
-    return render(request, "still_working.html")
 
 
 def edit(request: HttpRequest, lesson_id) -> HttpResponse:

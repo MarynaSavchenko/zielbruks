@@ -7,6 +7,12 @@ from django.utils import timezone
 from .models import Auditorium, Professor, Group
 
 
+class LoginForm(forms.Form):
+    """ form to render on login page """
+    login = forms.CharField()
+    password = forms.CharField(widget=forms.PasswordInput())
+
+
 class SelectAuditoriumForm(forms.ModelForm):
     """ form to choose auditorium to show"""
     auditorium = forms.ModelChoiceField(queryset=Auditorium.objects.all(), to_field_name='number')
@@ -47,7 +53,7 @@ class EditForm(forms.Form):
                                         widget=SplitDateTimeWidget(date_attrs={'type': 'date'},
                                                                    time_attrs={'type': 'time'}))
     auditorium = forms.CharField(max_length=100)
-    group = forms.IntegerField(min_value=1)
+    group = forms.CharField(max_length=100)
     professor = forms.CharField(max_length=100)
 
     def clean(self):
@@ -73,7 +79,7 @@ class MassEditForm(forms.Form):
     professor = forms.CharField(max_length=100, required=False)
     auditorium = forms.CharField(max_length=100, widget=forms.TextInput(
         attrs={'size': '5'}), required=False)
-    group = forms.IntegerField(min_value=1, max_value=9999, required=False)
+    group = forms.CharField(max_length=100, required=False)
     start_time = forms.SplitDateTimeField(widget=SplitDateTimeWidget(date_attrs={'type': 'date'},
                                                                      time_attrs={'type': 'time'}),
                                           required=False)

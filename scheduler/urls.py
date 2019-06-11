@@ -7,6 +7,7 @@ from . import views
 
 urlpatterns = [
     path('', views.index, name='index'),
+    path('login/', views.login, name='login'),
     path('calendar/', views.index, name='index'),
     path('calendar/<str:date>', views.index_specific, name='index_specific'),
     path('conflicts/', views.show_conflicts, name='conflicts'),
@@ -16,8 +17,6 @@ urlpatterns = [
          name='show_professors_schedule'),
     path('show_groups_schedule/', views.show_groups_schedule, name='show_groups_schedule'),
     path('show_schedule/', views.show_schedule, name='show_schedule'),
-    path('sign_up/', views.sign_up, name='sign_up'),
-    path('log_in/', views.log_in, name='log_in'),
     path('edit/<int:lesson_id>/', views.edit, name='edit'),
     path('remove/<int:lesson_id>/', views.remove, name='remove'),
     path('create/', views.create, name='create'),

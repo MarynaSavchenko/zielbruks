@@ -1,6 +1,4 @@
 """Models gathering point"""
-from random import randint
-
 from django.db import models
 
 # generated with http://tools.medialab.sciences-po.fr/iwanthue/
@@ -14,6 +12,7 @@ palette = ["#be7349", "#7977ec", "#73e36e", "#dd50b4", "#59ac2e", "#ab70e1", "#b
            "#eb92a2", "#738c4e", "#ce5f46", "#a0b87a", "#c36c6a", "#969448", "#f29278",
            "#89834d", "#e2c988", "#a68347", "#dea573"]
 
+
 def color_from_id(numeric_id, shuffle=False):
     """Selects color by entity id"""
     if shuffle:
@@ -21,6 +20,7 @@ def color_from_id(numeric_id, shuffle=False):
     else:
         colors = palette
     return colors[numeric_id % len(colors)]
+
 
 class Professor(models.Model):
     """Person lecturing in a Lesson"""
@@ -45,7 +45,6 @@ class Professor(models.Model):
     def __str__(self):
         return self.name + " " + self.surname
 
-
     def __eq__(self, other):
         if not isinstance(other, models.Model):
             return False
@@ -63,7 +62,6 @@ class Auditorium(models.Model):
     def __str__(self):
         return str(self.number)
 
-
     def __eq__(self, other):
         if not isinstance(other, models.Model):
             return False
@@ -75,10 +73,10 @@ class Auditorium(models.Model):
 
 class Group(models.Model):
     """Group of Students attending the same courses"""
-    number = models.IntegerField("Group number", unique=True)
+    name = models.CharField("Group name", unique=True, max_length=100)
 
     def __str__(self):
-        return str(self.number)
+        return str(self.name)
 
     def __eq__(self, other):
         if not isinstance(other, models.Model):
@@ -86,7 +84,7 @@ class Group(models.Model):
         if self._meta.concrete_model != other._meta.concrete_model:
             return False
         my_pk = self.pk
-        return my_pk == other.pk and self.number == other.number
+        return my_pk == other.pk and self.name == other.name
 
 
 class Lesson(models.Model):
