@@ -2,10 +2,9 @@
 
 {% block add_event %}
     <style type="text/css">
-        #edit_button {
-            display: none;
+        #create_button{
+            display: inline; float: right;;
         }
-
     </style>
     <div class="modal fade" tabindex="-1" role="dialog" id="modal">
         <div class="modal-dialog" role="document">
@@ -14,10 +13,14 @@
             </div>
         </div>
     </div>
-    <p align="right" id="p_with_buttons">
-        <button class="edit btn btn-primary" type="button" name="button" id="edit_button">Edit event</button>
-        <button class="create btn btn-primary" type="button" name="button">Create event</button>
+    <p id="p_with_buttons">
+        <button class="create btn btn-primary" type="button" name="button" id="create_button">Create event</button>
+        <form id="remove_form" method="post" style="display: inline;">
+            {% csrf_token %}
+        </form>
     </p>
+    <br>
+    <br>
     <script type="text/javascript">
         $(function () {
             $(".create").modalForm({formURL: "{% url 'create' %}"});
@@ -27,18 +30,44 @@
 
 {% block edit_event %}
     dp.onEventClicked = function (args) {
-    document.getElementById("details").innerText = args.e.text();
+        // update details
+        document.getElementById("details").innerText = args.e.text();
 
-    var old_btn = document.getElementById('edit_button');
-    old_btn.parentNode.removeChild(old_btn);
+        // remove old buttons
+        if(document.getElementById('remove_button') != null){
+            var old_btn = document.getElementById('remove_button');
+            old_btn.parentNode.removeChild(old_btn);
+        }
+        if(document.getElementById('edit_button') != null){
+            var old_btn = document.getElementById('edit_button');
+            old_btn.parentNode.removeChild(old_btn);
+        }
 
-    var new_btn = document.createElement("button");
-    new_btn.setAttribute("id", "edit_button");
-    new_btn.setAttribute("class","edit btn btn-primary");
-    new_btn.innerHTML = "Edit event";
-    document.getElementById('p_with_buttons').appendChild(new_btn);
-    $('#edit_button').show();
-    $("#edit_button").modalForm({formURL: "{% url 'edit' lesson_id=123 %}".replace(/123/, args.e.id())});
+        // add edit button
+        var edit_btn = document.createElement("button");
+        edit_btn.setAttribute("id", "edit_button");
+        edit_btn.setAttribute("class","edit btn btn-primary");
+        edit_btn.setAttribute("style", "display: inline; float: right;");
+        edit_btn.innerHTML = "Edit event";
+        document.getElementById('p_with_buttons').appendChild(edit_btn);
+        $("#edit_button").modalForm({formURL: "{% url 'edit' lesson_id=123 %}".replace(/123/, args.e.id())});
+
+
+        // add remove button
+        var remove_btn = document.createElement("input");
+        remove_btn.setAttribute("id", "remove_button");
+        remove_btn.setAttribute("type", "submit");
+        remove_btn.setAttribute("style", "display: inline; float: right;");
+        remove_btn.setAttribute("class", "btn btn-danger");
+        remove_btn.setAttribute("value", "Delete event");
+        remove_btn.onclick = function(e) { if(!confirm('Do you want to remove this lesson?'))
+                                                e.preventDefault();
+                                           else this.form.submit();}
+        document.getElementById('remove_form').appendChild(remove_btn);
+
+        // update form action
+        var url = "{% url 'remove' lesson_id=123 %}".replace(/123/, args.e.id());
+        document.getElementById('remove_form').setAttribute("action", url);
 
     };
 {% endblock edit_event %}

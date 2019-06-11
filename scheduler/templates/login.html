@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container" style="text-align: center">
+        <div class="jumbotron">
+            <h2>Login</h2>
+            <p style="color: red; font-size:100%">You must be logged in to see the site</p>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <p style="color: red; font-size:100%">{{ error }}</p>
+                <button class="create btn btn-primary" type="submit">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        label {
+            width: 15%;
+        }
+    </style>
+
+{% endblock content %}
+
