@@ -5,6 +5,7 @@ from datetime import datetime
 import pandas as pd
 from django.contrib.auth import authenticate, login as log
 from django.core.files.storage import default_storage
+from django.conf import settings
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.template import loader
@@ -19,7 +20,6 @@ from scheduler.calendar_util import get_start_date, generate_conflicts_context, 
 from scheduler.conflicts_checker import db_conflicts
 from scheduler.model_util import get_professor, get_auditorium, get_group
 from scheduler.models import Auditorium, Lesson, Group, Conflict, Professor
-from zielbruks.settings import LOGIN_REDIRECT_URL
 from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm, \
     EditForm, MassEditForm, LoginForm
 
@@ -36,7 +36,7 @@ def login(request: HttpRequest) -> HttpResponse:
                 if user.is_superuser:
                     log(request, user)
                     # Redirect to a success page.
-                    return HttpResponseRedirect(LOGIN_REDIRECT_URL)
+                    return HttpResponseRedirect(settings.LOGIN_REDIRECT_URL)
             context = {'error': "Incorrect login or password", 'form': form}
             return render(request, 'login.html', context)
         return render(request, 'login.html', context={"form": form})
