@@ -127,17 +127,11 @@ class Student(models.Model):
     name = models.CharField("Student name", max_length=100)
     surname = models.CharField("Student surname", max_length=100)
     group = models.ForeignKey(Group, related_name='students', on_delete=models.SET_NULL, null=True)
-    email = models.EmailField("Student email", max_length=100, null=True, blank=True, unique=True)
-    index = models.CharField(max_length=30, null=True)
+    index = models.IntegerField("Index", unique=True)
 
     def save(self, *args, **kwargs):
         self.full_clean()
         return super(Student, self).save(*args, **kwargs)
-
-    def clean(self):
-        """Clean up blank fields to null"""
-        if self.email == "":
-            self.email = None
 
     def __str__(self):
         return self.name + " " + self.surname

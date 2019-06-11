@@ -3,7 +3,8 @@
 {% block navbar %}
         <ul class="nav navbar-nav">
             <li><a href="{% url 'index' %}">Home</a></li>
-            <li><a href="{% url 'upload' %}">Upload</a></li>
+            <li><a href="{% url 'upload_schedule' %}">Upload schedule</a></li>
+            <li><a href="{% url 'upload_students' %}">Upload students</a></li>
             <li><a href="{% url 'show_schedule' %}">Full calendar</a></li>
             <li><a href="{% url 'show_room_schedule' %}">Room's calendar</a></li>
             <li><a href="{% url 'show_professors_schedule' %}">Professor's calendar</a></li>

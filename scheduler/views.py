@@ -64,6 +64,7 @@ def index_specific(_request: HttpRequest, date: str) -> HttpResponse:
 def upload(request: HttpRequest) -> HttpResponse:
     """Render file upload page"""
     filename = None
+    context = {}
     try:
         if request.method == 'POST' and request.FILES['uploaded_file']:
             file = request.FILES['uploaded_file']
@@ -76,7 +77,7 @@ def upload(request: HttpRequest) -> HttpResponse:
                 elif ext == '.xlsx':
                     data = pd.read_excel(file.name)
                 else:
-                    return render(request, "upload.html",
+                    return render(request, "upload_schedule.html",
                                   {'error': "Error: Extension not supported"})
                 added_lessons, incorrect, duplicate = imp.parse_data(data, ext)
                 data_html = data.style \
@@ -86,16 +87,60 @@ def upload(request: HttpRequest) -> HttpResponse:
                                       for _ in x], axis=1) \
                     .render()
                 db_conflicts()
-                return render(request, "upload.html",
-                              {'loaded_data': data_html, 'added': added_lessons})
+                context = {'loaded_data': data_html, 'added': added_lessons}
     except MultiValueDictKeyError:
-        return render(request, "upload.html", {'error': "Error: You didn't select a file"})
+        context = {'error': "Error: You didn't select a file"}
     except XLRDError:
-        return render(request, "upload.html", {'error': "Error: Corrupted file"})
+        context = {'error': "Error: Corrupted file"}
+    except UnicodeDecodeError:
+        context = {'error': "Error: File contains weird symbols"}
+    except imp.ImportSizeException:
+        context = {'error': "Error: Incorrect number of columns"}
     finally:
         if filename:
             default_storage.delete(filename)
-    return render(request, "upload.html")
+    return render(request, "upload_schedule.html", context)
+
+
+def upload_students(request: HttpRequest) -> HttpResponse:
+    """Render file upload page"""
+    filename = None
+    context = {}
+    try:
+        if request.method == 'POST' and request.FILES['uploaded_file']:
+            file = request.FILES['uploaded_file']
+            if isinstance(file.name, str):
+                filename = default_storage.save(file.name, file)
+
+                ext = os.path.splitext(file.name)[1]
+                if ext == '.csv':
+                    data = pd.read_csv(file.name)
+                elif ext == '.xlsx':
+                    data = pd.read_excel(file.name)
+                else:
+                    return render(request, "upload_students.html",
+                                  {'error': "Error: Extension not supported"})
+                added_lessons, incorrect, duplicate = imp.import_students(data)
+                data_html = data.style \
+                    .set_table_attributes('class="table table-striped table-hover table-bordered"')\
+                    .apply(lambda x: [('background: lightcoral' if x.name in incorrect else
+                                       ('background: lightblue' if x.name in duplicate else ''))
+                                      for _ in x], axis=1) \
+                    .render()
+                db_conflicts()
+                context = {'loaded_data': data_html, 'added': added_lessons}
+    except MultiValueDictKeyError:
+        context = {'error': "Error: You didn't select a file"}
+    except XLRDError:
+        context = {'error': "Error: Corrupted file"}
+    except UnicodeDecodeError:
+        context = {'error': "Error: File contains weird symbols"}
+    except imp.ImportSizeException:
+        context = {'error': "Error: Incorrect number of columns"}
+    finally:
+        if filename:
+            default_storage.delete(filename)
+    return render(request, "upload_students.html", context)
 
 
 def show_conflicts(request: HttpRequest) -> HttpResponse:
