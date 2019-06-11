@@ -1,6 +1,7 @@
 """Views gathering point"""
 import os.path
 from datetime import datetime
+from wsgiref.util import FileWrapper
 
 import pandas as pd
 from django.contrib.auth import authenticate, login as log
@@ -16,11 +17,12 @@ from scheduler.calendar_util import get_start_date, generate_conflicts_context, 
     generate_full_schedule_context, generate_full_index_context_with_date, get_group_colors, \
     get_auditoriums_colors, generate_full_index_context, generate_context_for_conflicts_report
 from scheduler.conflicts_checker import db_conflicts
+from scheduler.export_handlers import export_to_csv, export_to_excel
 from scheduler.model_util import get_professor, get_auditorium, get_group
 from scheduler.models import Auditorium, Lesson, Group, Conflict, Professor
 from zielbruks.settings import LOGIN_REDIRECT_URL
 from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm, \
-    EditForm, MassEditForm, LoginForm
+    EditForm, MassEditForm, LoginForm, ExportForm
 
 
 def login(request: HttpRequest) -> HttpResponse:
@@ -397,3 +399,33 @@ def professors(request: HttpRequest) -> HttpResponse:
         else:
             return HttpResponse("AN ERROR OCCURRED")
     return render(request, "professors.html", context)
+
+
+def export(request: HttpRequest) -> HttpResponse:
+    """Render the export page"""
+    if request.META.get('HTTP_REFERER') is None:
+        return redirect('/calendar/')
+    if request.method == 'POST':
+        form = ExportForm(request.POST)
+        if form.is_valid():
+            if is_ajax(request):
+                return render(request, 'export.html', context={"form": form})
+            if form.cleaned_data["start_time"] and form.cleaned_data["end_time"] and \
+                    form.cleaned_data["file_format"] == "csv":
+                temp_file = export_to_csv(form.cleaned_data["start_time"],
+                                          form.cleaned_data["end_time"])
+                file_name = 'schedule.csv'
+            elif form.cleaned_data["start_time"] and form.cleaned_data["end_time"] and \
+                    form.cleaned_data["file_format"] == "excel":
+                temp_file = export_to_excel(form.cleaned_data["start_time"],
+                                            form.cleaned_data["end_time"])
+                file_name = 'schedule.xlsx'
+            else:
+                return render(request, 'export.html', context={"form": form})
+            wrapper = FileWrapper(temp_file)
+            response = HttpResponse(wrapper, content_type='application/vnd.ms-excel')
+            response['Content-Disposition'] = 'attachment; filename=' + file_name
+            return response
+        return render(request, 'export.html', context={"form": form})
+    form = ExportForm()
+    return render(request, 'export.html', context={"form": form})

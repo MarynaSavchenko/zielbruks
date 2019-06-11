@@ -1,8 +1,8 @@
 """Forms"""
 
 from django import forms
-from django.utils import timezone
 from django.forms.widgets import SplitDateTimeWidget
+from django.utils import timezone
 
 from .models import Auditorium, Professor, Group
 
@@ -103,4 +103,29 @@ class MassEditForm(forms.Form):
                 if end == start:
                     self.add_error('end_time', 'End date equals start date.')
 
+        return self.cleaned_data
+
+
+class ExportForm(forms.Form):
+    """ popup form to export plan"""
+    start_time = forms.SplitDateTimeField(initial=timezone.now().replace(second=0),
+                                          widget=SplitDateTimeWidget(date_attrs={'type': 'date'},
+                                                                     time_attrs={'type': 'time'}))
+    end_time = forms.SplitDateTimeField(initial=timezone.now().replace(second=0),
+                                        widget=SplitDateTimeWidget(date_attrs={'type': 'date'},
+                                                                   time_attrs={'type': 'time'}))
+    file_format = forms.ChoiceField(widget=forms.RadioSelect,
+                                    choices=[('excel', 'excel'), ('csv', 'csv')],
+                                    initial='excel')
+
+    def clean(self):
+        try:
+            start = self.cleaned_data['start_time']
+            end = self.cleaned_data['end_time']
+            if end < start:
+                self.add_error('end_time', 'End date before start date.')
+            if end == start:
+                self.add_error('end_time', 'End date equals start date.')
+        except KeyError:
+            raise forms.ValidationError("Fill all the fields!")
         return self.cleaned_data
