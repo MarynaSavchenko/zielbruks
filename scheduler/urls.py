@@ -11,7 +11,7 @@ urlpatterns = [
     path('calendar/', views.index, name='index'),
     path('calendar/<str:date>', views.index_specific, name='index_specific'),
     path('conflicts/', views.show_conflicts, name='conflicts'),
-    path('upload_schedule/', views.upload, name='upload_schedule'),
+    path('upload_schedule/', views.upload_schedule, name='upload_schedule'),
     path('upload_students/', views.upload_students, name='upload_students'),
     path('show_room_schedule/', views.show_rooms_schedule, name='show_room_schedule'),
     path('show_professors_schedule/', views.show_professors_schedule,

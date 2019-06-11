@@ -61,8 +61,8 @@ def index_specific(_request: HttpRequest, date: str) -> HttpResponse:
     return render(_request, 'index.html', context)
 
 
-def upload(request: HttpRequest) -> HttpResponse:
-    """Render file upload page"""
+def upload_schedule(request: HttpRequest) -> HttpResponse:
+    """Render schedule upload page"""
     filename = None
     context: dict = {}
     try:
@@ -103,7 +103,7 @@ def upload(request: HttpRequest) -> HttpResponse:
 
 
 def upload_students(request: HttpRequest) -> HttpResponse:
-    """Render file upload page"""
+    """Render students upload page"""
     filename = None
     context: dict = {}
     try:
