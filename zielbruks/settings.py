@@ -10,9 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 import os
+import djcelery
 from typing import List
-from celery.schedules import crontab
 from scheduler.task import notify_professors
+djcelery.setup_loader()
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
@@ -37,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'bootstrap_modal_forms',
     'djcelery_email',
+    'djcelery',
+    'django_celery_beat',
     'scheduler',
 ]
 
@@ -144,10 +148,5 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
-CELERY_BEAT_SCHEDULE = {
-    'notify_professors': {
-        'task': 'notify_professors',
-        'schedule': crontab()
-    }
-}
+CELERY_BEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 # 'schedule': crontab(minute='0', hour='0', day_of_week='monday')
