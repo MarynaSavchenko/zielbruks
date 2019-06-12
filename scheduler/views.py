@@ -163,7 +163,7 @@ def show_rooms_schedule(request: HttpRequest) -> HttpResponse:
             room_lessons_list = [(q.start_time.isoformat(timespec='seconds'),
                                   q.end_time.isoformat(timespec='seconds'),
                                   q.name,
-                                  Group.objects.filter(id=q.group_id)[:1].get().number,
+                                  Group.objects.filter(id=q.group_id)[:1].get().name,
                                   room_number,
                                   (q.professor.name + " " + q.professor.surname),
                                   q.room_color,
