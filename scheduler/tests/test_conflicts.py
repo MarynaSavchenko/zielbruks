@@ -4,7 +4,7 @@ import datetime
 
 from django.test import TestCase
 
-from scheduler.models import Lesson, Professor, Group, Auditorium, Conflict
+from scheduler.models import Lesson, Professor, Group, Room, Conflict
 from scheduler.conflicts_checker import db_conflicts
 
 class NoConflictsTestCase(TestCase):
@@ -16,13 +16,13 @@ class NoConflictsTestCase(TestCase):
 
     def test_database_with_no_conflicts(self):
         """Test on a database with two lessons that are not overlapping"""
-        auditorium = Auditorium.objects.create(number="1.11a")
+        room = Room.objects.create(number="1.11a")
         professor = Professor.objects.create(name="John", surname="Doe")
         group = Group.objects.create(name="1")
         Lesson.objects.create(
             name="Lesson1",
             professor=professor,
-            auditorium=auditorium,
+            room=room,
             group=group,
             start_time=datetime.datetime(2019, 5, 11, 12, 00),
             end_time=datetime.datetime(2019, 5, 11, 13, 30)
@@ -30,7 +30,7 @@ class NoConflictsTestCase(TestCase):
         Lesson.objects.create(
             name="Lesson2",
             professor=professor,
-            auditorium=auditorium,
+            room=room,
             group=group,
             start_time=datetime.datetime(2019, 5, 11, 14, 00),
             end_time=datetime.datetime(2019, 5, 11, 16, 30)
@@ -45,7 +45,7 @@ class OverlappingLessonsConflictsTestCase(TestCase):
         self.first_lesson = Lesson.objects.create(
             name="First lesson",
             professor=self.professor,
-            auditorium=Auditorium.objects.create(number="1.11a"),
+            room=Room.objects.create(number="1.11a"),
             group=Group.objects.create(name="1"),
             start_time=datetime.datetime(2019, 5, 11, 12, 00),
             end_time=datetime.datetime(2019, 5, 11, 13, 30)
@@ -53,7 +53,7 @@ class OverlappingLessonsConflictsTestCase(TestCase):
         self.middle_lesson = Lesson.objects.create(
             name="Middle lesson",
             professor=self.professor,
-            auditorium=Auditorium.objects.create(number="1.11b"),
+            room=Room.objects.create(number="1.11b"),
             group=Group.objects.create(name="2"),
             start_time=datetime.datetime(2019, 5, 11, 13, 00),
             end_time=datetime.datetime(2019, 5, 11, 17, 00)
@@ -61,7 +61,7 @@ class OverlappingLessonsConflictsTestCase(TestCase):
         self.last_lesson = Lesson.objects.create(
             name="Last lesson",
             professor=self.professor,
-            auditorium=Auditorium.objects.create(number="1.11c"),
+            room=Room.objects.create(number="1.11c"),
             group=Group.objects.create(name="3"),
             start_time=datetime.datetime(2019, 5, 11, 15, 00),
             end_time=datetime.datetime(2019, 5, 11, 16, 30)
@@ -98,12 +98,12 @@ class OverlappingConflictsTypeTestCase(TestCase):
     """Class testing conflicts for the conflict types that are listed"""
     def setUp(self):
         self.professor = Professor.objects.create(name="John", surname="Doe")
-        self.auditorium = Auditorium.objects.create(number="1.11a")
+        self.room = Room.objects.create(number="1.11a")
         self.group = Group.objects.create(name="1")
         self.first_lesson = Lesson.objects.create(
             name="First lesson",
             professor=self.professor,
-            auditorium=self.auditorium,
+            room=self.room,
             group=self.group,
             start_time=datetime.datetime(2019, 5, 11, 12, 00),
             end_time=datetime.datetime(2019, 5, 11, 13, 30)
@@ -111,7 +111,7 @@ class OverlappingConflictsTypeTestCase(TestCase):
         self.second_lesson = Lesson.objects.create(
             name="Second lesson",
             professor=self.professor,
-            auditorium=self.auditorium,
+            room=self.room,
             group=self.group,
             start_time=datetime.datetime(2019, 5, 11, 13, 00),
             end_time=datetime.datetime(2019, 5, 11, 15, 00)
@@ -126,13 +126,13 @@ class OverlappingConflictsTypeTestCase(TestCase):
                                                      object_id=self.professor.id)),
                          1)
 
-    def test_overlapping_auditorium(self):
-        """Test when conflict is for auditorium"""
+    def test_overlapping_room(self):
+        """Test when conflict is for room"""
         db_conflicts()
         self.assertEqual(len(Conflict.objects.filter(first_lesson=self.first_lesson,
                                                      second_lesson=self.second_lesson,
-                                                     conflict_type='AUDITORIUM',
-                                                     object_id=self.auditorium.id)),
+                                                     conflict_type='ROOM',
+                                                     object_id=self.room.id)),
                          1)
 
     def test_overlapping_group(self):
@@ -151,7 +151,7 @@ class CorrectnessOfAmountOfIncorrectDataListedTestCase(TestCase):
         self.first_lesson = Lesson.objects.create(
             name="First lesson",
             professor=self.professor,
-            auditorium=Auditorium.objects.create(number="1.11a"),
+            room=Room.objects.create(number="1.11a"),
             group=Group.objects.create(name="1"),
             start_time=datetime.datetime(2019, 5, 11, 12, 00),
             end_time=datetime.datetime(2019, 5, 11, 13, 30)
@@ -159,7 +159,7 @@ class CorrectnessOfAmountOfIncorrectDataListedTestCase(TestCase):
         self.second_lesson = Lesson.objects.create(
             name="Second lesson",
             professor=self.professor,
-            auditorium=Auditorium.objects.create(number="1.11b"),
+            room=Room.objects.create(number="1.11b"),
             group=Group.objects.create(name="2"),
             start_time=datetime.datetime(2019, 5, 11, 13, 00),
             end_time=datetime.datetime(2019, 5, 11, 15, 00)

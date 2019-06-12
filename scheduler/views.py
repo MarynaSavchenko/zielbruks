@@ -19,10 +19,10 @@ from scheduler.calendar_util import get_start_date, generate_conflicts_context, 
 from scheduler.conflicts_checker import db_conflicts, conflicts_diff
 from scheduler.model_util import get_professor, get_room, get_group
 from scheduler.models import Room, Lesson, Group, Conflict, Professor
+from scheduler.export_handlers import export_to_csv, export_to_excel
+from zielbruks.settings import LOGIN_REDIRECT_URL
 from .forms import SelectRoomForm, SelectProfessorForm, SelectGroupForm, \
     EditForm, MassEditForm, LoginForm, ExportForm
-from zielbruks.settings import LOGIN_REDIRECT_URL
-from scheduler.export_handlers import export_to_csv, export_to_excel
 
 
 def login(request: HttpRequest) -> HttpResponse:

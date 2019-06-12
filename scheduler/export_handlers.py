@@ -3,7 +3,7 @@ from tempfile import NamedTemporaryFile
 
 import pandas as pd
 
-from scheduler.models import Lesson, Group, Auditorium
+from scheduler.models import Lesson, Group, Room
 
 
 def export_to_csv(start_time, end_time):
@@ -30,7 +30,7 @@ def get_lessons(start_time, end_time, iscsv):
                 q.name,
                 (q.professor.name + " " + q.professor.surname),
                 Group.objects.filter(id=q.group_id)[:1].get().name,
-                Auditorium.objects.filter(id=q.auditorium_id)[:1].get().number,)
+                Room.objects.filter(id=q.auditorium_id)[:1].get().number,)
                for q in lessons_query]
     return pd.DataFrame(lessons,
                         columns=['Date', 'Start time', 'End time', 'Lesson', 'Professor', 'Group',
