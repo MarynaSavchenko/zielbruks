@@ -35,10 +35,9 @@
 {% block edit_event %}
     dp.onEventClicked = function (args) {
     // update details
-    args.e.backColor = "#B6D7A8";
 
     document.getElementById("details").innerText = "Selected event: " + args.e.text() + ", date: "+
-    args.e.start().toString("d/M/yyyy");
+    args.e.start().toString("d-M-yyyy");
 
 
 
