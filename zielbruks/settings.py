@@ -10,8 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 import os
-import djcelery
 from typing import List
+import djcelery
 from scheduler.task import notify_professors
 djcelery.setup_loader()
 
