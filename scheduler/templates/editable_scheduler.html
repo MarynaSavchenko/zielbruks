@@ -36,46 +36,44 @@
     dp.onEventClicked = function (args) {
     // update details
 
-    document.getElementById("details").innerText = "Selected event: " + args.e.text() + ", date: "+
-    args.e.start().toString("d-M-yyyy");
+        document.getElementById("details").innerText = "Selected event: " + args.e.text() + ", date: "+
+        args.e.start().toString("d-M-yyyy");
+
+        // remove old buttons
+        if(document.getElementById('remove_button') != null){
+            var old_btn = document.getElementById('remove_button');
+            old_btn.parentNode.removeChild(old_btn);
+        }
+        if(document.getElementById('edit_button') != null){
+            var old_btn = document.getElementById('edit_button');
+            old_btn.parentNode.removeChild(old_btn);
+        }
+
+        // add edit button
+        var edit_btn = document.createElement("button");
+        edit_btn.setAttribute("id", "edit_button");
+        edit_btn.setAttribute("class","edit btn btn-primary");
+        edit_btn.setAttribute("style", "display: inline; float: right;");
+        edit_btn.innerHTML = "Edit event";
+        document.getElementById('p_with_buttons').appendChild(edit_btn);
+        $("#edit_button").modalForm({formURL: "{% url 'edit' lesson_id=123 %}".replace(/123/, args.e.id())});
 
 
+        // add remove button
+        var remove_btn = document.createElement("input");
+        remove_btn.setAttribute("id", "remove_button");
+        remove_btn.setAttribute("type", "submit");
+        remove_btn.setAttribute("style", "display: inline; float: right;");
+        remove_btn.setAttribute("class", "btn btn-danger");
+        remove_btn.setAttribute("value", "Delete event");
+        remove_btn.onclick = function(e) { if(!confirm('Do you want to remove this lesson?'))
+        e.preventDefault();
+        else this.form.submit();}
+        document.getElementById('remove_form').appendChild(remove_btn);
 
-    // remove old buttons
-    if(document.getElementById('remove_button') != null){
-    var old_btn = document.getElementById('remove_button');
-    old_btn.parentNode.removeChild(old_btn);
-    }
-    if(document.getElementById('edit_button') != null){
-    var old_btn = document.getElementById('edit_button');
-    old_btn.parentNode.removeChild(old_btn);
-    }
-
-    // add edit button
-    var edit_btn = document.createElement("button");
-    edit_btn.setAttribute("id", "edit_button");
-    edit_btn.setAttribute("class","edit btn btn-primary");
-    edit_btn.setAttribute("style", "display: inline; float: right;");
-    edit_btn.innerHTML = "Edit event";
-    document.getElementById('p_with_buttons').appendChild(edit_btn);
-    $("#edit_button").modalForm({formURL: "{% url 'edit' lesson_id=123 %}".replace(/123/, args.e.id())});
-
-
-    // add remove button
-    var remove_btn = document.createElement("input");
-    remove_btn.setAttribute("id", "remove_button");
-    remove_btn.setAttribute("type", "submit");
-    remove_btn.setAttribute("style", "display: inline; float: right;");
-    remove_btn.setAttribute("class", "btn btn-danger");
-    remove_btn.setAttribute("value", "Delete event");
-    remove_btn.onclick = function(e) { if(!confirm('Do you want to remove this lesson?'))
-    e.preventDefault();
-    else this.form.submit();}
-    document.getElementById('remove_form').appendChild(remove_btn);
-
-    // update form action
-    var url = "{% url 'remove' lesson_id=123 %}".replace(/123/, args.e.id());
-    document.getElementById('remove_form').setAttribute("action", url);
+        // update form action
+        var url = "{% url 'remove' lesson_id=123 %}".replace(/123/, args.e.id());
+        document.getElementById('remove_form').setAttribute("action", url);
 
     };
 {% endblock edit_event %}
