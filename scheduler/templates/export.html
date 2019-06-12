@@ -6,9 +6,7 @@
             <span aria-hidden="true">&times;</span>
         </button>
         <h5 class="modal-title">
-            {% if form.id.value %}Edit Lesson
-            {% else %}Create Lesson
-            {% endif %}
+            Export
         </h5>
     </div>
 
@@ -16,11 +14,11 @@
         {% for field in form %}
             <div class="form-group{% if field.errors %} invalid{% endif %}">
                 {% if not field.is_hidden %}
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                <label class="control-label col-sm-2" for="{{ field.id_for_label }}">{{ field.label }}</label>
                 {% endif %}
-                {{ field }}
+                <p style="text-align: right;">{{ field }}</p>
                 {% for error in field.errors %}
-                    <p class="help-block">{{ error }}</p>
+                    <p class="help-block" style="color: red;">{{ error }}</p>
                 {% endfor %}
             </div>
         {% endfor %}
