@@ -5,7 +5,7 @@ from django.db.models import QuerySet
 
 from scheduler.conflicts_checker import conflicts_diff
 from scheduler.forms import MassEditForm
-from scheduler.models import Lesson, Auditorium, Group, Conflict, color_from_id
+from scheduler.models import Lesson, Room, Group, Conflict, color_from_id
 
 
 def get_start_date(lessons: QuerySet):
@@ -26,9 +26,9 @@ def generate_full_schedule_context():
                      q.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
                      q.name,
                      Group.objects.filter(id=q.group_id)[:1].get().name,
-                     Auditorium.objects.filter(id=q.auditorium_id)[:1].get().number,
+                     Room.objects.filter(id=q.room_id)[:1].get().number,
                      (q.professor.name + " " + q.professor.surname),
-                     q.auditorium_color,
+                     q.room_color,
                      q.group_color,
                      q.id,
                      q.start_time.strftime("%H:%M") + "-" + q.end_time.strftime("%H:%M"))
@@ -42,7 +42,7 @@ def generate_full_schedule_context():
         'type': 'all',
         'name': 'lessons',
         "groups_colors": get_group_colors(),
-        "auditoriums_colors": get_auditoriums_colors(),
+        "rooms_colors": get_rooms_colors(),
     }
     return context
 
@@ -80,16 +80,17 @@ def generate_full_index_context():
     return context
 
 
-def get_auditoriums_colors():
-    """Returns list of tuples of auditoriums names and colors"""
+def get_rooms_colors():
+    """Returns list of tuples of rooms names and colors"""
     return [(a.number, color_from_id(a.id))
-            for a in Auditorium.objects.all()]
+            for a in Room.objects.all()]
 
 
 def get_group_colors():
     """Returns list of tuples of groups names and colors"""
     return [(g.name, color_from_id(g.id, True))
             for g in Group.objects.all()]
+
 
 def generate_context_for_conflicts_report(past_conflicts, current_conflicts):
     """Returns context dict based on list of past conflicts and current conflicts"""

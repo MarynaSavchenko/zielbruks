@@ -1,6 +1,7 @@
 """Views gathering point"""
 import os.path
 from datetime import datetime
+from wsgiref.util import FileWrapper
 
 import pandas as pd
 from django.contrib.auth import authenticate, login as log
@@ -16,12 +17,14 @@ from xlrd import XLRDError
 import scheduler.import_handlers as imp
 from scheduler.calendar_util import get_start_date, generate_conflicts_context, \
     generate_full_schedule_context, generate_full_index_context_with_date, get_group_colors, \
-    get_auditoriums_colors, generate_full_index_context, generate_context_for_conflicts_report
-from scheduler.conflicts_checker import db_conflicts
-from scheduler.model_util import get_professor, get_auditorium, get_group
-from scheduler.models import Auditorium, Lesson, Group, Conflict, Professor
-from .forms import SelectAuditoriumForm, SelectProfessorForm, SelectGroupForm, \
-    EditForm, MassEditForm, LoginForm
+    get_rooms_colors, generate_full_index_context, generate_context_for_conflicts_report
+from scheduler.conflicts_checker import db_conflicts, conflicts_diff
+from scheduler.model_util import get_professor, get_room, get_group
+from scheduler.models import Room, Lesson, Group, Conflict, Professor
+from scheduler.export_handlers import export_to_csv, export_to_excel
+from .forms import SelectRoomForm, SelectProfessorForm, SelectGroupForm, \
+    EditForm, MassEditForm, LoginForm, ExportForm
+
 
 
 def login(request: HttpRequest) -> HttpResponse:
@@ -107,39 +110,39 @@ def show_conflicts(request: HttpRequest) -> HttpResponse:
 
 
 def show_rooms_schedule(request: HttpRequest) -> HttpResponse:
-    """Render the auditorium schedule page"""
+    """Render the room schedule page"""
     if request.method == 'POST':
-        form = SelectAuditoriumForm(request.POST)
+        form = SelectRoomForm(request.POST)
         if form.is_valid():
-            room = form.cleaned_data['auditorium']
+            room = form.cleaned_data['room']
             room_number = room.number
-            auditorium_lessons_query = Lesson.objects.filter(auditorium=room)
-            auditorium_lessons_list = [(q.start_time.isoformat(timespec='seconds'),
-                                        q.end_time.isoformat(timespec='seconds'),
-                                        q.name,
-                                        Group.objects.filter(id=q.group_id)[:1].get().name,
-                                        room_number,
-                                        (q.professor.name + " " + q.professor.surname),
-                                        q.auditorium_color,
-                                        q.group_color,
-                                        q.id,
-                                        q.start_time.strftime("%H:%M") + "-"
-                                        + q.end_time.strftime("%H:%M"))
-                                       for q in auditorium_lessons_query]
+            room_lessons_query = Lesson.objects.filter(room=room)
+            room_lessons_list = [(q.start_time.isoformat(timespec='seconds'),
+                                  q.end_time.isoformat(timespec='seconds'),
+                                  q.name,
+                                  Group.objects.filter(id=q.group_id)[:1].get().number,
+                                  room_number,
+                                  (q.professor.name + " " + q.professor.surname),
+                                  q.room_color,
+                                  q.group_color,
+                                  q.id,
+                                  q.start_time.strftime("%H:%M") + "-"
+                                  + q.end_time.strftime("%H:%M"))
+                                 for q in room_lessons_query]
             context = {
                 'form': form,
                 'chosen_flag': True,
-                'events_flag': bool(auditorium_lessons_list),
-                'type': 'auditorium',
+                'events_flag': bool(room_lessons_list),
+                'type': 'room',
                 'name': room_number,
-                'events': auditorium_lessons_list,
-                'start_date': get_start_date(auditorium_lessons_query),
+                'events': room_lessons_list,
+                'start_date': get_start_date(room_lessons_query),
                 "groups_colors": get_group_colors(),
-                "auditoriums_colors": get_auditoriums_colors(),
+                "rooms_colors": get_rooms_colors(),
             }
             return render(request, "room_schedule.html", context)
         return HttpResponse("AN ERROR OCCURRED")
-    return render(request, "room_schedule.html", context={'form': SelectAuditoriumForm()})
+    return render(request, "room_schedule.html", context={'form': SelectRoomForm()})
 
 
 def show_professors_schedule(request: HttpRequest) -> HttpResponse:
@@ -153,10 +156,10 @@ def show_professors_schedule(request: HttpRequest) -> HttpResponse:
                                         q.end_time.isoformat(timespec='seconds'),
                                         q.name,
                                         Group.objects.filter(id=q.group_id)[:1].get().name,
-                                        Auditorium.objects.filter(id=q.auditorium_id)[:1]
+                                        Room.objects.filter(id=q.room_id)[:1]
                                         .get().number,
                                         (q.professor.name + " " + q.professor.surname),
-                                        q.auditorium_color,
+                                        q.room_color,
                                         q.group_color,
                                         q.id,
                                         q.start_time.strftime("%H:%M") + "-"
@@ -172,7 +175,7 @@ def show_professors_schedule(request: HttpRequest) -> HttpResponse:
                 'lessons': Lesson.objects.all(),
                 'start_date': get_start_date(professors_lessons_query),
                 "groups_colors": get_group_colors(),
-                "auditoriums_colors": get_auditoriums_colors(),
+                "rooms_colors": get_rooms_colors(),
             }
             return render(request, "professors_scheduler.html", context)
         return HttpResponse("AN ERROR OCCURRED")
@@ -190,9 +193,9 @@ def show_groups_schedule(request: HttpRequest) -> HttpResponse:
                                     q.end_time.isoformat(timespec='seconds'),
                                     q.name,
                                     group,
-                                    Auditorium.objects.filter(id=q.auditorium_id)[:1].get().number,
+                                    Room.objects.filter(id=q.room_id)[:1].get().number,
                                     (q.professor.name + " " + q.professor.surname),
-                                    q.auditorium_color,
+                                    q.room_color,
                                     q.group_color,
                                     q.id,
                                     q.start_time.strftime("%H:%M") + "-"
@@ -208,7 +211,7 @@ def show_groups_schedule(request: HttpRequest) -> HttpResponse:
                 'lessons': Lesson.objects.all(),
                 'start_date': get_start_date(groups_lessons_query),
                 "groups_colors": get_group_colors(),
-                "auditoriums_colors": get_auditoriums_colors(),
+                "rooms_colors": get_rooms_colors(),
             }
             return render(request, "groups_scheduler.html", context)
         return HttpResponse("AN ERROR OCCURRED")
@@ -229,14 +232,14 @@ def edit(request: HttpRequest, lesson_id) -> HttpResponse:
         form = EditForm(request.POST)
         if form.is_valid():
             if is_ajax(request):
-                return render(request, 'edit.html', context={"form": form})
+                return render(request, 'popup.html', context={"form": form})
 
             past_conflicts = list(Conflict.objects.all())
             lesson = Lesson.objects.get(id=form.cleaned_data['id'])
             lesson.name = form.cleaned_data['name']
             professor = form.cleaned_data['professor'].strip().split()
             lesson.professor = get_professor(professor[0], professor[1])
-            lesson.auditorium = get_auditorium(form.cleaned_data['auditorium'])
+            lesson.room = get_room(form.cleaned_data['room'])
             lesson.group = get_group(form.cleaned_data['group'])
             lesson.start_time = form.cleaned_data['start_time']
             lesson.end_time = form.cleaned_data['end_time']
@@ -246,13 +249,13 @@ def edit(request: HttpRequest, lesson_id) -> HttpResponse:
             current_conflicts = list(context['conflicts'])
             context.update(generate_context_for_conflicts_report(past_conflicts, current_conflicts))
             return render(request, 'index.html', context=context)
-        return render(request, 'edit.html', context={"form": form})
+        return render(request, 'popup.html', context={"form": form})
     lesson = Lesson.objects.get(id=lesson_id)
     form = EditForm(
         initial={'id': lesson.id, 'name': lesson.name, 'professor': lesson.professor,
-                 'auditorium': lesson.auditorium, 'group': lesson.group,
+                 'room': lesson.room, 'group': lesson.group,
                  'start_time': lesson.start_time, 'end_time': lesson.end_time})
-    return render(request, 'edit.html', context={"form": form})
+    return render(request, 'popup.html', context={"form": form})
 
 
 def create(request: HttpRequest) -> HttpResponse:
@@ -263,17 +266,17 @@ def create(request: HttpRequest) -> HttpResponse:
         form = EditForm(request.POST)
         if form.is_valid():
             if is_ajax(request):
-                return render(request, 'edit.html', context={"form": form})
+                return render(request, 'popup.html', context={"form": form})
 
             past_conflicts = list(Conflict.objects.all())
             professor = form.cleaned_data['professor'].strip().split()
             professor = get_professor(professor[0], professor[1])
-            auditorium = get_auditorium(form.cleaned_data['auditorium'])
+            room = get_room(form.cleaned_data['room'])
             group = get_group(form.cleaned_data['group'])
             Lesson.objects.get_or_create(
                 name=form.cleaned_data['name'],
                 professor=professor,
-                auditorium=auditorium,
+                room=room,
                 group=group,
                 start_time=form.cleaned_data['start_time'],
                 end_time=form.cleaned_data['end_time']
@@ -283,8 +286,8 @@ def create(request: HttpRequest) -> HttpResponse:
             current_conflicts = list(context['conflicts'])
             context.update(generate_context_for_conflicts_report(past_conflicts, current_conflicts))
             return render(request, 'index.html', context=context)
-        return render(request, 'edit.html', context={"form": form})
-    return render(request, 'edit.html', context={"form": EditForm()})
+        return render(request, 'popup.html', context={"form": form})
+    return render(request, 'popup.html', context={"form": EditForm()})
 
 
 def remove(request: HttpRequest, lesson_id) -> HttpResponse:
@@ -335,8 +338,8 @@ def edit_lessons(request: HttpRequest) -> HttpResponse:
             if form.cleaned_data['professor']:
                 professor = form.cleaned_data['professor'].strip().split()
                 changes['professor'] = get_professor(professor[0], professor[1])
-            if form.cleaned_data['auditorium']:
-                changes['auditorium'] = get_auditorium(form.cleaned_data['auditorium'])
+            if form.cleaned_data['room']:
+                changes['room'] = get_room(form.cleaned_data['room'])
             if form.cleaned_data['group']:
                 changes['group'] = get_group(form.cleaned_data['group'])
             if form.cleaned_data['start_time']:
@@ -398,3 +401,33 @@ def professors(request: HttpRequest) -> HttpResponse:
         else:
             return HttpResponse("AN ERROR OCCURRED")
     return render(request, "professors.html", context)
+
+
+def export(request: HttpRequest) -> HttpResponse:
+    """Render the export page"""
+    if request.META.get('HTTP_REFERER') is None:
+        return redirect('/calendar/')
+    if request.method == 'POST':
+        form = ExportForm(request.POST)
+        if form.is_valid():
+            if is_ajax(request):
+                return render(request, 'popup.html', context={"form": form, "export": True})
+            if form.cleaned_data["start_time"] and form.cleaned_data["end_time"] and \
+                    form.cleaned_data["file_format"] == "csv":
+                temp_file = export_to_csv(form.cleaned_data["start_time"],
+                                          form.cleaned_data["end_time"])
+                file_name = 'schedule.csv'
+            elif form.cleaned_data["start_time"] and form.cleaned_data["end_time"] and \
+                    form.cleaned_data["file_format"] == "excel":
+                temp_file = export_to_excel(form.cleaned_data["start_time"],
+                                            form.cleaned_data["end_time"])
+                file_name = 'schedule.xlsx'
+            else:
+                return render(request, 'popup.html', context={"form": form, "export": True})
+            wrapper = FileWrapper(temp_file)
+            response = HttpResponse(wrapper, content_type='application/vnd.ms-excel')
+            response['Content-Disposition'] = 'attachment; filename=' + file_name
+            return response
+        return render(request, 'popup.html', context={"form": form, "export": True})
+    form = ExportForm()
+    return render(request, 'popup.html', context={"form": form, "export": True})

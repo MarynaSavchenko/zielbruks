@@ -3,21 +3,25 @@
     {% if chosen_flag %}
 
         <h2>Schedule for {{ type }} {{ name }}</h2>
+        <div>
+            {% block add_event %}{% endblock add_event %}
+            {% block export_plan %}{% endblock export_plan %}
+        </div>
 
-        {% block add_event %}{% endblock add_event %}
 
         <div>
             <div style="float:left; width: 150px; ">
                 <div id="nav"></div>
             </div>
-            <div style="float:right; width: 160px; padding: 5px; height: 460px; overflow-y: scroll;" class="panel panel-default" class="panel panel-default">
+            <div style="float:right; width: 160px; padding: 5px; height: 460px; overflow-y: scroll;"
+                 class="panel panel-default" class="panel panel-default">
                 <div class="col-sm-9">
                     <h4 class="title">Legend</h4>
                     <p class="text">
-                        Auditoriums <br/>
+                        Rooms <br/>
                         (background): <br/>
                     <ul>
-                        {% for a in auditoriums_colors %}
+                        {% for a in rooms_colors %}
                             <li style="color:{{ a.1 }}; font-size: 150%;"><span
                                     style="color:black; font-size: 50%;">{{ a.0 }}</span></li>
                         {% endfor %}
@@ -70,21 +74,21 @@
             dp.days = 2;
             dp.businessBeginsHour = 7;
             dp.events.list = [
-            {% for e in events %}
-                {
-                    start: new DayPilot.Date("{{ e.0 }}"),
-                    end: new DayPilot.Date("{{ e.1 }}"),
-                    id: {{ e.8 }},
-                    text: "{{ e.9 }}\
+                {% for e in events %}
+                    {
+                        start: new DayPilot.Date("{{ e.0 }}"),
+                        end: new DayPilot.Date("{{ e.1 }}"),
+                        id: {{ e.8 }},
+                        text: "{{ e.9 }}\
                         {{ e.2 }},\
                         group: {{ e.3 }},\
                         place: {{ e.4 }},\
                         professor: {{ e.5 }}",
-                    backColor: "{{ e.6 }}",
-                    barColor: "{{ e.7 }}",
-                    barBackColor: "{{ e.7 }}"
-                },
-            {% endfor %}
+                        backColor: "{{ e.6 }}",
+                        barColor: "{{ e.7 }}",
+                        barBackColor: "{{ e.7 }}"
+                    },
+                {% endfor %}
             ];
             dp.eventClickHandling = "Enabled";
             dp.eventMoveHandling = "Disabled";
@@ -94,6 +98,7 @@
             };
 
             {% block edit_event %}{% endblock edit_event %}
+
 
             dp.init()
 

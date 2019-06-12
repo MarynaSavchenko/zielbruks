@@ -17,3 +17,4 @@ watchdog
 django-celery
 django_celery_beat
 django-celery-email
+openpyxl==2.6.2
