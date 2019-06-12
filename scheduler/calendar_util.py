@@ -3,7 +3,6 @@ import datetime
 
 from django.db.models import QuerySet
 
-from scheduler import conflicts_checker, models
 from scheduler.conflicts_checker import conflicts_diff
 from scheduler.forms import MassEditForm
 from scheduler.models import Lesson, Room, Group, Conflict, color_from_id

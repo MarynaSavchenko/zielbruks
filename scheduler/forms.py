@@ -16,6 +16,12 @@ class SelectRoomForm(forms.ModelForm):
         fields: list = []
 
 
+class LoginForm(forms.Form):
+    """ form to render on login page """
+    login = forms.CharField()
+    password = forms.CharField(widget=forms.PasswordInput())
+
+
 class SelectProfessorForm(forms.ModelForm):
     """ form to choose professor to show their schedule"""
     professor = forms.ModelChoiceField(queryset=Professor.objects.all(), to_field_name='id')

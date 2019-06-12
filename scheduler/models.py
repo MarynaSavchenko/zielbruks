@@ -1,6 +1,4 @@
 """Models gathering point"""
-from random import randint
-
 from django.db import models
 
 # generated with http://tools.medialab.sciences-po.fr/iwanthue/

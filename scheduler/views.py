@@ -3,6 +3,7 @@ import os.path
 from datetime import datetime
 
 import pandas as pd
+from django.contrib.auth import authenticate, login as log
 from django.core.files.storage import default_storage
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
@@ -18,7 +19,28 @@ from scheduler.conflicts_checker import db_conflicts, conflicts_diff
 from scheduler.model_util import get_professor, get_room, get_group
 from scheduler.models import Room, Lesson, Group, Conflict, Professor
 from .forms import SelectRoomForm, SelectProfessorForm, SelectGroupForm, \
-    EditForm, MassEditForm
+    EditForm, MassEditForm, LoginForm
+from zielbruks.settings import LOGIN_REDIRECT_URL
+
+
+def login(request: HttpRequest) -> HttpResponse:
+    """Render the login page"""
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['login']
+            password = request.POST['password']
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                if user.is_superuser:
+                    log(request, user)
+                    # Redirect to a success page.
+                    return HttpResponseRedirect(LOGIN_REDIRECT_URL)
+            context = {'error': "Incorrect login or password", 'form': form}
+            return render(request, 'login.html', context)
+        return render(request, 'login.html', context={"form": form})
+    context = {'form': LoginForm()}
+    return render(request, 'login.html', context)
 
 
 def index(request: HttpRequest) -> HttpResponse:
@@ -196,16 +218,6 @@ def show_schedule(request: HttpRequest) -> HttpResponse:
     """Render the schedule page"""
     context = generate_full_schedule_context()
     return render(request, "full_schedule.html", context)
-
-
-def sign_up(request: HttpRequest) -> HttpResponse:
-    """Render the signup page"""
-    return render(request, "still_working.html")
-
-
-def log_in(request: HttpRequest) -> HttpResponse:
-    """Render the login page"""
-    return render(request, "still_working.html")
 
 
 def edit(request: HttpRequest, lesson_id) -> HttpResponse:
