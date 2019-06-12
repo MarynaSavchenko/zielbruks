@@ -5,6 +5,8 @@ from django.urls import path
 
 from . import views
 
+print("Secret key is " + settings.SECRET_KEY)
+
 urlpatterns = [
     path('', views.index, name='index'),
     path('login/', views.login, name='login'),
