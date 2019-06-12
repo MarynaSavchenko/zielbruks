@@ -18,7 +18,7 @@ from scheduler.calendar_util import get_start_date, generate_conflicts_context, 
     get_rooms_colors, generate_full_index_context, generate_context_for_conflicts_report
 from scheduler.conflicts_checker import db_conflicts, conflicts_diff
 from scheduler.model_util import get_professor, get_room, get_group
-from scheduler.models import Room, Lesson, Group, Conflict, Professor
+from scheduler.models import Room, Lesson, Group, Conflict, Professor, Student
 from scheduler.export_handlers import export_to_csv, export_to_excel
 from zielbruks.settings import LOGIN_REDIRECT_URL
 from .forms import SelectRoomForm, SelectProfessorForm, SelectGroupForm, \
@@ -474,3 +474,20 @@ def export(request: HttpRequest) -> HttpResponse:
         return render(request, 'popup.html', context={"form": form, "export": True})
     form = ExportForm()
     return render(request, 'popup.html', context={"form": form, "export": True})
+
+
+def view_students(request: HttpRequest) -> HttpResponse:
+    """Render the group schedule page"""
+    if request.method == 'POST':
+        form = SelectGroupForm(request.POST)
+        if form.is_valid():
+            group = form.cleaned_data['group']
+            group_students_query = Student.objects.filter(group=group)
+            students = [(q.index, q.name, q.surname) for q in group_students_query]
+            context = {
+                'form': form,
+                'students': students
+            }
+            return render(request, "students.html", context)
+        return HttpResponse("AN ERROR OCCURRED")
+    return render(request, "students.html", context={'form': SelectGroupForm()})
