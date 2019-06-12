@@ -4,22 +4,22 @@ from django import forms
 from django.forms.widgets import SplitDateTimeWidget
 from django.utils import timezone
 
-from .models import Auditorium, Professor, Group
+from .models import Room, Professor, Group
+
+
+class SelectRoomForm(forms.ModelForm):
+    """ form to choose room to show"""
+    room = forms.ModelChoiceField(queryset=Room.objects.all(), to_field_name='number')
+
+    class Meta:
+        model = Room
+        fields: list = []
 
 
 class LoginForm(forms.Form):
     """ form to render on login page """
     login = forms.CharField()
     password = forms.CharField(widget=forms.PasswordInput())
-
-
-class SelectAuditoriumForm(forms.ModelForm):
-    """ form to choose auditorium to show"""
-    auditorium = forms.ModelChoiceField(queryset=Auditorium.objects.all(), to_field_name='number')
-
-    class Meta:
-        model = Auditorium
-        fields: list = []
 
 
 class SelectProfessorForm(forms.ModelForm):
@@ -52,7 +52,7 @@ class EditForm(forms.Form):
     end_time = forms.SplitDateTimeField(initial=timezone.now().replace(second=0),
                                         widget=SplitDateTimeWidget(date_attrs={'type': 'date'},
                                                                    time_attrs={'type': 'time'}))
-    auditorium = forms.CharField(max_length=100)
+    room = forms.CharField(max_length=100)
     group = forms.CharField(max_length=100)
     professor = forms.CharField(max_length=100)
 
@@ -77,7 +77,7 @@ class MassEditForm(forms.Form):
     lesson_name = forms.CharField(max_length=100, widget=forms.TextInput(
         attrs={'size': '30', 'class': 'inputText'}), required=False)
     professor = forms.CharField(max_length=100, required=False)
-    auditorium = forms.CharField(max_length=100, widget=forms.TextInput(
+    room = forms.CharField(max_length=100, widget=forms.TextInput(
         attrs={'size': '5'}), required=False)
     group = forms.CharField(max_length=100, required=False)
     start_time = forms.SplitDateTimeField(widget=SplitDateTimeWidget(date_attrs={'type': 'date'},

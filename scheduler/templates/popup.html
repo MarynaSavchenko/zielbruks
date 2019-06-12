@@ -7,6 +7,7 @@
         </button>
         <h5 class="modal-title">
             {% if form.id.value %}Edit Lesson
+            {% elif export %}Export
             {% else %}Create Lesson
             {% endif %}
         </h5>
@@ -16,11 +17,11 @@
         {% for field in form %}
             <div class="form-group{% if field.errors %} invalid{% endif %}">
                 {% if not field.is_hidden %}
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    <label class="control-label col-sm-2" for="{{ field.id_for_label }}">{{ field.label }}</label>
                 {% endif %}
-                {{ field }}
+                    <p style="text-align: right;">{{ field }}</p>
                 {% for error in field.errors %}
-                    <p class="help-block">{{ error }}</p>
+                    <p class="help-block" style="color: red;">{{ error }}</p>
                 {% endfor %}
             </div>
         {% endfor %}
@@ -29,7 +30,10 @@
     <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         <button type="button" class="submit-btn btn btn-primary">
-            Export
+            {% if form.id.value %}Edit
+            {% elif export %}Export
+            {% else %}Create
+            {% endif %}
         </button>
     </div>
 
