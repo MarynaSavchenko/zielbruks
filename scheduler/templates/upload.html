@@ -20,30 +20,46 @@
             });
         });
     </script>
+
     <style>
         th {
             text-align: center
         }
+
+        .collapsible {
+            background-color: #eee;
+            color: #444;
+            cursor: pointer;
+            padding: 18px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 15px;
+        }
+
+        .collapsible:hover {
+            background-color: #ccc;
+        }
+
+        .content {
+            padding: 0 18px;
+            background-color: white;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.2s ease-out;
+        }
+
+        .legend {
+            background-color: lightgray;
+        }
     </style>
 {% endblock script %}
-
-{% block navbar %}
-    <ul class="nav navbar-nav">
-        <li><a href="{% url 'index' %}">Home</a></li>
-        <li class="active"><a href="{% url 'upload' %}">Upload</a></li>
-        <li><a href="{% url 'show_schedule' %}">Full calendar</a></li>
-        <li><a href="{% url 'show_room_schedule' %}">Room's calendar</a></li>
-        <li><a href="{% url 'show_professors_schedule' %}">Professor's calendar</a></li>
-        <li><a href="{% url 'show_groups_schedule' %}">Group's calendar</a></li>
-        <li><a href="{% url 'conflicts' %}">Conflicts</a></li>
-    <li><a href="{% url 'professors' %}">Professors</a></li>
-</ul>
-{% endblock navbar %}
 
 {% block content %}
     <div class="container">
 
-        <h2>Upload file</h2>
+        {% block legend %}{% endblock legend %}
         <div>
             <form method="post" id="upload" enctype="multipart/form-data">
                 {% csrf_token %}
@@ -55,11 +71,11 @@
             <br>
 
             {% if error %}
-            <p style="...">
+                <p style="...">
                 <div class="alert alert-danger">
                     {{ error }}
                 </div>
-            </p>
+                </p>
             {% endif %}
 
             {% if loaded_data %}
