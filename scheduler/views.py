@@ -230,7 +230,7 @@ def edit(request: HttpRequest, lesson_id) -> HttpResponse:
         form = EditForm(request.POST)
         if form.is_valid():
             if is_ajax(request):
-                return render(request, 'edit.html', context={"form": form})
+                return render(request, 'popup.html', context={"form": form})
 
             past_conflicts = list(Conflict.objects.all())
             lesson = Lesson.objects.get(id=form.cleaned_data['id'])
@@ -247,13 +247,13 @@ def edit(request: HttpRequest, lesson_id) -> HttpResponse:
             current_conflicts = list(context['conflicts'])
             context.update(generate_context_for_conflicts_report(past_conflicts, current_conflicts))
             return render(request, 'index.html', context=context)
-        return render(request, 'edit.html', context={"form": form})
+        return render(request, 'popup.html', context={"form": form})
     lesson = Lesson.objects.get(id=lesson_id)
     form = EditForm(
         initial={'id': lesson.id, 'name': lesson.name, 'professor': lesson.professor,
                  'room': lesson.room, 'group': lesson.group,
                  'start_time': lesson.start_time, 'end_time': lesson.end_time})
-    return render(request, 'edit.html', context={"form": form})
+    return render(request, 'popup.html', context={"form": form})
 
 
 def create(request: HttpRequest) -> HttpResponse:
@@ -264,7 +264,7 @@ def create(request: HttpRequest) -> HttpResponse:
         form = EditForm(request.POST)
         if form.is_valid():
             if is_ajax(request):
-                return render(request, 'edit.html', context={"form": form})
+                return render(request, 'popup.html', context={"form": form})
 
             past_conflicts = list(Conflict.objects.all())
             professor = form.cleaned_data['professor'].strip().split()
@@ -284,8 +284,8 @@ def create(request: HttpRequest) -> HttpResponse:
             current_conflicts = list(context['conflicts'])
             context.update(generate_context_for_conflicts_report(past_conflicts, current_conflicts))
             return render(request, 'index.html', context=context)
-        return render(request, 'edit.html', context={"form": form})
-    return render(request, 'edit.html', context={"form": EditForm()})
+        return render(request, 'popup.html', context={"form": form})
+    return render(request, 'popup.html', context={"form": EditForm()})
 
 
 def remove(request: HttpRequest, lesson_id) -> HttpResponse:
@@ -409,7 +409,7 @@ def export(request: HttpRequest) -> HttpResponse:
         form = ExportForm(request.POST)
         if form.is_valid():
             if is_ajax(request):
-                return render(request, 'export.html', context={"form": form})
+                return render(request, 'popup.html', context={"form": form, "export": True})
             if form.cleaned_data["start_time"] and form.cleaned_data["end_time"] and \
                     form.cleaned_data["file_format"] == "csv":
                 temp_file = export_to_csv(form.cleaned_data["start_time"],
@@ -421,11 +421,11 @@ def export(request: HttpRequest) -> HttpResponse:
                                             form.cleaned_data["end_time"])
                 file_name = 'schedule.xlsx'
             else:
-                return render(request, 'export.html', context={"form": form})
+                return render(request, 'popup.html', context={"form": form, "export": True})
             wrapper = FileWrapper(temp_file)
             response = HttpResponse(wrapper, content_type='application/vnd.ms-excel')
             response['Content-Disposition'] = 'attachment; filename=' + file_name
             return response
-        return render(request, 'export.html', context={"form": form})
+        return render(request, 'popup.html', context={"form": form, "export": True})
     form = ExportForm()
-    return render(request, 'export.html', context={"form": form})
+    return render(request, 'popup.html', context={"form": form, "export": True})
