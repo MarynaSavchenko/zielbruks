@@ -4,7 +4,7 @@ from typing import List, Tuple
 from numpy import nan
 import pandas as pd
 
-from scheduler.model_util import get_professor, get_auditorium, get_group
+from scheduler.model_util import get_professor, get_room, get_group
 from scheduler.models import Lesson, Student
 
 
@@ -54,9 +54,6 @@ def import_csv(data: pd.DataFrame) -> Tuple[int, List[int], List[int]]:
             professor_data = row[5].strip().split()
             if len(date) == 3 and len(start_t) >= 2 and len(end_t) >= 2\
                     and len(professor_data) == 2:
-                if not all((len(x) == 2 for x in date[1:2] + start_t + end_t)):
-                    incorrect.append(row[0])
-                    continue
                 if len(date[0]) == 2:
                     start_date = dt.datetime(int(date[2]) + 2000, int(date[1]), int(date[0]),
                                              int(start_t[0]), int(start_t[1]))
@@ -74,12 +71,12 @@ def import_csv(data: pd.DataFrame) -> Tuple[int, List[int], List[int]]:
                     incorrect.append(row[0])
                     continue
                 professor = get_professor(professor_data[0], professor_data[1])
-                auditorium = get_auditorium(str(row[7]))
+                room = get_room(str(row[7]))
                 group = get_group(str(row[6]))
                 _lesson, created = Lesson.objects.get_or_create(
                     name=str(row[4]).strip(),
                     professor=professor,
-                    auditorium=auditorium,
+                    room=room,
                     group=group,
                     start_time=start_date,
                     end_time=end_date
@@ -137,12 +134,12 @@ def import_excel(data: pd.DataFrame) -> Tuple[int, List[int], List[int]]:
                 incorrect.append(row[0])
                 continue
             professor = get_professor(professor_data[0], professor_data[1])
-            auditorium = get_auditorium(str(row[7]))
+            room = get_room(str(row[7]))
             group = get_group(str(row[6]))
             _lesson, created = Lesson.objects.get_or_create(
                 name=str(row[4]).strip(),
                 professor=professor,
-                auditorium=auditorium,
+                room=room,
                 group=group,
                 start_time=start_date,
                 end_time=end_date

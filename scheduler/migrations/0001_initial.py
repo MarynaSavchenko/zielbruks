@@ -13,17 +13,10 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Auditorium',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('number', models.CharField(max_length=30, unique=True, verbose_name='Auditorium number')),
-            ],
-        ),
-        migrations.CreateModel(
             name='Conflict',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('conflict_type', models.CharField(choices=[('AUDITORIUM', 'AUDITORIUM'), ('PROFESSOR', 'PROFESSOR'), ('GROUP', 'GROUP')], max_length=20)),
+                ('conflict_type', models.CharField(choices=[('ROOM', 'ROOM'), ('PROFESSOR', 'PROFESSOR'), ('GROUP', 'GROUP')], max_length=20)),
                 ('object_id', models.IntegerField()),
             ],
         ),
@@ -41,7 +34,6 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=100, verbose_name='Lesson name')),
                 ('start_time', models.DateTimeField()),
                 ('end_time', models.DateTimeField()),
-                ('auditorium', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='lessons', to='scheduler.Auditorium')),
                 ('group', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='lessons', to='scheduler.Group')),
             ],
         ),
@@ -52,6 +44,13 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=100, verbose_name='Professor name')),
                 ('surname', models.CharField(max_length=100, verbose_name='Professor surname')),
                 ('email', models.EmailField(blank=True, max_length=100, null=True, unique=True, verbose_name='Professor email')),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Room',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('number', models.CharField(max_length=30, unique=True, verbose_name='Room number')),
             ],
         ),
         migrations.CreateModel(
@@ -70,6 +69,11 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='lessons', to='scheduler.Professor'),
         ),
         migrations.AddField(
+            model_name='lesson',
+            name='room',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='lessons', to='scheduler.Room'),
+        ),
+        migrations.AddField(
             model_name='conflict',
             name='first_lesson',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='first_lesson', to='scheduler.Lesson'),
@@ -81,6 +85,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='lesson',
-            unique_together={('name', 'professor', 'auditorium', 'group', 'start_time', 'end_time')},
+            unique_together={('name', 'professor', 'room', 'group', 'start_time', 'end_time')},
         ),
     ]

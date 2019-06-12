@@ -1,5 +1,5 @@
 """Utilities for working with model elements"""
-from scheduler.models import Professor, Auditorium, Group
+from scheduler.models import Professor, Room, Group
 
 
 def get_professor(name: str, surname: str) -> Professor:
@@ -8,10 +8,10 @@ def get_professor(name: str, surname: str) -> Professor:
     return professor
 
 
-def get_auditorium(number: str) -> Auditorium:
-    """Gets auditorium from database or creates a new object and returns it"""
-    auditorium, _created = Auditorium.objects.get_or_create(number=number)
-    return auditorium
+def get_room(number: str) -> Room:
+    """Gets room from database or creates a new object and returns it"""
+    room, _created = Room.objects.get_or_create(number=number)
+    return room
 
 
 def get_group(name: str) -> Group:
