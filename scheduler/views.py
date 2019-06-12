@@ -1,6 +1,7 @@
 """Views gathering point"""
 import os.path
 from datetime import datetime
+from wsgiref.util import FileWrapper
 
 import pandas as pd
 from django.contrib.auth import authenticate, login as log
@@ -19,8 +20,9 @@ from scheduler.conflicts_checker import db_conflicts, conflicts_diff
 from scheduler.model_util import get_professor, get_room, get_group
 from scheduler.models import Room, Lesson, Group, Conflict, Professor
 from .forms import SelectRoomForm, SelectProfessorForm, SelectGroupForm, \
-    EditForm, MassEditForm, LoginForm
+    EditForm, MassEditForm, LoginForm, ExportForm
 from zielbruks.settings import LOGIN_REDIRECT_URL
+from scheduler.export_handlers import export_to_csv, export_to_excel
 
 
 def login(request: HttpRequest) -> HttpResponse:
@@ -151,7 +153,7 @@ def show_professors_schedule(request: HttpRequest) -> HttpResponse:
             professors_lessons_list = [(q.start_time.isoformat(timespec='seconds'),
                                         q.end_time.isoformat(timespec='seconds'),
                                         q.name,
-                                        Group.objects.filter(id=q.group_id)[:1].get().number,
+                                        Group.objects.filter(id=q.group_id)[:1].get().name,
                                         Room.objects.filter(id=q.room_id)[:1]
                                         .get().number,
                                         (q.professor.name + " " + q.professor.surname),
@@ -397,3 +399,33 @@ def professors(request: HttpRequest) -> HttpResponse:
         else:
             return HttpResponse("AN ERROR OCCURRED")
     return render(request, "professors.html", context)
+
+
+def export(request: HttpRequest) -> HttpResponse:
+    """Render the export page"""
+    if request.META.get('HTTP_REFERER') is None:
+        return redirect('/calendar/')
+    if request.method == 'POST':
+        form = ExportForm(request.POST)
+        if form.is_valid():
+            if is_ajax(request):
+                return render(request, 'export.html', context={"form": form})
+            if form.cleaned_data["start_time"] and form.cleaned_data["end_time"] and \
+                    form.cleaned_data["file_format"] == "csv":
+                temp_file = export_to_csv(form.cleaned_data["start_time"],
+                                          form.cleaned_data["end_time"])
+                file_name = 'schedule.csv'
+            elif form.cleaned_data["start_time"] and form.cleaned_data["end_time"] and \
+                    form.cleaned_data["file_format"] == "excel":
+                temp_file = export_to_excel(form.cleaned_data["start_time"],
+                                            form.cleaned_data["end_time"])
+                file_name = 'schedule.xlsx'
+            else:
+                return render(request, 'export.html', context={"form": form})
+            wrapper = FileWrapper(temp_file)
+            response = HttpResponse(wrapper, content_type='application/vnd.ms-excel')
+            response['Content-Disposition'] = 'attachment; filename=' + file_name
+            return response
+        return render(request, 'export.html', context={"form": form})
+    form = ExportForm()
+    return render(request, 'export.html', context={"form": form})

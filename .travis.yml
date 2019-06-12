@@ -23,7 +23,7 @@ jobs:
     - name: "type analysis"
       stage: test
       script: "mypy scheduler zielbruks"
-    - stage: delploy
+    - stage: deploy
       script: skip
       deploy:
         - provider: script

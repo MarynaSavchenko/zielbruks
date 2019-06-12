@@ -73,10 +73,10 @@ class Room(models.Model):
 
 class Group(models.Model):
     """Group of Students attending the same courses"""
-    number = models.IntegerField("Group number", unique=True)
+    name = models.CharField("Group name", unique=True, max_length=100)
 
     def __str__(self):
-        return str(self.number)
+        return str(self.name)
 
     def __eq__(self, other):
         if not isinstance(other, models.Model):
@@ -84,7 +84,7 @@ class Group(models.Model):
         if self._meta.concrete_model != other._meta.concrete_model:
             return False
         my_pk = self.pk
-        return my_pk == other.pk and self.number == other.number
+        return my_pk == other.pk and self.name == other.name
 
 
 class Lesson(models.Model):

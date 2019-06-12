@@ -25,7 +25,7 @@ def generate_full_schedule_context():
     lessons_list = [(q.start_time.strftime("%Y-%m-%dT%H:%M:%S"),
                      q.end_time.strftime("%Y-%m-%dT%H:%M:%S"),
                      q.name,
-                     Group.objects.filter(id=q.group_id)[:1].get().number,
+                     Group.objects.filter(id=q.group_id)[:1].get().name,
                      Room.objects.filter(id=q.room_id)[:1].get().number,
                      (q.professor.name + " " + q.professor.surname),
                      q.room_color,
@@ -88,7 +88,7 @@ def get_rooms_colors():
 
 def get_group_colors():
     """Returns list of tuples of groups names and colors"""
-    return [(g.number, color_from_id(g.id, True))
+    return [(g.name, color_from_id(g.id, True))
             for g in Group.objects.all()]
 
 

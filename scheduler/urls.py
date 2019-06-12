@@ -23,6 +23,7 @@ urlpatterns = [
     path('professors/', views.professors, name='professors'),
     path('delete_lessons/', views.delete_lessons, name='delete_lessons'),
     path('edit_lessons/', views.edit_lessons, name='edit_lessons'),
+    path('export/', views.export, name='export'),
 ]
 
 if settings.STATIC_URL is not None:

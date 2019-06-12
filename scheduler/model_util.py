@@ -14,7 +14,7 @@ def get_room(number: str) -> Room:
     return room
 
 
-def get_group(number: int) -> Group:
+def get_group(name: str) -> Group:
     """Gets group from database or creates a new object and returns it"""
-    group, _created = Group.objects.get_or_create(number=number)
+    group, _created = Group.objects.get_or_create(name=name)
     return group

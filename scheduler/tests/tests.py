@@ -18,7 +18,7 @@ class ImportHandlersTest(TestCase):
             name="Existing",
             professor=Professor.objects.create(name="John", surname="Doe"),
             room=Room.objects.create(number="1.11a"),
-            group=Group.objects.create(number=1),
+            group=Group.objects.create(name="1"),
             start_time=datetime.datetime(2019, 5, 11, 12, 00),
             end_time=datetime.datetime(2019, 5, 11, 13, 30)
         )
