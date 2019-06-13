@@ -1,2 +1,3 @@
 
-SECRET_KEY = 'TODO: read from environ'
+DEBUG=False
+SECRET_KEY = 'insert-random-string-here'
