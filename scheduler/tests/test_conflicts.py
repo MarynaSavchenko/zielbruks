@@ -7,6 +7,7 @@ from django.test import TestCase
 from scheduler.models import Lesson, Professor, Group, Room, Conflict
 from scheduler.conflicts_checker import db_conflicts
 
+
 class NoConflictsTestCase(TestCase):
     """Class testing finding conflicts in database that does not have them"""
     def test_clean_database(self):
@@ -37,6 +38,7 @@ class NoConflictsTestCase(TestCase):
         )
         db_conflicts()
         self.assertQuerysetEqual(Conflict.objects.all(), Conflict.objects.none())
+
 
 class OverlappingLessonsConflictsTestCase(TestCase):
     """Class testing conflicts for the times the lessons overlap"""
@@ -94,6 +96,7 @@ class OverlappingLessonsConflictsTestCase(TestCase):
                                                      object_id=self.professor.id)),
                          1)
 
+
 class OverlappingConflictsTypeTestCase(TestCase):
     """Class testing conflicts for the conflict types that are listed"""
     def setUp(self):
@@ -143,6 +146,7 @@ class OverlappingConflictsTypeTestCase(TestCase):
                                                      conflict_type='GROUP',
                                                      object_id=self.group.id)),
                          1)
+
 
 class CorrectnessOfAmountOfIncorrectDataListedTestCase(TestCase):
     """Class testing if the amount of conflicts is correct"""

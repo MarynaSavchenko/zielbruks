@@ -1,12 +1,14 @@
-''' Module sending messages to list of emails based on templates '''
+"""Module sending messages to list of emails based on templates"""
 from django.core import mail
 from django.core.mail import EmailMessage
 from django.template.loader import get_template
+
 
 class Mailer:
     """
     Send email messages helper class
     """
+
     def __init__(self, from_email='auto@zielbruks.tk'):
         self.connection = mail.get_connection()
         self.from_email = from_email
@@ -37,10 +39,9 @@ class Mailer:
         message_template = get_template(template)
         for recipient in to_emails:
             message_content = message_template.render(context)
-            message = EmailMessage(subject, message_content, \
-                to=[recipient], from_email=self.from_email)
+            message = EmailMessage(subject, message_content,
+                                   to=[recipient], from_email=self.from_email)
             message.content_subtype = 'html'
             messages.append(message)
 
         return messages
-        
