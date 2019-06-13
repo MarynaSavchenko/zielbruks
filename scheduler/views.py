@@ -486,7 +486,8 @@ def view_students(request: HttpRequest) -> HttpResponse:
             students = [(q.index, q.name, q.surname) for q in group_students_query]
             context = {
                 'form': form,
-                'students': students
+                'students': students,
+                'group': group.name
             }
             return render(request, "students.html", context)
         return HttpResponse("AN ERROR OCCURRED")

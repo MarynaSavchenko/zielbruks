@@ -33,7 +33,6 @@
 
 {% block content %}
     <div class="basic">
-        {
         <div class="container">
 
             <div class="jumbotron">
@@ -51,6 +50,7 @@
             {% if students %}
                 <div class="container">
                     <div class="basic" id="students">
+                        <h3 style="text-align: center">Group: {{ group }}</h3>
                         <table id="students_table" class="table table-striped table-hover table-bordered">
                             <tr>
                                 <th>Index</th>
@@ -67,71 +67,52 @@
                         </table>
                     </div>
                     <div class="basic">
-                        <button onclick="javascript:tableToHTML();">Get attendance list</button>
+                        <button id="export" class="create btn btn-primary">Get attendance list</button>
                     </div>
                 </div>
             {% else %}
-                <p>
-                <div class="alert alert-danger">
-                    No students in this group
-                </div>
-                </p>
+                {% if group %}
+                    <div class="alert alert-danger">
+                        No students assigned to this group
+                    </div>
+                {% endif %}
             {% endif %}
         </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
-    <script src="../static/js/CustomFont-normal.js"></script>
-    <script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/TableExport/3.3.13/js/tableexport.min.js"></script>
 
-        function tableToHTML() {
-            var pdf = new jsPDF('p', 'pt', 'letter');
-
-            pdf.setFont('CustomFont');
-
+    <script type="text/javascript">
+        $('#export').on('click', function () {
             appendColumn();
-            source = document.getElementById('students');
+            html2canvas($('#students'), {
+                onrendered: function (canvas) {
 
-            margins = {
-                top: 80,
-                bottom: 60,
-                left: 40,
-                width: 522
-            };
-            // all coords and widths are in jsPDF instance's declared units
-            // 'inches' in this case
-            pdf.fromHTML(
-                source, // HTML string or DOM elem ref.
-                margins.left, // x coord
-                margins.top, { // y coord
-                    'width': margins.width // max width of content on PDF
-                },
-
-                function (dispose) {
-                    // dispose: object with X, Y of the last line add to the PDF
-                    //          this allow the insertion of new lines after html
-                    pdf.save('attendance_list.pdf');
+                    var img = canvas.toDataURL("image/png");
+                    var doc = new jsPDF("p", "mm", "a4");
+                    var width = doc.internal.pageSize.getWidth();
+                    doc.addImage(img, 'JPEG', 10, 10, width - 20, 0);
+                    doc.save('sample-file.pdf');
                     deleteColumn();
-                }, margins);
-        }
+                }
+            });
+
+        });
 
         function appendColumn() {
-            var tbl = document.getElementById('students_table'), // table reference
-                i;
-            // open loop for each row and append cell
-            //var label = tbl.rows[0].insertCell(tbl.rows[0].cells.length);
-            //label.innerHTML = " ";
+            var tbl = document.getElementById('students_table'), i;
+
             for (i = 0; i < tbl.rows.length; i++) {
-                tbl.rows[i].insertCell(tbl.rows[i].cells.length);
+                var x = tbl.rows[i].insertCell(tbl.rows[i].cells.length);
+                x.style = 'width:50%;';
             }
         }
 
-        // delete table columns with index greater then 0
         function deleteColumn() {
-            var tbl = document.getElementById('students_table'), // table reference
-                lastCol = tbl.rows[0].cells.length - 1, // set the last column index
-                i;
-            // delete cells with index greater then 0 (for each row)
+            var tbl = document.getElementById('students_table'),
+                lastCol = tbl.rows[0].cells.length - 1, i;
             for (i = 0; i < tbl.rows.length; i++) {
                 tbl.rows[i].deleteCell(lastCol);
             }
