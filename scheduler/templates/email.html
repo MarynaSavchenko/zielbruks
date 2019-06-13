@@ -1,0 +1,35 @@
+<h2>Nadchodzące zajęcia: </h2>
+
+    {% if lessons %}
+
+    {% load custom_filters %}
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th> Lesson</th>
+            <th> Start Time</th>
+            <th> End Time</th>
+            <th> Auditorium</th>
+            </tr>
+        </thead>
+        <tr>
+            {% for l in lessons %}
+        <tr>
+            <td> {{ l.name }}</td>
+            <td> {{ l.start_time }}</td>
+            <td> {{ l.end_time }}</td>
+            <td> {{ l.auditorium }}</td>
+        </tr>
+        	{% endfor %}
+        </tbody>
+    </table>
+
+
+    {% else %}
+    <p style="...">
+    <div class="alert alert-danger">
+        There are no conflicts.
+    </div>
+    </p>
+    {% endif %}
