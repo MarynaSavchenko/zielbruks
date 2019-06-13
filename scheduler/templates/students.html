@@ -94,7 +94,7 @@
                     var doc = new jsPDF("p", "mm", "a4");
                     var width = doc.internal.pageSize.getWidth();
                     doc.addImage(img, 'JPEG', 10, 10, width - 20, 0);
-                    doc.save('sample-file.pdf');
+                    doc.save('attendance_list.pdf');
                     deleteColumn();
                 }
             });
