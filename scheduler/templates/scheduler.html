@@ -8,21 +8,6 @@
             {% block export_plan %}{% endblock export_plan %}
         </div>
 
-
-        {% if events_flag %}
-            <p style="...">
-            <div id="details" class="alert alert-info">
-                Select an event to show the details.
-            </div>
-            </p>
-        {% else %}
-            <p style="...">
-            <div class="alert alert-danger">
-                There are no lessons.
-            </div>
-            </p>
-        {% endif %}
-
         {% if events_flag %}
             <p style="...">
             <div id="details" class="alert alert-info">
@@ -110,7 +95,8 @@
             dp.eventMoveHandling = "Disabled";
             dp.eventResizeHandling = "Disabled";
             dp.onEventClicked = function (args) {
-                    document.getElementById("details").innerText = args.e.text();
+                    document.getElementById("details").innerText = "Selected event: " + args.e.text() + ", date: "+
+                        args.e.start().toString("dd-MM-yyyy");
             };
 
             {% block edit_event %}{% endblock edit_event %}
