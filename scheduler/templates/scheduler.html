@@ -23,6 +23,20 @@
             </p>
         {% endif %}
 
+        {% if events_flag %}
+            <p style="...">
+            <div id="details" class="alert alert-info">
+                Select an event to show the details.
+            </div>
+            </p>
+        {% else %}
+            <p style="...">
+            <div class="alert alert-danger">
+                There are no lessons.
+            </div>
+            </p>
+        {% endif %}
+
         <div>
             <div style="float:left; width: 150px; ">
                 <div id="nav"></div>
