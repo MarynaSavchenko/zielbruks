@@ -29,10 +29,6 @@
     <button class="create btn btn-primary" type="button" name="button" id="create_button">Create
         event
     </button>
-    <form id="remove_form" method="post">
-        {% csrf_token %}
-    </form>
-
     </p>
     <br>
     <br>
@@ -51,8 +47,9 @@
 {% block edit_event %}
     dp.onEventClicked = function (args) {
     // update details
-     document.getElementById("details").innerText = "Selected event: " + args.e.text() + ", date: "+
-        args.e.start().toString("dd-MM-yyyy");
+    document.getElementById("details").innerText = "Selected event:\n" +
+        args.e.start().toString("dd-MM-yyyy, HH:mm") + " - " + args.e.end().toString("dd-MM-yyyy, HH:mm") +
+        "\n" + args.e.text().substr(args.e.text().indexOf(" ") + 1);
 
     // remove old buttons
     if(document.getElementById('remove_button') != null){

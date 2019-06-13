@@ -95,8 +95,9 @@
             dp.eventMoveHandling = "Disabled";
             dp.eventResizeHandling = "Disabled";
             dp.onEventClicked = function (args) {
-                    document.getElementById("details").innerText = "Selected event: " + args.e.text() + ", date: "+
-                        args.e.start().toString("dd-MM-yyyy");
+                document.getElementById("details").innerText = "Selected event:\n" +
+                    args.e.start().toString("dd-MM-yyyy, HH:mm") + " - " + args.e.end().toString("dd-MM-yyyy, HH:mm") +
+                    "\n" + args.e.text().substr(args.e.text().indexOf(" ") + 1);
             };
 
             {% block edit_event %}{% endblock edit_event %}
@@ -108,5 +109,3 @@
     {% endif %}
 
 </div>
-
-

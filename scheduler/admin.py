@@ -1,6 +1,6 @@
 """Admin panel configuration"""
 from django.contrib import admin
-from .models import Professor, Student, Lesson, Group, Room
+from .models import Professor, Student, Group, Room
 
 # Register your models here.
 

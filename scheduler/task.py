@@ -1,11 +1,9 @@
-''' Module definig task to perform '''
+"""Module definig task to perform"""
 from __future__ import absolute_import, unicode_literals
 from datetime import datetime, timedelta, time
-import collections
-from operator import itemgetter
-from celery import task
 from scheduler.celery import app
 from scheduler.mailer import Mailer
+
 
 @app.task(name="notify_professors")
 def notify_professors():
@@ -19,15 +17,15 @@ def notify_professors():
     next_week = today + timedelta(7)
     period_start = datetime.combine(today, time())
     period_end = datetime.combine(next_week, time())
-    incomig_lessons = []
+    incoming_lessons = []
     for lesson in Lesson.objects.filter(start_time__range=(period_start, period_end)):
-        incomig_lessons.append(lesson)
+        incoming_lessons.append(lesson)
     for professor in Professor.objects.all():
         professor_lessons = []
-        for lesson in incomig_lessons:
+        for lesson in incoming_lessons:
             if lesson.professor == professor:
                 professor_lessons.append(lesson)
-        if(professor_lessons and professor.email):
+        if professor_lessons and professor.email:
             sorted_lessons = sorted(professor_lessons, key=lambda k: k.start_time)
-            mail.send_messages(subject='Lesson notification', template='email.html',\
-            context={'lessons': sorted_lessons}, to_emails=[professor.email])
+            mail.send_messages(subject='Lesson notification', template='email.html',
+                               context={'lessons': sorted_lessons}, to_emails=[professor.email])
