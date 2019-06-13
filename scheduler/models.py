@@ -1,6 +1,4 @@
 """Models gathering point"""
-from random import randint
-
 from django.db import models
 
 # generated with http://tools.medialab.sciences-po.fr/iwanthue/
@@ -14,6 +12,7 @@ palette = ["#be7349", "#7977ec", "#73e36e", "#dd50b4", "#59ac2e", "#ab70e1", "#b
            "#eb92a2", "#738c4e", "#ce5f46", "#a0b87a", "#c36c6a", "#969448", "#f29278",
            "#89834d", "#e2c988", "#a68347", "#dea573"]
 
+
 def color_from_id(numeric_id, shuffle=False):
     """Selects color by entity id"""
     if shuffle:
@@ -21,6 +20,7 @@ def color_from_id(numeric_id, shuffle=False):
     else:
         colors = palette
     return colors[numeric_id % len(colors)]
+
 
 class Professor(models.Model):
     """Person lecturing in a Lesson"""
@@ -45,7 +45,6 @@ class Professor(models.Model):
     def __str__(self):
         return self.name + " " + self.surname
 
-
     def __eq__(self, other):
         if not isinstance(other, models.Model):
             return False
@@ -56,13 +55,12 @@ class Professor(models.Model):
                and self.email == other.email
 
 
-class Auditorium(models.Model):
+class Room(models.Model):
     """Place at which a Lesson is given"""
-    number = models.CharField("Auditorium number", max_length=30, unique=True)
+    number = models.CharField("Room number", max_length=30, unique=True)
 
     def __str__(self):
         return str(self.number)
-
 
     def __eq__(self, other):
         if not isinstance(other, models.Model):
@@ -75,10 +73,10 @@ class Auditorium(models.Model):
 
 class Group(models.Model):
     """Group of Students attending the same courses"""
-    number = models.IntegerField("Group number", unique=True)
+    name = models.CharField("Group name", unique=True, max_length=100)
 
     def __str__(self):
-        return str(self.number)
+        return str(self.name)
 
     def __eq__(self, other):
         if not isinstance(other, models.Model):
@@ -86,7 +84,7 @@ class Group(models.Model):
         if self._meta.concrete_model != other._meta.concrete_model:
             return False
         my_pk = self.pk
-        return my_pk == other.pk and self.number == other.number
+        return my_pk == other.pk and self.name == other.name
 
 
 class Lesson(models.Model):
@@ -95,16 +93,16 @@ class Lesson(models.Model):
     # If you want to get a list of lessons from Foreign Tables, you should use related_name
     name = models.CharField("Lesson name", max_length=100)
     professor = models.ForeignKey(Professor, related_name='lessons', on_delete=models.CASCADE)
-    auditorium = models.ForeignKey(Auditorium, related_name='lessons', on_delete=models.CASCADE)
+    room = models.ForeignKey(Room, related_name='lessons', on_delete=models.CASCADE)
     group = models.ForeignKey(Group, related_name='lessons', on_delete=models.CASCADE)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
 
     group_color = property(lambda self: color_from_id(self.group_id, True))
-    auditorium_color = property(lambda self: color_from_id(self.auditorium_id))
+    room_color = property(lambda self: color_from_id(self.room_id))
 
     class Meta:
-        unique_together = ('name', 'professor', 'auditorium', 'group', 'start_time', 'end_time',)
+        unique_together = ('name', 'professor', 'room', 'group', 'start_time', 'end_time',)
 
     def __str__(self):
         return self.name
@@ -117,7 +115,7 @@ class Lesson(models.Model):
         my_pk = self.pk
         if my_pk == other.pk and self.name == other.name and self.start_time == other.start_time \
                 and self.end_time == other.end_time:
-            if self.professor == other.professor and self.auditorium == other.auditorium \
+            if self.professor == other.professor and self.room == other.room \
                     and self.group == other.group:
                 return True
         return False
@@ -129,17 +127,11 @@ class Student(models.Model):
     name = models.CharField("Student name", max_length=100)
     surname = models.CharField("Student surname", max_length=100)
     group = models.ForeignKey(Group, related_name='students', on_delete=models.SET_NULL, null=True)
-    email = models.EmailField("Student email", max_length=100, null=True, blank=True, unique=True)
-    index = models.CharField(max_length=30, null=True)
+    index = models.IntegerField("Index", unique=True)
 
     def save(self, *args, **kwargs):
         self.full_clean()
         return super(Student, self).save(*args, **kwargs)
-
-    def clean(self):
-        """Clean up blank fields to null"""
-        if self.email == "":
-            self.email = None
 
     def __str__(self):
         return self.name + " " + self.surname
@@ -152,7 +144,7 @@ class Conflict(models.Model):
     second_lesson = models.ForeignKey(Lesson, related_name='second_lesson',
                                       on_delete=models.CASCADE, null=False)
     CONFLICT_TYPE = (
-        ('AUDITORIUM', 'AUDITORIUM'),
+        ('ROOM', 'ROOM'),
         ('PROFESSOR', 'PROFESSOR'),
         ('GROUP', 'GROUP')
     )
