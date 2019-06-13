@@ -10,3 +10,11 @@ xlrd==1.2.0 # for read_excel in pandas
 numpy==1.16.2
 django-bootstrap-modal-forms==1.4.2
 Jinja2==2.10.1
+celery==4.3.0
+anyjson
+redis
+watchdog
+django-celery
+django_celery_beat
+django-celery-email
+openpyxl==2.6.2

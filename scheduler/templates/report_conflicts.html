@@ -40,7 +40,7 @@
         <p><u>Removed conflict of:</u></br> <b> {{ conflict.conflict_type }} </b>,
             {% if conflict.first_lesson %}
             {{ conflict.first_lesson.name }},
-            {{ conflict.first_lesson.professor }}, {{ conflict.first_lesson.auditorium }},
+            {{ conflict.first_lesson.professor }}, {{ conflict.first_lesson.room }},
             {{ conflict.first_lesson.group }}, {{ conflict.first_lesson.start_time }},
             {{ conflict.first_lesson.end_time }}
             {% else %}
@@ -49,7 +49,7 @@
             </br><i>and</i>
             {% if conflict.second_lesson %}
             {{ conflict.second_lesson.name }}, {{ conflict.second_lesson.professor }},
-            {{ conflict.second_lesson.auditorium }}, {{ conflict.second_lesson.group }},
+            {{ conflict.second_lesson.room }}, {{ conflict.second_lesson.group }},
             {{ conflict.second_lesson.start_time }}, {{ conflict.second_lesson.end_time }}
             {% else %}
             Lesson removed.
@@ -65,11 +65,11 @@
         {% for conflict in new_conflicts %}
         <p><u>New conflict:</u></br><b> {{ conflict.conflict_type }} </b>,
             {{ conflict.first_lesson.name }},
-            {{ conflict.first_lesson.professor }}, {{ conflict.first_lesson.auditorium }},
+            {{ conflict.first_lesson.professor }}, {{ conflict.first_lesson.room }},
             {{ conflict.first_lesson.group }}, {{ conflict.first_lesson.start_time }},
             {{ conflict.first_lesson.end_time }} </br><i> and </i> {{ conflict.second_lesson.name }}
             , {{ conflict.second_lesson.professor }},
-            {{ conflict.second_lesson.auditorium }}, {{ conflict.second_lesson.group }},
+            {{ conflict.second_lesson.room }}, {{ conflict.second_lesson.group }},
             {{ conflict.second_lesson.start_time }}, {{ conflict.second_lesson.end_time }}</p>
         {% endfor %}
     </div>
