@@ -1,3 +1,4 @@
+"""Settings overrides to be used in production environment"""
 
-DEBUG=False
+DEBUG = False
 SECRET_KEY = 'insert-random-string-here'

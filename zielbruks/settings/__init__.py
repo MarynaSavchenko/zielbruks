@@ -1,3 +1,4 @@
+"""Module containing django project configuration"""
 
 import os
 print("Import base by init")
