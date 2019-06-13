@@ -33,6 +33,9 @@
             {% block edit_conflicts %} {% endblock edit_conflicts %}
             {% for conflict in conflicts%}
             {% get_color_tag forloop.counter0 as conflicts_color %}
+                {% if conflict in new_conflicts %}
+                        {% get_danger_tag as conflicts_color %}
+                {% endif %}
             <tr class={{conflicts_color}}>
                 <td><input type="checkbox" name="checks[]" value={{ conflict.first_lesson.id }}></td>
                 <td> {{ conflict.conflict_type }}</td>

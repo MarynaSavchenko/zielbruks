@@ -1,0 +1,70 @@
+{% extends 'upload.html' %}
+
+{% block navbar %}
+    <ul class="nav navbar-nav">
+        <li><a href="{% url 'index' %}">Home</a></li>
+        <li class="dropdown active">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Upload
+                <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li class="active"><a href="{% url 'upload_schedule' %}">Upload schedule</a></li>
+                <li><a href="{% url 'upload_students' %}">Upload students</a></li>
+            </ul>
+        </li>
+        <li><a href="{% url 'show_schedule' %}">Full calendar</a></li>
+        <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Specific schedule
+                <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="{% url 'show_room_schedule' %}">Room's calendar</a></li>
+                <li><a href="{% url 'show_professors_schedule' %}">Professor's calendar</a></li>
+                <li><a href="{% url 'show_groups_schedule' %}">Group's calendar</a></li>
+            </ul>
+        </li>
+        <li><a href="{% url 'conflicts' %}">Conflicts</a></li>
+        <li><a href="{% url 'professors' %}">Professors</a></li>
+    </ul>
+{% endblock navbar %}
+
+{% block legend %}
+
+    <div class="container">
+        <button class="collapsible">▼ File format</button>
+        <div class="content legend">
+            <h4>CSV file:</h4>
+            <p style="padding-left: 30px">
+                Accepted format: date | start_time | end_time | Subject | Professor | Group | Room<br>
+                Comma(,) as a separator<br>
+                Date: DD-MM-YY or YYYY-MM-DD<br>
+                Time: HH:MM(:SS)
+            </p>
+            <h4>Excel file:</h4>
+            <p style="padding-left: 30px">
+                Accepted format: date | start_time | end_time | Subject | Professor | Group | Room<br>
+                Date: YYYY-MM-DD<br>
+                Time: HH:MM(:SS)<br>
+                Date and time must be general type or excel date and time types
+            </p>
+        </div>
+    </div>
+
+    <h2>Upload schedule</h2>
+
+
+    <script>
+        var coll = document.getElementsByClassName("collapsible");
+        var i;
+
+        for (i = 0; i < coll.length; i++) {
+            coll[i].addEventListener("click", function () {
+                this.classList.toggle("active");
+                var content = this.nextElementSibling;
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                }
+            });
+        }
+    </script>
+{% endblock legend %}
